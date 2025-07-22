@@ -1,0 +1,166 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AZURE_WEBAPP_NAME: techbookstore
+  JAVA_VERSION: '8'
+  NODE_VERSION: '12.x'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: techbookstore_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 8
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Run backend tests
+      working-directory: ./backend
+      run: |
+        ./mvnw clean test
+        ./mvnw jacoco:report
+      env:
+        SPRING_PROFILES_ACTIVE: test
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Run frontend tests
+      working-directory: ./frontend
+      run: |
+        npm ci
+        npm run test:ci
+        npm run lint
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./backend/target/site/jacoco/jacoco.xml,./frontend/coverage/lcov.info
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK 8
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Build backend
+      working-directory: ./backend
+      run: ./mvnw clean package -DskipTests
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Build frontend
+      working-directory: ./frontend
+      run: |
+        npm ci
+        npm run build
+    
+    - name: Build Docker image
+      run: |
+        docker build -t techbookstore:${{ github.sha }} .
+        docker tag techbookstore:${{ github.sha }} techbookstore:latest
+    
+    - name: Log in to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+    
+    - name: Push to ACR
+      run: |
+        docker tag techbookstore:${{ github.sha }} ${{ secrets.ACR_LOGIN_SERVER }}/techbookstore:${{ github.sha }}
+        docker tag techbookstore:${{ github.sha }} ${{ secrets.ACR_LOGIN_SERVER }}/techbookstore:latest
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/techbookstore:${{ github.sha }}
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/techbookstore:latest
+
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy to Azure Container Apps (Staging)
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        appSourcePath: ${{ github.workspace }}
+        resourceGroup: ${{ secrets.AZURE_RG }}
+        containerAppName: techbookstore-staging
+        containerAppEnvironment: techbookstore-env-staging
+        targetPort: 8080
+        imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER }}/techbookstore:${{ github.sha }}
+
+  deploy-production:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy to Azure Container Apps (Production)
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        appSourcePath: ${{ github.workspace }}
+        resourceGroup: ${{ secrets.AZURE_RG }}
+        containerAppName: techbookstore
+        containerAppEnvironment: techbookstore-env
+        targetPort: 8080
+        imageToDeploy: ${{ secrets.ACR_LOGIN_SERVER }}/techbookstore:${{ github.sha }}

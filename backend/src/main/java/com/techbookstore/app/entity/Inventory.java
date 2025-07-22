@@ -81,7 +81,7 @@ public class Inventory {
     }
 
     public void setStoreStock(Integer storeStock) {
-        this.storeStock = storeStock;
+        this.storeStock = storeStock != null ? storeStock : 0;
     }
 
     public Integer getWarehouseStock() {
@@ -89,7 +89,7 @@ public class Inventory {
     }
 
     public void setWarehouseStock(Integer warehouseStock) {
-        this.warehouseStock = warehouseStock;
+        this.warehouseStock = warehouseStock != null ? warehouseStock : 0;
     }
 
     public Integer getReservedCount() {
@@ -97,7 +97,7 @@ public class Inventory {
     }
 
     public void setReservedCount(Integer reservedCount) {
-        this.reservedCount = reservedCount;
+        this.reservedCount = reservedCount != null ? reservedCount : 0;
     }
 
     public String getLocationCode() {
@@ -113,7 +113,7 @@ public class Inventory {
     }
 
     public void setReorderPoint(Integer reorderPoint) {
-        this.reorderPoint = reorderPoint;
+        this.reorderPoint = reorderPoint != null ? reorderPoint : 0;
     }
 
     public Integer getReorderQuantity() {
@@ -121,7 +121,7 @@ public class Inventory {
     }
 
     public void setReorderQuantity(Integer reorderQuantity) {
-        this.reorderQuantity = reorderQuantity;
+        this.reorderQuantity = reorderQuantity != null ? reorderQuantity : 0;
     }
 
     public LocalDate getLastReceivedDate() {

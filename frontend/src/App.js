@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Box, CssBaseline } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Dashboard, Book, Inventory, ShoppingCart, People, Assessment } from '@material-ui/icons';
+import { Dashboard, Book, Storage, ShoppingCart, People, Assessment } from '@material-ui/icons';
 import BookList from './components/BookList';
 import InventoryList from './components/InventoryList';
 import DashboardPage from './components/Dashboard';
@@ -39,7 +39,7 @@ function App() {
   const menuItems = [
     { id: 'dashboard', label: 'ダッシュボード', icon: <Dashboard />, path: '/' },
     { id: 'books', label: '書籍管理', icon: <Book />, path: '/books' },
-    { id: 'inventory', label: '在庫管理', icon: <Inventory />, path: '/inventory' },
+    { id: 'inventory', label: '在庫管理', icon: <Storage />, path: '/inventory' },
     { id: 'orders', label: '発注管理', icon: <ShoppingCart />, path: '/orders' },
     { id: 'customers', label: '顧客管理', icon: <People />, path: '/customers' },
     { id: 'reports', label: 'レポート', icon: <Assessment />, path: '/reports' },

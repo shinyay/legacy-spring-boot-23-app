@@ -14,7 +14,6 @@ import {
   Typography,
   Chip,
   CircularProgress,
-  TablePagination,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { fetchBooks } from '../store/actions/booksActions';
@@ -59,18 +58,19 @@ function BookList() {
   
   // Redux state
   const books = useSelector((state) => state.books?.books?.content || []);
-  const totalElements = useSelector((state) => state.books?.books?.totalElements || 0);
   const loading = useSelector((state) => state.books?.loading || false);
   const error = useSelector((state) => state.books?.error);
 
   // Local state
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [sortBy, setSortBy] = useState('id');
-  const [sortDir, setSortDir] = useState('asc');
+  
+  // Constants for pagination and sorting (no UI controls)
+  const page = 0;
+  const rowsPerPage = 10;
+  const sortBy = 'id';
+  const sortDir = 'asc';
 
-  // Fetch books on component mount and when search/pagination changes
+  // Fetch books on component mount and when search changes
   useEffect(() => {
     const params = {
       page,
@@ -80,33 +80,22 @@ function BookList() {
       keyword: searchKeyword,
     };
     dispatch(fetchBooks(params));
-  }, [dispatch, page, rowsPerPage, sortBy, sortDir, searchKeyword]);
+  }, [dispatch, searchKeyword]); // Removed pagination dependencies since they're constants
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
-    setPage(0); // Reset to first page when searching
   };
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setPage(0);
     const params = {
-      page: 0,
+      page,
       size: rowsPerPage,
       sortBy,
       sortDir,
       keyword: searchKeyword,
     };
     dispatch(fetchBooks(params));
-  };
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
   };
 
   const getLevelColor = (level) => {
@@ -236,8 +225,6 @@ function BookList() {
             </TableBody>
           </Table>
         </TableContainer>
-        
-        />
       </Paper>
     </div>
   );

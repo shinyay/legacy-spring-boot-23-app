@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
   TableBody,
@@ -11,8 +12,10 @@ import {
   Chip,
   Box,
   Button,
+  CircularProgress,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { fetchInventory } from '../store/actions/inventoryActions';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,134 +32,158 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     gap: theme.spacing(1),
   },
+  stockChip: {
+    minWidth: 60,
+  },
+  titleCell: {
+    maxWidth: 200,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  loading: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
+  },
 }));
 
 function InventoryList() {
   const classes = useStyles();
+  const dispatch = useDispatch();
+  
+  // Redux state - using real API calls instead of mock data
+  const inventoryItems = useSelector((state) => state.inventory?.items || []);
+  const loading = useSelector((state) => state.inventory?.loading || false);
+  const error = useSelector((state) => state.inventory?.error);
 
-  // Mock data - これは実際のAPIから取得することになります
-  const inventoryItems = [
-    {
-      id: 1,
-      bookId: 1,
-      bookTitle: 'React実践入門',
-      isbn13: '9784797395919',
-      storeStock: 15,
-      warehouseStock: 25,
-      reservedCount: 2,
-      totalStock: 40,
-      availableStock: 38,
-      lowStock: false,
-      locationCode: 'A-01-03',
-    },
-    {
-      id: 2,
-      bookId: 2,
-      bookTitle: 'Kubernetes実践ガイド',
-      isbn13: '9784798058306',
-      storeStock: 2,
-      warehouseStock: 0,
-      reservedCount: 0,
-      totalStock: 2,
-      availableStock: 2,
-      lowStock: true,
-      locationCode: 'B-02-15',
-    },
-    {
-      id: 3,
-      bookId: 3,
-      bookTitle: 'AWS認定ソリューションアーキテクト',
-      isbn13: '9784797395815',
-      storeStock: 0,
-      warehouseStock: 0,
-      reservedCount: 1,
-      totalStock: 0,
-      availableStock: -1,
-      lowStock: true,
-      locationCode: 'C-03-07',
-    },
-  ];
+  useEffect(() => {
+    dispatch(fetchInventory());
+  }, [dispatch]);
 
-  const getStockChip = (item) => {
-    if (item.totalStock === 0) {
-      return <Chip label="品切れ" color="secondary" size="small" />;
-    } else if (item.lowStock) {
-      return <Chip label="在庫少" style={{ backgroundColor: '#ff9800', color: 'white' }} size="small" />;
-    } else if (item.availableStock <= 0) {
-      return <Chip label="予約済" color="default" size="small" />;
+  const getStockStatusColor = (availableStock, lowStock) => {
+    if (availableStock <= 0) {
+      return 'secondary'; // Red for out of stock
+    } else if (lowStock) {
+      return 'primary'; // Orange for low stock
     } else {
-      return <Chip label="在庫あり" color="primary" size="small" />;
+      return 'default'; // Green for normal stock
     }
   };
+
+  const getStockStatusLabel = (availableStock, lowStock) => {
+    if (availableStock <= 0) {
+      return '在庫切れ';
+    } else if (lowStock) {
+      return '在庫少';
+    } else {
+      return '在庫有';
+    }
+  };
+
+  const formatLocation = (locationCode) => {
+    return locationCode || '-';
+  };
+
+  if (loading) {
+    return (
+      <div className={classes.loading}>
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={2}>
+        <Typography color="error">
+          エラーが発生しました: {error}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <div className={classes.root}>
       <Typography variant="h4" gutterBottom>
-        在庫管理
+        在庫一覧
       </Typography>
-      
-      <Box mb={2}>
-        <Button variant="contained" color="primary" style={{ marginRight: 16 }}>
-          入荷処理
-        </Button>
-        <Button variant="contained" color="secondary">
-          棚卸し
-        </Button>
-      </Box>
 
       <Paper className={classes.paper}>
         <TableContainer>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <TableCell>ISBN</TableCell>
-                <TableCell>書籍名</TableCell>
-                <TableCell>店頭在庫</TableCell>
-                <TableCell>倉庫在庫</TableCell>
-                <TableCell>予約数</TableCell>
-                <TableCell>利用可能数</TableCell>
-                <TableCell>ステータス</TableCell>
-                <TableCell>所在</TableCell>
-                <TableCell>操作</TableCell>
+                <TableCell>書籍タイトル</TableCell>
+                <TableCell>ISBN-13</TableCell>
+                <TableCell align="right">店頭在庫</TableCell>
+                <TableCell align="right">倉庫在庫</TableCell>
+                <TableCell align="right">予約数</TableCell>
+                <TableCell align="right">利用可能在庫</TableCell>
+                <TableCell>在庫状況</TableCell>
+                <TableCell>棚番号</TableCell>
+                <TableCell>アクション</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {inventoryItems.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>{item.isbn13}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" style={{ fontWeight: 'bold' }}>
+                  <TableCell className={classes.titleCell}>
+                    <Typography variant="body2" title={item.bookTitle}>
                       {item.bookTitle}
                     </Typography>
                   </TableCell>
-                  <TableCell>{item.storeStock}</TableCell>
-                  <TableCell>{item.warehouseStock}</TableCell>
-                  <TableCell>{item.reservedCount}</TableCell>
-                  <TableCell>
+                  <TableCell>{item.isbn13}</TableCell>
+                  <TableCell align="right">{item.storeStock}</TableCell>
+                  <TableCell align="right">{item.warehouseStock}</TableCell>
+                  <TableCell align="right">{item.reservedCount}</TableCell>
+                  <TableCell align="right">
                     <Typography
                       variant="body2"
-                      style={{
-                        fontWeight: 'bold',
-                        color: item.availableStock <= 0 ? '#f44336' : '#4caf50'
-                      }}
+                      color={item.availableStock <= 0 ? "error" : "textPrimary"}
                     >
                       {item.availableStock}
                     </Typography>
                   </TableCell>
-                  <TableCell>{getStockChip(item)}</TableCell>
-                  <TableCell>{item.locationCode}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={getStockStatusLabel(item.availableStock, item.lowStock)}
+                      color={getStockStatusColor(item.availableStock, item.lowStock)}
+                      size="small"
+                      className={classes.stockChip}
+                    />
+                  </TableCell>
+                  <TableCell>{formatLocation(item.locationCode)}</TableCell>
                   <TableCell>
                     <div className={classes.actionButtons}>
-                      <Button size="small" color="primary">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                      >
                         入荷
                       </Button>
-                      <Button size="small" color="default">
-                        調整
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="secondary"
+                      >
+                        販売
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
+              {inventoryItems.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={9} align="center">
+                    <Typography variant="body2" color="textSecondary">
+                      在庫データがありません
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

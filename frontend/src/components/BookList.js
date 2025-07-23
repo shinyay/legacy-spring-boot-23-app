@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
@@ -37,44 +37,67 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   levelChip: {
-    fontSize: '0.75rem',
+    minWidth: 60,
+  },
+  titleCell: {
+    maxWidth: 200,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  loading: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
   },
 }));
-
-const getLevelColor = (level) => {
-  switch (level) {
-    case 'BEGINNER': return 'primary';
-    case 'INTERMEDIATE': return 'secondary';
-    case 'ADVANCED': return 'default';
-    default: return 'default';
-  }
-};
-
-const getLevelLabel = (level) => {
-  switch (level) {
-    case 'BEGINNER': return '初級';
-    case 'INTERMEDIATE': return '中級';
-    case 'ADVANCED': return '上級';
-    default: return level;
-  }
-};
 
 function BookList() {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const { books, loading, error, totalElements, currentPage } = useSelector(state => state.books);
-  const [search, setSearch] = React.useState('');
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  
+  // Redux state
+  const books = useSelector((state) => state.books?.books?.content || []);
+  const totalElements = useSelector((state) => state.books?.books?.totalElements || 0);
+  const loading = useSelector((state) => state.books?.loading || false);
+  const error = useSelector((state) => state.books?.error);
 
+  // Local state
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortBy, setSortBy] = useState('id');
+  const [sortDir, setSortDir] = useState('asc');
+
+  // Fetch books on component mount and when search/pagination changes
   useEffect(() => {
-    dispatch(fetchBooks(page, rowsPerPage, 'id', 'asc', search));
-  }, [dispatch, page, rowsPerPage, search]);
+    const params = {
+      page,
+      size: rowsPerPage,
+      sortBy,
+      sortDir,
+      keyword: searchKeyword,
+    };
+    dispatch(fetchBooks(params));
+  }, [dispatch, page, rowsPerPage, sortBy, sortDir, searchKeyword]);
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
+  const handleSearchChange = (event) => {
+    setSearchKeyword(event.target.value);
+    setPage(0); // Reset to first page when searching
+  };
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
     setPage(0);
-    dispatch(fetchBooks(0, rowsPerPage, 'id', 'asc', search));
+    const params = {
+      page: 0,
+      size: rowsPerPage,
+      sortBy,
+      sortDir,
+      keyword: searchKeyword,
+    };
+    dispatch(fetchBooks(params));
   };
 
   const handleChangePage = (event, newPage) => {
@@ -86,18 +109,46 @@ function BookList() {
     setPage(0);
   };
 
-  if (loading) {
+  const getLevelColor = (level) => {
+    switch (level) {
+      case 'BEGINNER':
+        return 'primary';
+      case 'INTERMEDIATE':
+        return 'secondary';
+      case 'ADVANCED':
+        return 'default';
+      default:
+        return 'default';
+    }
+  };
+
+  const getLevelLabel = (level) => {
+    switch (level) {
+      case 'BEGINNER':
+        return '初級';
+      case 'INTERMEDIATE':
+        return '中級';
+      case 'ADVANCED':
+        return '上級';
+      default:
+        return level;
+    }
+  };
+
+  if (loading && books.length === 0) {
     return (
-      <Box display="flex" justifyContent="center" p={4}>
+      <div className={classes.loading}>
         <CircularProgress />
-      </Box>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Box p={4}>
-        <Typography color="error">Error: {error}</Typography>
+      <Box p={2}>
+        <Typography color="error">
+          エラーが発生しました: {error}
+        </Typography>
       </Box>
     );
   }
@@ -105,57 +156,62 @@ function BookList() {
   return (
     <div className={classes.root}>
       <Typography variant="h4" gutterBottom>
-        書籍管理
+        書籍一覧
       </Typography>
       
-      <Box className={classes.searchBox}>
-        <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+      {/* Search */}
+      <form onSubmit={handleSearchSubmit}>
+        <Box className={classes.searchBox}>
           <TextField
-            label="検索（タイトル、ISBN）"
+            label="検索キーワード"
             variant="outlined"
-            size="small"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchKeyword}
+            onChange={handleSearchChange}
+            placeholder="タイトル、ISBN、著者名で検索"
             style={{ minWidth: 300 }}
           />
-          <Button type="submit" variant="contained" color="primary">
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+          >
             検索
           </Button>
-        </form>
-        <Button variant="contained" color="secondary">
-          新規登録
-        </Button>
-      </Box>
+        </Box>
+      </form>
 
       <Paper className={classes.paper}>
         <TableContainer>
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <TableCell>ISBN</TableCell>
+                <TableCell>ID</TableCell>
+                <TableCell>ISBN-13</TableCell>
                 <TableCell>タイトル</TableCell>
                 <TableCell>出版社</TableCell>
-                <TableCell>技術レベル</TableCell>
-                <TableCell>価格</TableCell>
-                <TableCell>ページ数</TableCell>
-                <TableCell>操作</TableCell>
+                <TableCell>発行日</TableCell>
+                <TableCell>定価</TableCell>
+                <TableCell>レベル</TableCell>
+                <TableCell>アクション</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {books.map((book) => (
                 <TableRow key={book.id}>
+                  <TableCell>{book.id}</TableCell>
                   <TableCell>{book.isbn13}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" style={{ fontWeight: 'bold' }}>
+                  <TableCell className={classes.titleCell}>
+                    <Typography variant="body2" title={book.title}>
                       {book.title}
                     </Typography>
-                    {book.titleEn && (
-                      <Typography variant="caption" color="textSecondary">
-                        {book.titleEn}
-                      </Typography>
-                    )}
                   </TableCell>
                   <TableCell>{book.publisherName}</TableCell>
+                  <TableCell>
+                    {book.publicationDate ? new Date(book.publicationDate).toLocaleDateString('ja-JP') : '-'}
+                  </TableCell>
+                  <TableCell>
+                    {book.listPrice ? `¥${book.listPrice.toLocaleString()}` : '-'}
+                  </TableCell>
                   <TableCell>
                     {book.level && (
                       <Chip
@@ -167,15 +223,12 @@ function BookList() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {book.sellingPrice && `¥${book.sellingPrice.toLocaleString()}`}
-                  </TableCell>
-                  <TableCell>{book.pages}</TableCell>
-                  <TableCell>
-                    <Button size="small" color="primary">
-                      編集
-                    </Button>
-                    <Button size="small" color="secondary">
-                      削除
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="primary"
+                    >
+                      詳細
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -183,15 +236,7 @@ function BookList() {
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={totalElements}
-          rowsPerPage={rowsPerPage}
-          page={currentPage}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="ページあたりの行数:"
+        
         />
       </Paper>
     </div>

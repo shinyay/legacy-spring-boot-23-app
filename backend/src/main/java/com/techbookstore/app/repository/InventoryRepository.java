@@ -13,19 +13,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
     Optional<Inventory> findByBookId(Long bookId);
 
-    @Query("SELECT i FROM Inventory i WHERE " +
-           "(i.storeStock + i.warehouseStock) <= i.reorderPoint AND i.reorderPoint IS NOT NULL")
+    @Query("SELECT i FROM Inventory i WHERE i.reorderPoint IS NOT NULL AND (i.storeStock + i.warehouseStock) <= i.reorderPoint")
     List<Inventory> findLowStockItems();
 
-    @Query("SELECT i FROM Inventory i WHERE " +
-           "(i.storeStock + i.warehouseStock) = 0")
+    @Query("SELECT i FROM Inventory i WHERE (i.storeStock + i.warehouseStock) <= 0")
     List<Inventory> findOutOfStockItems();
-
-    @Query("SELECT i FROM Inventory i WHERE " +
-           "(i.storeStock + i.warehouseStock - i.reservedCount) <= 0")
-    List<Inventory> findUnavailableItems();
-
-    @Query("SELECT i FROM Inventory i ORDER BY " +
-           "(i.storeStock + i.warehouseStock) ASC")
-    List<Inventory> findAllOrderByStockAsc();
 }

@@ -3,9 +3,6 @@ package com.techbookstore.app.entity;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "books")
@@ -50,34 +47,8 @@ public class Book {
     @Column(name = "sample_code_url", length = 500)
     private String sampleCodeUrl;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<BookAuthor> bookAuthors = new HashSet<>();
-
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<BookCategory> bookCategories = new HashSet<>();
-
-    @OneToOne(mappedBy = "book", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Inventory inventory;
-
     public enum TechLevel {
         BEGINNER, INTERMEDIATE, ADVANCED
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
     }
 
     // Constructors
@@ -89,147 +60,42 @@ public class Book {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getIsbn13() { return isbn13; }
+    public void setIsbn13(String isbn13) { this.isbn13 = isbn13; }
 
-    public String getIsbn13() {
-        return isbn13;
-    }
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-    public void setIsbn13(String isbn13) {
-        this.isbn13 = isbn13;
-    }
+    public String getTitleEn() { return titleEn; }
+    public void setTitleEn(String titleEn) { this.titleEn = titleEn; }
 
-    public String getTitle() {
-        return title;
-    }
+    public Publisher getPublisher() { return publisher; }
+    public void setPublisher(Publisher publisher) { this.publisher = publisher; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public LocalDate getPublicationDate() { return publicationDate; }
+    public void setPublicationDate(LocalDate publicationDate) { this.publicationDate = publicationDate; }
 
-    public String getTitleEn() {
-        return titleEn;
-    }
+    public Integer getEdition() { return edition; }
+    public void setEdition(Integer edition) { this.edition = edition; }
 
-    public void setTitleEn(String titleEn) {
-        this.titleEn = titleEn;
-    }
+    public BigDecimal getListPrice() { return listPrice; }
+    public void setListPrice(BigDecimal listPrice) { this.listPrice = listPrice; }
 
-    public Publisher getPublisher() {
-        return publisher;
-    }
+    public BigDecimal getSellingPrice() { return sellingPrice; }
+    public void setSellingPrice(BigDecimal sellingPrice) { this.sellingPrice = sellingPrice; }
 
-    public void setPublisher(Publisher publisher) {
-        this.publisher = publisher;
-    }
+    public Integer getPages() { return pages; }
+    public void setPages(Integer pages) { this.pages = pages; }
 
-    public LocalDate getPublicationDate() {
-        return publicationDate;
-    }
+    public TechLevel getLevel() { return level; }
+    public void setLevel(TechLevel level) { this.level = level; }
 
-    public void setPublicationDate(LocalDate publicationDate) {
-        this.publicationDate = publicationDate;
-    }
+    public String getVersionInfo() { return versionInfo; }
+    public void setVersionInfo(String versionInfo) { this.versionInfo = versionInfo; }
 
-    public Integer getEdition() {
-        return edition;
-    }
-
-    public void setEdition(Integer edition) {
-        this.edition = edition;
-    }
-
-    public BigDecimal getListPrice() {
-        return listPrice;
-    }
-
-    public void setListPrice(BigDecimal listPrice) {
-        this.listPrice = listPrice;
-    }
-
-    public BigDecimal getSellingPrice() {
-        return sellingPrice;
-    }
-
-    public void setSellingPrice(BigDecimal sellingPrice) {
-        this.sellingPrice = sellingPrice;
-    }
-
-    public Integer getPages() {
-        return pages;
-    }
-
-    public void setPages(Integer pages) {
-        this.pages = pages;
-    }
-
-    public TechLevel getLevel() {
-        return level;
-    }
-
-    public void setLevel(TechLevel level) {
-        this.level = level;
-    }
-
-    public String getVersionInfo() {
-        return versionInfo;
-    }
-
-    public void setVersionInfo(String versionInfo) {
-        this.versionInfo = versionInfo;
-    }
-
-    public String getSampleCodeUrl() {
-        return sampleCodeUrl;
-    }
-
-    public void setSampleCodeUrl(String sampleCodeUrl) {
-        this.sampleCodeUrl = sampleCodeUrl;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Set<BookAuthor> getBookAuthors() {
-        return bookAuthors;
-    }
-
-    public void setBookAuthors(Set<BookAuthor> bookAuthors) {
-        this.bookAuthors = bookAuthors;
-    }
-
-    public Set<BookCategory> getBookCategories() {
-        return bookCategories;
-    }
-
-    public void setBookCategories(Set<BookCategory> bookCategories) {
-        this.bookCategories = bookCategories;
-    }
-
-    public Inventory getInventory() {
-        return inventory;
-    }
-
-    public void setInventory(Inventory inventory) {
-        this.inventory = inventory;
-    }
+    public String getSampleCodeUrl() { return sampleCodeUrl; }
+    public void setSampleCodeUrl(String sampleCodeUrl) { this.sampleCodeUrl = sampleCodeUrl; }
 }

@@ -1,7 +1,6 @@
 package com.techbookstore.app.dto;
 
 import com.techbookstore.app.entity.Inventory;
-
 import java.time.LocalDate;
 
 public class InventoryDto {
@@ -43,123 +42,48 @@ public class InventoryDto {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getBookId() { return bookId; }
+    public void setBookId(Long bookId) { this.bookId = bookId; }
 
-    public Long getBookId() {
-        return bookId;
-    }
+    public String getBookTitle() { return bookTitle; }
+    public void setBookTitle(String bookTitle) { this.bookTitle = bookTitle; }
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
+    public String getIsbn13() { return isbn13; }
+    public void setIsbn13(String isbn13) { this.isbn13 = isbn13; }
 
-    public String getBookTitle() {
-        return bookTitle;
-    }
+    public Integer getStoreStock() { return storeStock; }
+    public void setStoreStock(Integer storeStock) { this.storeStock = storeStock; }
 
-    public void setBookTitle(String bookTitle) {
-        this.bookTitle = bookTitle;
-    }
+    public Integer getWarehouseStock() { return warehouseStock; }
+    public void setWarehouseStock(Integer warehouseStock) { this.warehouseStock = warehouseStock; }
 
-    public String getIsbn13() {
-        return isbn13;
-    }
+    public Integer getReservedCount() { return reservedCount; }
+    public void setReservedCount(Integer reservedCount) { this.reservedCount = reservedCount; }
 
-    public void setIsbn13(String isbn13) {
-        this.isbn13 = isbn13;
-    }
+    public String getLocationCode() { return locationCode; }
+    public void setLocationCode(String locationCode) { this.locationCode = locationCode; }
 
-    public Integer getStoreStock() {
-        return storeStock;
-    }
+    public Integer getReorderPoint() { return reorderPoint; }
+    public void setReorderPoint(Integer reorderPoint) { this.reorderPoint = reorderPoint; }
 
-    public void setStoreStock(Integer storeStock) {
-        this.storeStock = storeStock;
-    }
+    public Integer getReorderQuantity() { return reorderQuantity; }
+    public void setReorderQuantity(Integer reorderQuantity) { this.reorderQuantity = reorderQuantity; }
 
-    public Integer getWarehouseStock() {
-        return warehouseStock;
-    }
+    public LocalDate getLastReceivedDate() { return lastReceivedDate; }
+    public void setLastReceivedDate(LocalDate lastReceivedDate) { this.lastReceivedDate = lastReceivedDate; }
 
-    public void setWarehouseStock(Integer warehouseStock) {
-        this.warehouseStock = warehouseStock;
-    }
+    public LocalDate getLastSoldDate() { return lastSoldDate; }
+    public void setLastSoldDate(LocalDate lastSoldDate) { this.lastSoldDate = lastSoldDate; }
 
-    public Integer getReservedCount() {
-        return reservedCount;
-    }
+    public Integer getTotalStock() { return totalStock; }
+    public void setTotalStock(Integer totalStock) { this.totalStock = totalStock; }
 
-    public void setReservedCount(Integer reservedCount) {
-        this.reservedCount = reservedCount;
-    }
+    public Integer getAvailableStock() { return availableStock; }
+    public void setAvailableStock(Integer availableStock) { this.availableStock = availableStock; }
 
-    public String getLocationCode() {
-        return locationCode;
-    }
-
-    public void setLocationCode(String locationCode) {
-        this.locationCode = locationCode;
-    }
-
-    public Integer getReorderPoint() {
-        return reorderPoint;
-    }
-
-    public void setReorderPoint(Integer reorderPoint) {
-        this.reorderPoint = reorderPoint;
-    }
-
-    public Integer getReorderQuantity() {
-        return reorderQuantity;
-    }
-
-    public void setReorderQuantity(Integer reorderQuantity) {
-        this.reorderQuantity = reorderQuantity;
-    }
-
-    public LocalDate getLastReceivedDate() {
-        return lastReceivedDate;
-    }
-
-    public void setLastReceivedDate(LocalDate lastReceivedDate) {
-        this.lastReceivedDate = lastReceivedDate;
-    }
-
-    public LocalDate getLastSoldDate() {
-        return lastSoldDate;
-    }
-
-    public void setLastSoldDate(LocalDate lastSoldDate) {
-        this.lastSoldDate = lastSoldDate;
-    }
-
-    public Integer getTotalStock() {
-        return totalStock;
-    }
-
-    public void setTotalStock(Integer totalStock) {
-        this.totalStock = totalStock;
-    }
-
-    public Integer getAvailableStock() {
-        return availableStock;
-    }
-
-    public void setAvailableStock(Integer availableStock) {
-        this.availableStock = availableStock;
-    }
-
-    public boolean isLowStock() {
-        return lowStock;
-    }
-
-    public void setLowStock(boolean lowStock) {
-        this.lowStock = lowStock;
-    }
+    public boolean isLowStock() { return lowStock; }
+    public void setLowStock(boolean lowStock) { this.lowStock = lowStock; }
 }

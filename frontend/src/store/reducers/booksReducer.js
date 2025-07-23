@@ -1,52 +1,106 @@
+import {
+  FETCH_BOOKS_START,
+  FETCH_BOOKS_SUCCESS,
+  FETCH_BOOKS_FAILURE,
+  FETCH_BOOK_START,
+  FETCH_BOOK_SUCCESS,
+  FETCH_BOOK_FAILURE,
+  CREATE_BOOK_START,
+  CREATE_BOOK_SUCCESS,
+  CREATE_BOOK_FAILURE,
+  UPDATE_BOOK_START,
+  UPDATE_BOOK_SUCCESS,
+  UPDATE_BOOK_FAILURE,
+  DELETE_BOOK_START,
+  DELETE_BOOK_SUCCESS,
+  DELETE_BOOK_FAILURE,
+} from '../actions/booksActions';
+
 const initialState = {
   books: [],
+  selectedBook: null,
   loading: false,
   error: null,
-  totalElements: 0,
-  totalPages: 0,
-  currentPage: 0,
 };
 
 const booksReducer = (state = initialState, action) => {
   switch (action.type) {
-    case 'FETCH_BOOKS_REQUEST':
+    case FETCH_BOOKS_START:
+    case FETCH_BOOK_START:
+    case CREATE_BOOK_START:
+    case UPDATE_BOOK_START:
+    case DELETE_BOOK_START:
       return {
         ...state,
         loading: true,
         error: null,
       };
-    case 'FETCH_BOOKS_SUCCESS':
+
+    case FETCH_BOOKS_SUCCESS:
       return {
         ...state,
         loading: false,
-        books: action.payload.content,
-        totalElements: action.payload.totalElements,
-        totalPages: action.payload.totalPages,
-        currentPage: action.payload.number,
+        books: action.payload,
+        error: null,
       };
-    case 'FETCH_BOOKS_FAILURE':
+
+    case FETCH_BOOK_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        selectedBook: action.payload,
+        error: null,
+      };
+
+    case CREATE_BOOK_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        books: {
+          ...state.books,
+          content: [action.payload, ...(state.books.content || [])],
+          totalElements: (state.books.totalElements || 0) + 1,
+        },
+        error: null,
+      };
+
+    case UPDATE_BOOK_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        books: {
+          ...state.books,
+          content: (state.books.content || []).map(book =>
+            book.id === action.payload.id ? action.payload : book
+          ),
+        },
+        selectedBook: action.payload,
+        error: null,
+      };
+
+    case DELETE_BOOK_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        books: {
+          ...state.books,
+          content: (state.books.content || []).filter(book => book.id !== action.payload),
+          totalElements: Math.max((state.books.totalElements || 0) - 1, 0),
+        },
+        error: null,
+      };
+
+    case FETCH_BOOKS_FAILURE:
+    case FETCH_BOOK_FAILURE:
+    case CREATE_BOOK_FAILURE:
+    case UPDATE_BOOK_FAILURE:
+    case DELETE_BOOK_FAILURE:
       return {
         ...state,
         loading: false,
         error: action.payload,
       };
-    case 'ADD_BOOK_SUCCESS':
-      return {
-        ...state,
-        books: [...state.books, action.payload],
-      };
-    case 'UPDATE_BOOK_SUCCESS':
-      return {
-        ...state,
-        books: state.books.map(book =>
-          book.id === action.payload.id ? action.payload : book
-        ),
-      };
-    case 'DELETE_BOOK_SUCCESS':
-      return {
-        ...state,
-        books: state.books.filter(book => book.id !== action.payload),
-      };
+
     default:
       return state;
   }

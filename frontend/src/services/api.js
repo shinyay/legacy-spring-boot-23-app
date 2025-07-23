@@ -1,38 +1,117 @@
 import axios from 'axios';
 
-const API_BASE_URL = '/api/v1';
-
-export const api = axios.create({
-  baseURL: API_BASE_URL,
+// Create axios instance with base URL
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api/v1',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
+// Books API
 export const booksApi = {
-  getBooks: (page = 0, size = 10, sortBy = 'id', sortDir = 'asc', keyword = '') => {
-    const params = { page, size, sortBy, sortDir };
-    if (keyword) params.keyword = keyword;
-    return api.get('/books', { params });
+  // Get all books with pagination and search
+  getBooks: (params = {}) => {
+    const { page = 0, size = 10, sortBy = 'id', sortDir = 'asc', keyword = '' } = params;
+    return api.get('/books', {
+      params: { page, size, sortBy, sortDir, keyword }
+    });
   },
-  getBook: (id) => api.get(`/books/${id}`),
-  createBook: (book) => api.post('/books', book),
-  updateBook: (id, book) => api.put(`/books/${id}`, book),
-  deleteBook: (id) => api.delete(`/books/${id}`),
-  getBookByIsbn: (isbn13) => api.get(`/books/isbn/${isbn13}`),
+
+  // Get book by ID
+  getBook: (id) => {
+    return api.get(`/books/${id}`);
+  },
+
+  // Get book by ISBN
+  getBookByIsbn: (isbn13) => {
+    return api.get(`/books/isbn/${isbn13}`);
+  },
+
+  // Create new book
+  createBook: (bookData) => {
+    return api.post('/books', bookData);
+  },
+
+  // Update book
+  updateBook: (id, bookData) => {
+    return api.put(`/books/${id}`, bookData);
+  },
+
+  // Delete book
+  deleteBook: (id) => {
+    return api.delete(`/books/${id}`);
+  },
 };
 
+// Inventory API
 export const inventoryApi = {
-  getInventory: () => api.get('/inventory'),
-  getInventoryByBookId: (bookId) => api.get(`/inventory/${bookId}`),
-  getInventoryAlerts: () => api.get('/inventory/alerts'),
-  getOutOfStockItems: () => api.get('/inventory/out-of-stock'),
-  receiveStock: (bookId, quantity, location) => 
-    api.post('/inventory/receive', { bookId, quantity, location }),
-  sellStock: (bookId, quantity) => 
-    api.post('/inventory/sell', { bookId, quantity }),
-  adjustStock: (bookId, storeStock, warehouseStock) => 
-    api.put('/inventory/adjust', { bookId, storeStock, warehouseStock }),
+  // Get all inventory
+  getInventory: () => {
+    return api.get('/inventory');
+  },
+
+  // Get inventory by book ID
+  getInventoryByBook: (bookId) => {
+    return api.get(`/inventory/${bookId}`);
+  },
+
+  // Get inventory alerts
+  getInventoryAlerts: () => {
+    return api.get('/inventory/alerts');
+  },
+
+  // Get out of stock items
+  getOutOfStockItems: () => {
+    return api.get('/inventory/out-of-stock');
+  },
+
+  // Receive stock
+  receiveStock: (data) => {
+    return api.post('/inventory/receive', data);
+  },
+
+  // Sell stock
+  sellStock: (data) => {
+    return api.post('/inventory/sell', data);
+  },
+
+  // Adjust stock
+  adjustStock: (data) => {
+    return api.put('/inventory/adjust', data);
+  },
 };
+
+// Request interceptor
+api.interceptors.request.use(
+  (config) => {
+    // Add auth token if available
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Handle common errors
+    if (error.response?.status === 401) {
+      // Unauthorized - redirect to login
+      localStorage.removeItem('authToken');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;

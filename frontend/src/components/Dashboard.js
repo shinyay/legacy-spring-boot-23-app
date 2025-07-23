@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Grid,
   Paper,
@@ -10,9 +10,11 @@ import {
   ListItem,
   ListItemText,
   Chip,
+  CircularProgress,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { TrendingUp, Warning, Inventory, ShoppingCart } from '@material-ui/icons';
+import { inventoryApi, booksApi } from '../services/api';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,64 +50,127 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.warning.main,
     marginRight: theme.spacing(1),
   },
+  loading: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
+  },
 }));
 
 function Dashboard() {
   const classes = useStyles();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    totalBooks: 0,
+    lowStockItems: 0,
+    outOfStock: 0,
+    pendingOrders: 0,
+  });
+  const [recentBooks, setRecentBooks] = useState([]);
+  const [lowStockAlerts, setLowStockAlerts] = useState([]);
 
-  // Mock data - これは実際のAPIから取得することになります
-  const stats = {
-    totalBooks: 1247,
-    lowStockItems: 23,
-    outOfStock: 5,
-    pendingOrders: 8,
-  };
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const recentBooks = [
-    { id: 1, title: 'React実践入門', isbn: '9784797395919', level: 'INTERMEDIATE' },
-    { id: 2, title: 'Spring Boot 2 徹底活用', isbn: '9784798058306', level: 'ADVANCED' },
-    { id: 3, title: 'JavaScript本格入門', isbn: '9784797395815', level: 'BEGINNER' },
-  ];
+        // Fetch all data in parallel
+        const [booksResponse, inventoryResponse, alertsResponse, outOfStockResponse] = await Promise.all([
+          booksApi.getBooks({ page: 0, size: 5, sortBy: 'id', sortDir: 'desc' }),
+          inventoryApi.getInventory(),
+          inventoryApi.getInventoryAlerts(),
+          inventoryApi.getOutOfStockItems(),
+        ]);
 
-  const lowStockAlerts = [
-    { id: 1, title: 'Kubernetes実践ガイド', currentStock: 2, reorderPoint: 5 },
-    { id: 2, title: 'Docker/Kubernetes 実践コンテナ開発入門', currentStock: 1, reorderPoint: 3 },
-    { id: 3, title: 'AWS認定ソリューションアーキテクト', currentStock: 0, reorderPoint: 5 },
-  ];
+        // Calculate statistics
+        const inventory = inventoryResponse.data;
+        const totalBooks = inventory.length;
+        const lowStockItems = alertsResponse.data.length;
+        const outOfStock = outOfStockResponse.data.length;
+        const pendingOrders = inventory.reduce((sum, item) => sum + (item.reservedCount || 0), 0);
+
+        setStats({
+          totalBooks,
+          lowStockItems,
+          outOfStock,
+          pendingOrders,
+        });
+
+        setRecentBooks(booksResponse.data.content || booksResponse.data || []);
+        setLowStockAlerts(alertsResponse.data || []);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err.response?.data?.message || err.message || 'データの取得に失敗しました');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const getLevelLabel = (level) => {
     switch (level) {
-      case 'BEGINNER': return '初級';
-      case 'INTERMEDIATE': return '中級';
-      case 'ADVANCED': return '上級';
-      default: return level;
+      case 'BEGINNER':
+        return '初級';
+      case 'INTERMEDIATE':
+        return '中級';
+      case 'ADVANCED':
+        return '上級';
+      default:
+        return '-';
     }
   };
 
   const getLevelColor = (level) => {
     switch (level) {
-      case 'BEGINNER': return 'primary';
-      case 'INTERMEDIATE': return 'secondary';
-      case 'ADVANCED': return 'default';
-      default: return 'default';
+      case 'BEGINNER':
+        return 'primary';
+      case 'INTERMEDIATE':
+        return 'secondary';
+      case 'ADVANCED':
+        return 'default';
+      default:
+        return 'default';
     }
   };
+
+  if (loading) {
+    return (
+      <div className={classes.loading}>
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={2}>
+        <Typography color="error">
+          エラーが発生しました: {error}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <div className={classes.root}>
       <Typography variant="h4" gutterBottom>
         ダッシュボード
       </Typography>
-      
+
       <Grid container spacing={3}>
-        {/* 統計カード */}
+        {/* Statistics Cards */}
         <Grid item xs={12} sm={6} md={3}>
           <Card className={classes.card}>
             <CardContent className={classes.statCard}>
               <Inventory className={classes.statIcon} />
               <Box>
                 <Typography className={classes.statNumber}>
-                  {stats.totalBooks.toLocaleString()}
+                  {stats?.totalBooks || 0}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
                   総書籍数
@@ -114,69 +179,68 @@ function Dashboard() {
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <Card className={classes.card}>
             <CardContent className={classes.statCard}>
               <Warning className={classes.statIcon} style={{ color: '#ff9800' }} />
               <Box>
-                <Typography className={classes.statNumber} style={{ color: '#ff9800' }}>
-                  {stats.lowStockItems}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  在庫少
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <Card className={classes.card}>
-            <CardContent className={classes.statCard}>
-              <Warning className={classes.statIcon} style={{ color: '#f44336' }} />
-              <Box>
-                <Typography className={classes.statNumber} style={{ color: '#f44336' }}>
-                  {stats.outOfStock}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  品切れ
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-        
-        <Grid item xs={12} sm={6} md={3}>
-          <Card className={classes.card}>
-            <CardContent className={classes.statCard}>
-              <ShoppingCart className={classes.statIcon} />
-              <Box>
                 <Typography className={classes.statNumber}>
-                  {stats.pendingOrders}
+                  {stats?.lowStockItems || 0}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                  発注待ち
+                  在庫不足
                 </Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* 新着書籍 */}
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={classes.card}>
+            <CardContent className={classes.statCard}>
+              <Warning className={classes.statIcon} style={{ color: '#f44336' }} />
+              <Box>
+                <Typography className={classes.statNumber}>
+                  {stats?.outOfStock || 0}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  在庫切れ
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={classes.card}>
+            <CardContent className={classes.statCard}>
+              <ShoppingCart className={classes.statIcon} />
+              <Box>
+                <Typography className={classes.statNumber}>
+                  {stats?.pendingOrders || 0}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  予約待ち
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Recent Books */}
         <Grid item xs={12} md={6}>
           <Card className={classes.card}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                <TrendingUp style={{ verticalAlign: 'middle', marginRight: 8 }} />
-                新着書籍
+                最近追加された書籍
               </Typography>
               <List>
                 {recentBooks.map((book) => (
-                  <ListItem key={book.id} divider>
+                  <ListItem key={book.id}>
                     <ListItemText
                       primary={book.title}
-                      secondary={`ISBN: ${book.isbn}`}
+                      secondary={`ISBN: ${book.isbn13}`}
                     />
                     <Chip
                       label={getLevelLabel(book.level)}
@@ -185,33 +249,44 @@ function Dashboard() {
                     />
                   </ListItem>
                 ))}
+                {recentBooks.length === 0 && (
+                  <ListItem>
+                    <ListItemText 
+                      primary="データがありません"
+                      secondary="最近追加された書籍はありません"
+                    />
+                  </ListItem>
+                )}
               </List>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* 在庫アラート */}
+        {/* Inventory Alerts */}
         <Grid item xs={12} md={6}>
           <Card className={classes.card}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                <Warning className={classes.alertIcon} />
                 在庫アラート
               </Typography>
               <List>
-                {lowStockAlerts.map((item) => (
-                  <ListItem key={item.id} divider>
+                {lowStockAlerts.map((alert) => (
+                  <ListItem key={alert.id}>
+                    <Warning className={classes.alertIcon} />
                     <ListItemText
-                      primary={item.title}
-                      secondary={`現在庫: ${item.currentStock} / 発注点: ${item.reorderPoint}`}
-                    />
-                    <Chip
-                      label={item.currentStock === 0 ? "品切れ" : "在庫少"}
-                      color={item.currentStock === 0 ? "secondary" : "default"}
-                      size="small"
+                      primary={alert.bookTitle}
+                      secondary={`在庫数: ${alert.availableStock} / 発注点: ${alert.reorderPoint || '-'}`}
                     />
                   </ListItem>
                 ))}
+                {lowStockAlerts.length === 0 && (
+                  <ListItem>
+                    <ListItemText 
+                      primary="アラートなし"
+                      secondary="現在、在庫アラートはありません"
+                    />
+                  </ListItem>
+                )}
               </List>
             </CardContent>
           </Card>

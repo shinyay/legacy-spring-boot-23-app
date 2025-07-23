@@ -22,6 +22,9 @@ yarn-error.log*
 /build
 /dist
 
+# Test coverage reports
+coverage/
+
 # Environment variables
 .env.local
 .env.development.local

@@ -22,18 +22,21 @@ public interface BookRepository extends JpaRepository<Book, Long> {
            "LOWER(b.isbn13) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Book> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT b FROM Book b JOIN b.bookCategories bc WHERE bc.category.id = :categoryId")
-    Page<Book> findByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
+    // Temporarily disabled due to missing entity relationships
+    // @Query("SELECT b FROM Book b JOIN b.bookCategories bc WHERE bc.category.id = :categoryId")
+    // Page<Book> findByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
 
     @Query("SELECT b FROM Book b WHERE b.level = :level")
     Page<Book> findByLevel(@Param("level") Book.TechLevel level, Pageable pageable);
 
-    @Query("SELECT b FROM Book b JOIN b.bookAuthors ba WHERE ba.author.id = :authorId")
-    List<Book> findByAuthorId(@Param("authorId") Long authorId);
+    // Temporarily disabled due to missing entity relationships  
+    // @Query("SELECT b FROM Book b JOIN b.bookAuthors ba WHERE ba.author.id = :authorId")
+    // List<Book> findByAuthorId(@Param("authorId") Long authorId);
 
     @Query("SELECT b FROM Book b WHERE b.publisher.id = :publisherId")
     Page<Book> findByPublisherId(@Param("publisherId") Long publisherId, Pageable pageable);
 
-    @Query("SELECT b FROM Book b ORDER BY b.createdAt DESC")
-    List<Book> findLatestBooks(Pageable pageable);
+    // Temporarily disabled due to missing entity property
+    // @Query("SELECT b FROM Book b ORDER BY b.createdAt DESC")
+    // List<Book> findLatestBooks(Pageable pageable);
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   Grid,
-  Paper,
   Typography,
   Box,
   Card,
@@ -13,7 +12,7 @@ import {
   CircularProgress,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { TrendingUp, Warning, Inventory, ShoppingCart } from '@material-ui/icons';
+import { Warning, Storage, ShoppingCart } from '@material-ui/icons';
 import { inventoryApi, booksApi } from '../services/api';
 
 const useStyles = makeStyles((theme) => ({
@@ -167,7 +166,7 @@ function Dashboard() {
         <Grid item xs={12} sm={6} md={3}>
           <Card className={classes.card}>
             <CardContent className={classes.statCard}>
-              <Inventory className={classes.statIcon} />
+              <Storage className={classes.statIcon} />
               <Box>
                 <Typography className={classes.statNumber}>
                   {stats?.totalBooks || 0}

@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/51</span>
+                <span class='fraction'>0/44</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/26</span>
+                <span class='fraction'>0/24</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/46</span>
+                <span class='fraction'>0/40</span>
             </div>
         
             
@@ -297,19 +297,7 @@
 <a name='L232'></a><a href='#L232'>232</a>
 <a name='L233'></a><a href='#L233'>233</a>
 <a name='L234'></a><a href='#L234'>234</a>
-<a name='L235'></a><a href='#L235'>235</a>
-<a name='L236'></a><a href='#L236'>236</a>
-<a name='L237'></a><a href='#L237'>237</a>
-<a name='L238'></a><a href='#L238'>238</a>
-<a name='L239'></a><a href='#L239'>239</a>
-<a name='L240'></a><a href='#L240'>240</a>
-<a name='L241'></a><a href='#L241'>241</a>
-<a name='L242'></a><a href='#L242'>242</a>
-<a name='L243'></a><a href='#L243'>243</a>
-<a name='L244'></a><a href='#L244'>244</a>
-<a name='L245'></a><a href='#L245'>245</a>
-<a name='L246'></a><a href='#L246'>246</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L235'></a><a href='#L235'>235</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -371,7 +359,6 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -407,15 +394,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -569,7 +547,6 @@ import {
   Typography,
   Chip,
   CircularProgress,
-  TablePagination,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { fetchBooks } from '../store/actions/booksActions';
@@ -614,16 +591,15 @@ function <span class="fstat-no" title="function not covered" >BookList(</span>) 
   
   // Redux state
   const books = <span class="cstat-no" title="statement not covered" >useSelector(<span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; <span class="cstat-no" title="statement not covered" >state.books?.books?.content || [])</span>;</span>
-  const totalElements = <span class="cstat-no" title="statement not covered" >useSelector(<span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; <span class="cstat-no" title="statement not covered" >state.books?.books?.totalElements || 0)</span>;</span>
   const loading = <span class="cstat-no" title="statement not covered" >useSelector(<span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; <span class="cstat-no" title="statement not covered" >state.books?.loading || false)</span>;</span>
   const error = <span class="cstat-no" title="statement not covered" >useSelector(<span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; <span class="cstat-no" title="statement not covered" >state.books?.error)</span>;</span>
 &nbsp;
   // Local state
   const [searchKeyword, setSearchKeyword] = <span class="cstat-no" title="statement not covered" >useState('');</span>
   const [page, setPage] = <span class="cstat-no" title="statement not covered" >useState(0);</span>
-  const [rowsPerPage, setRowsPerPage] = <span class="cstat-no" title="statement not covered" >useState(10);</span>
-  const [sortBy, setSortBy] = <span class="cstat-no" title="statement not covered" >useState('id');</span>
-  const [sortDir, setSortDir] = <span class="cstat-no" title="statement not covered" >useState('asc');</span>
+  const [rowsPerPage] = <span class="cstat-no" title="statement not covered" >useState(10);</span>
+  const [sortBy] = <span class="cstat-no" title="statement not covered" >useState('id');</span>
+  const [sortDir] = <span class="cstat-no" title="statement not covered" >useState('asc');</span>
 &nbsp;
   // Fetch books on component mount and when search/pagination changes
 <span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
@@ -653,15 +629,6 @@ function <span class="fstat-no" title="function not covered" >BookList(</span>) 
       keyword: searchKeyword,
     };
 <span class="cstat-no" title="statement not covered" >    dispatch(fetchBooks(params));</span>
-  };
-&nbsp;
-  const handleChangePage = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(e</span>vent, newPage) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    setPage(newPage);</span>
-  };
-&nbsp;
-  const handleChangeRowsPerPage = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(e</span>vent) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    setRowsPerPage(parseInt(event.target.value, 10));</span>
-<span class="cstat-no" title="statement not covered" >    setPage(0);</span>
   };
 &nbsp;
   const getLevelColor = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(l</span>evel) =&gt; {</span>
@@ -805,7 +772,7 @@ export default BookList;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-07-23T12:11:15.623Z
+                at 2025-07-23T13:38:25.963Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

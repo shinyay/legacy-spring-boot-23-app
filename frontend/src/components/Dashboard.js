@@ -56,6 +56,72 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     height: 200,
   },
+}));
+
+function Dashboard() {
+  const classes = useStyles();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    totalBooks: 0,
+    lowStockItems: 0,
+    outOfStock: 0,
+    pendingOrders: 0,
+  });
+  const [recentBooks, setRecentBooks] = useState([]);
+  const [lowStockAlerts, setLowStockAlerts] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch all data in parallel
+        const [booksResponse, inventoryResponse, alertsResponse, outOfStockResponse] = await Promise.all([
+          booksApi.getBooks({ page: 0, size: 5, sortBy: 'id', sortDir: 'desc' }),
+          inventoryApi.getInventory(),
+          inventoryApi.getInventoryAlerts(),
+          inventoryApi.getOutOfStockItems(),
+        ]);
+
+        // Calculate statistics
+        const inventory = inventoryResponse.data;
+        const totalBooks = inventory.length;
+        const lowStockItems = alertsResponse.data.length;
+        const outOfStock = outOfStockResponse.data.length;
+        const pendingOrders = inventory.reduce((sum, item) => sum + (item.reservedCount || 0), 0);
+
+        setStats({
+          totalBooks,
+          lowStockItems,
+          outOfStock,
+          pendingOrders,
+        });
+
+        setRecentBooks(booksResponse.data.content || booksResponse.data || []);
+        setLowStockAlerts(alertsResponse.data || []);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err.response?.data?.message || err.message || 'データの取得に失敗しました');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const getLevelLabel = (level) => {
+    switch (level) {
+      case 'BEGINNER':
+        return '初級';
+      case 'INTERMEDIATE':
+        return '中級';
+      case 'ADVANCED':
+        return '上級';
+      default:
+        return '-';
     }
   };
 
@@ -191,6 +257,12 @@ const useStyles = makeStyles((theme) => ({
                     />
                   </ListItem>
                 )}
+              </List>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Inventory Alerts */}
         <Grid item xs={12} md={6}>
           <Card className={classes.card}>
             <CardContent>

@@ -63,12 +63,14 @@ function BookList() {
 
   // Local state
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage] = useState(10);
-  const [sortBy] = useState('id');
-  const [sortDir] = useState('asc');
+  
+  // Constants for pagination and sorting (no UI controls)
+  const page = 0;
+  const rowsPerPage = 10;
+  const sortBy = 'id';
+  const sortDir = 'asc';
 
-  // Fetch books on component mount and when search/pagination changes
+  // Fetch books on component mount and when search changes
   useEffect(() => {
     const params = {
       page,
@@ -78,18 +80,16 @@ function BookList() {
       keyword: searchKeyword,
     };
     dispatch(fetchBooks(params));
-  }, [dispatch, page, rowsPerPage, sortBy, sortDir, searchKeyword]);
+  }, [dispatch, searchKeyword]); // Removed pagination dependencies since they're constants
 
   const handleSearchChange = (event) => {
     setSearchKeyword(event.target.value);
-    setPage(0); // Reset to first page when searching
   };
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setPage(0);
     const params = {
-      page: 0,
+      page,
       size: rowsPerPage,
       sortBy,
       sortDir,
@@ -225,8 +225,6 @@ function BookList() {
             </TableBody>
           </Table>
         </TableContainer>
-        
-        />
       </Paper>
     </div>
   );

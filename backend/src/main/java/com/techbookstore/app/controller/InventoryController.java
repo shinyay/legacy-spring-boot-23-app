@@ -88,7 +88,6 @@ public class InventoryController {
             // Fixed: Check if enough stock is available AND store stock is sufficient
             if (inventory.getAvailableStock() >= request.getQuantity() &&
                 inventory.getStoreStock() >= request.getQuantity()) {
-                
                 inventory.setStoreStock(inventory.getStoreStock() - request.getQuantity());
                 inventory.setLastSoldDate(LocalDate.now());
                 Inventory savedInventory = inventoryRepository.save(inventory);

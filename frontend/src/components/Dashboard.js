@@ -56,70 +56,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     height: 200,
   },
-}));
-
-function Dashboard() {
-  const classes = useStyles();
-  
-  // State for real-time data from API
-  const [stats, setStats] = useState(null);
-  const [recentBooks, setRecentBooks] = useState([]);
-  const [lowStockAlerts, setLowStockAlerts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch real data from API endpoints
-        const [inventoryResponse, booksResponse, alertsResponse] = await Promise.all([
-          inventoryApi.getInventory(),
-          booksApi.getBooks({ page: 0, size: 5, sortBy: 'id', sortDir: 'desc' }),
-          inventoryApi.getInventoryAlerts()
-        ]);
-
-        const inventory = inventoryResponse.data;
-        const books = booksResponse.data;
-        const alerts = alertsResponse.data;
-
-        // Calculate statistics from real data
-        const totalBooks = books.totalElements || 0;
-        const lowStockItems = alerts.length;
-        const outOfStock = inventory.filter(item => item.availableStock <= 0).length;
-        const pendingOrders = inventory.filter(item => item.reservedCount > 0).length;
-
-        setStats({
-          totalBooks,
-          lowStockItems,
-          outOfStock,
-          pendingOrders,
-        });
-
-        setRecentBooks(books.content || []);
-        setLowStockAlerts(alerts);
-        
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
-
-  const getLevelLabel = (level) => {
-    switch (level) {
-      case 'BEGINNER':
-        return '初級';
-      case 'INTERMEDIATE':
-        return '中級';
-      case 'ADVANCED':
-        return '上級';
-      default:
-        return level || '-';
     }
   };
 
@@ -255,12 +191,6 @@ function Dashboard() {
                     />
                   </ListItem>
                 )}
-              </List>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Low Stock Alerts */}
         <Grid item xs={12} md={6}>
           <Card className={classes.card}>
             <CardContent>

@@ -237,16 +237,6 @@ function BookList() {
           </Table>
         </TableContainer>
         
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={totalElements}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} / ${count}`}
-          labelRowsPerPage="表示件数:"
         />
       </Paper>
     </div>

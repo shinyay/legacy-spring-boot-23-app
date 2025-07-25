@@ -55,6 +55,39 @@ code .
 # "Dev Containers: Reopen in Container"
 ```
 
+#### VS Code エディタ設定
+
+Java開発のためのVS Code設定が必要です（`.vscode/`ディレクトリは`.gitignore`で除外されているため、各開発者が個別に設定する必要があります）。
+
+プロジェクトルートに`.vscode/settings.json`ファイルを作成してください：
+
+```json
+{
+    "java.jdt.ls.java.home": "/usr/local/sdkman/candidates/java/current"
+}
+```
+
+**設定手順：**
+
+1. プロジェクトルートに`.vscode`ディレクトリを作成
+2. 上記の内容で`settings.json`ファイルを作成
+3. Java Home パスは環境に合わせて調整してください
+
+**一般的なJava Homeパス：**
+- Dev Container環境: `/usr/local/sdkman/candidates/java/current`
+- macOS (Homebrew): `/opt/homebrew/opt/openjdk@8`
+- Linux (apt): `/usr/lib/jvm/java-8-openjdk-amd64`
+- Windows: `C:\Program Files\Java\jdk1.8.0_XXX`
+
+**確認方法：**
+```bash
+# 現在のJAVA_HOMEを確認
+echo $JAVA_HOME
+
+# Javaバージョンを確認
+java -version
+```
+
 ### 2. ローカル環境でのセットアップ
 
 #### 前提条件

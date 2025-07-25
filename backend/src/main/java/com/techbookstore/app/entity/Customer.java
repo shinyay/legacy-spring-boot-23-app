@@ -1,6 +1,7 @@
 package com.techbookstore.app.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -14,21 +15,31 @@ public class Customer {
     
     @Enumerated(EnumType.STRING)
     @Column(name = "customer_type", nullable = false, length = 20)
+    @NotNull(message = "Customer type is required")
     private CustomerType customerType;
     
     @Column(nullable = false, length = 100)
+    @NotBlank(message = "Name is required")
+    @Size(max = 100, message = "Name must not exceed 100 characters")
     private String name;
     
     @Column(name = "name_kana", length = 100)
+    @Size(max = 100, message = "Name kana must not exceed 100 characters")
     private String nameKana;
     
     @Column(nullable = false, unique = true, length = 255)
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
+    @Size(max = 255, message = "Email must not exceed 255 characters")
     private String email;
     
     @Column(nullable = false, length = 20)
+    @NotBlank(message = "Phone is required")
+    @Size(max = 20, message = "Phone must not exceed 20 characters")
     private String phone;
     
     @Column(name = "birth_date")
+    @Past(message = "Birth date must be in the past")
     private LocalDate birthDate;
     
     @Enumerated(EnumType.STRING)
@@ -36,12 +47,15 @@ public class Customer {
     private Gender gender;
     
     @Column(length = 100)
+    @Size(max = 100, message = "Occupation must not exceed 100 characters")
     private String occupation;
     
     @Column(name = "company_name", length = 100)
+    @Size(max = 100, message = "Company name must not exceed 100 characters")
     private String companyName;
     
     @Column(length = 100)
+    @Size(max = 100, message = "Department must not exceed 100 characters")
     private String department;
     
     @Column(name = "postal_code", length = 10)

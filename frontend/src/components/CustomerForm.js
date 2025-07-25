@@ -30,6 +30,19 @@ import {
   clearCustomerError
 } from '../store/actions/customersActions';
 
+// Email validation helper
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Postal code validation helper (Japanese format)
+const isValidPostalCode = (postalCode) => {
+  if (!postalCode) return true; // Optional field
+  const postalCodeRegex = /^(\d{3}-\d{4}|\d{7})$/;
+  return postalCodeRegex.test(postalCode);
+};
+
 const useStyles = makeStyles((theme) => ({
   root: {
     padding: theme.spacing(3),
@@ -151,16 +164,53 @@ const CustomerForm = () => {
     
     if (!formData.name.trim()) {
       newErrors.name = '名前は必須です';
+    } else if (formData.name.length > 100) {
+      newErrors.name = '名前は100文字以内で入力してください';
     }
     
     if (!formData.email.trim()) {
       newErrors.email = 'メールアドレスは必須です';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!isValidEmail(formData.email)) {
       newErrors.email = '正しいメールアドレスを入力してください';
+    } else if (formData.email.length > 255) {
+      newErrors.email = 'メールアドレスは255文字以内で入力してください';
     }
     
     if (!formData.phone.trim()) {
       newErrors.phone = '電話番号は必須です';
+    } else if (formData.phone.length > 20) {
+      newErrors.phone = '電話番号は20文字以内で入力してください';
+    }
+    
+    // Postal code validation
+    if (formData.postalCode && !isValidPostalCode(formData.postalCode)) {
+      newErrors.postalCode = '郵便番号は「123-4567」または「1234567」の形式で入力してください';
+    }
+    
+    // Optional field length validations
+    if (formData.nameKana && formData.nameKana.length > 100) {
+      newErrors.nameKana = 'ふりがなは100文字以内で入力してください';
+    }
+    
+    if (formData.occupation && formData.occupation.length > 100) {
+      newErrors.occupation = '職業は100文字以内で入力してください';
+    }
+    
+    if (formData.companyName && formData.companyName.length > 100) {
+      newErrors.companyName = '会社名は100文字以内で入力してください';
+    }
+    
+    if (formData.department && formData.department.length > 100) {
+      newErrors.department = '部署は100文字以内で入力してください';
+    }
+    
+    // Birth date validation
+    if (formData.birthDate) {
+      const birthDate = new Date(formData.birthDate);
+      const today = new Date();
+      if (birthDate >= today) {
+        newErrors.birthDate = '生年月日は過去の日付を入力してください';
+      }
     }
     
     // Corporate specific validation

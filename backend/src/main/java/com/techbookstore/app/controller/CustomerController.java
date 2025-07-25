@@ -16,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/api/v1/customers")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:3000}")
 public class CustomerController {
     
     private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
@@ -55,23 +52,7 @@ public class CustomerController {
     public ResponseEntity<CustomerDto> createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
         logger.info("Creating new customer with email: {}", request.getEmail());
         
-        Customer customer = new Customer();
-        customer.setCustomerType(Customer.CustomerType.valueOf(request.getCustomerType()));
-        customer.setName(request.getName());
-        customer.setNameKana(request.getNameKana());
-        customer.setEmail(request.getEmail());
-        customer.setPhone(request.getPhone());
-        customer.setBirthDate(request.getBirthDate());
-        if (request.getGender() != null) {
-            customer.setGender(Customer.Gender.valueOf(request.getGender()));
-        }
-        customer.setOccupation(request.getOccupation());
-        customer.setCompanyName(request.getCompanyName());
-        customer.setDepartment(request.getDepartment());
-        customer.setPostalCode(request.getPostalCode());
-        customer.setAddress(request.getAddress());
-        customer.setNotes(request.getNotes());
-        
+        Customer customer = mapRequestToCustomer(request);
         Customer savedCustomer = customerService.createCustomer(customer);
         return ResponseEntity.ok(new CustomerDto(savedCustomer));
     }
@@ -88,23 +69,7 @@ public class CustomerController {
                                                      @Valid @RequestBody UpdateCustomerRequest request) {
         logger.info("Updating customer with ID: {}", id);
         
-        Customer customer = new Customer();
-        customer.setCustomerType(Customer.CustomerType.valueOf(request.getCustomerType()));
-        customer.setName(request.getName());
-        customer.setNameKana(request.getNameKana());
-        customer.setEmail(request.getEmail());
-        customer.setPhone(request.getPhone());
-        customer.setBirthDate(request.getBirthDate());
-        if (request.getGender() != null) {
-            customer.setGender(Customer.Gender.valueOf(request.getGender()));
-        }
-        customer.setOccupation(request.getOccupation());
-        customer.setCompanyName(request.getCompanyName());
-        customer.setDepartment(request.getDepartment());
-        customer.setPostalCode(request.getPostalCode());
-        customer.setAddress(request.getAddress());
-        customer.setNotes(request.getNotes());
-        
+        Customer customer = mapRequestToCustomer(request);
         Customer updatedCustomer = customerService.updateCustomer(id, customer);
         return ResponseEntity.ok(new CustomerDto(updatedCustomer));
     }
@@ -251,30 +216,87 @@ public class CustomerController {
     }
     
     /**
+     * Maps a customer request DTO to a Customer entity with proper exception handling.
+     * 
+     * @param request the customer request
+     * @return the mapped customer entity
+     */
+    private Customer mapRequestToCustomer(CreateCustomerRequest request) {
+        Customer customer = new Customer();
+        
+        try {
+            customer.setCustomerType(Customer.CustomerType.valueOf(request.getCustomerType()));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid customer type: " + request.getCustomerType());
+        }
+        
+        customer.setName(request.getName());
+        customer.setNameKana(request.getNameKana());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
+        customer.setBirthDate(request.getBirthDate());
+        
+        if (request.getGender() != null && !request.getGender().trim().isEmpty()) {
+            try {
+                customer.setGender(Customer.Gender.valueOf(request.getGender()));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid gender: " + request.getGender());
+            }
+        }
+        
+        customer.setOccupation(request.getOccupation());
+        customer.setCompanyName(request.getCompanyName());
+        customer.setDepartment(request.getDepartment());
+        customer.setPostalCode(request.getPostalCode());
+        customer.setAddress(request.getAddress());
+        customer.setNotes(request.getNotes());
+        
+        return customer;
+    }
+    
+    /**
      * Request DTO for creating customers.
      */
     public static class CreateCustomerRequest {
         
         @NotBlank(message = "Customer type is required")
+        @Pattern(regexp = "INDIVIDUAL|CORPORATE", message = "Customer type must be INDIVIDUAL or CORPORATE")
         private String customerType;
         
         @NotBlank(message = "Name is required")
+        @Size(max = 100, message = "Name must not exceed 100 characters")
         private String name;
         
+        @Size(max = 100, message = "Name kana must not exceed 100 characters")
         private String nameKana;
         
         @NotBlank(message = "Email is required")
+        @Email(message = "Email must be valid")
+        @Size(max = 255, message = "Email must not exceed 255 characters")
         private String email;
         
         @NotBlank(message = "Phone is required")
+        @Size(max = 20, message = "Phone must not exceed 20 characters")
         private String phone;
         
+        @Past(message = "Birth date must be in the past")
         private LocalDate birthDate;
+        
+        @Pattern(regexp = "MALE|FEMALE|OTHER|", message = "Gender must be MALE, FEMALE, OTHER, or empty")
         private String gender;
+        
+        @Size(max = 100, message = "Occupation must not exceed 100 characters")
         private String occupation;
+        
+        @Size(max = 100, message = "Company name must not exceed 100 characters")
         private String companyName;
+        
+        @Size(max = 100, message = "Department must not exceed 100 characters")
         private String department;
+        
+        @Pattern(regexp = "^\\d{3}-\\d{4}$|^\\d{7}$|^$", message = "Postal code must be in format XXX-XXXX or XXXXXXX")
         private String postalCode;
+        
         private String address;
         private String notes;
         

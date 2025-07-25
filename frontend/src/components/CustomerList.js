@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {
@@ -125,7 +125,7 @@ const CustomerList = () => {
     }
   }, [error]);
 
-  const loadCustomers = () => {
+  const loadCustomers = useCallback(() => {
     const params = {
       page,
       size: rowsPerPage,
@@ -140,43 +140,43 @@ const CustomerList = () => {
     } else {
       dispatch(fetchCustomers(params));
     }
-  };
+  }, [dispatch, page, rowsPerPage, customerTypeFilter, statusFilter, searchKeyword]);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     setPage(0);
     loadCustomers();
-  };
+  }, [loadCustomers]);
 
-  const handleClearSearch = () => {
+  const handleClearSearch = useCallback(() => {
     setSearchKeyword('');
     setCustomerTypeFilter('');
     setStatusFilter('');
     setPage(0);
     dispatch(fetchCustomers({ page: 0, size: rowsPerPage, sort: 'name,asc' }));
-  };
+  }, [dispatch, rowsPerPage]);
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = useCallback((event, newPage) => {
     setPage(newPage);
-  };
+  }, []);
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = useCallback((event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
+  }, []);
 
-  const handleViewCustomer = (customerId) => {
+  const handleViewCustomer = useCallback((customerId) => {
     history.push(`/customers/${customerId}`);
-  };
+  }, [history]);
 
-  const handleEditCustomer = (customerId) => {
+  const handleEditCustomer = useCallback((customerId) => {
     history.push(`/customers/${customerId}/edit`);
-  };
+  }, [history]);
 
-  const handleDeleteClick = (customer) => {
+  const handleDeleteClick = useCallback((customer) => {
     setDeleteDialog({ open: true, customer });
-  };
+  }, []);
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = useCallback(async () => {
     if (deleteDialog.customer) {
       try {
         await dispatch(deleteCustomer(deleteDialog.customer.id));
@@ -184,28 +184,29 @@ const CustomerList = () => {
         loadCustomers(); // Reload the list
       } catch (error) {
         console.error('Failed to delete customer:', error);
+        // Handle error appropriately - could show snackbar or alert
       }
     }
-  };
+  }, [deleteDialog.customer, dispatch, loadCustomers]);
 
-  const handleDeleteCancel = () => {
+  const handleDeleteCancel = useCallback(() => {
     setDeleteDialog({ open: false, customer: null });
-  };
+  }, []);
 
-  const getStatusColor = (status) => {
+  const getStatusColor = useMemo(() => (status) => {
     switch (status) {
       case 'ACTIVE': return 'primary';
       case 'INACTIVE': return 'default';
       case 'DELETED': return 'secondary';
       default: return 'default';
     }
-  };
+  }, []);
 
-  const getCustomerTypeIcon = (customerType) => {
+  const getCustomerTypeIcon = useMemo(() => (customerType) => {
     return customerType === 'INDIVIDUAL' ? 
       <PersonIcon className={classes.typeIcon} fontSize="small" /> : 
       <BusinessIcon className={classes.typeIcon} fontSize="small" />;
-  };
+  }, [classes.typeIcon]);
 
   if (loading && customers.content.length === 0) {
     return (
@@ -467,4 +468,4 @@ const CustomerList = () => {
   );
 };
 
-export default CustomerList;
+export default React.memo(CustomerList);

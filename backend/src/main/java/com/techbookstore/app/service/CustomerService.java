@@ -47,8 +47,9 @@ public class CustomerService {
     public Customer createCustomer(Customer customer) {
         logger.info("Creating new customer with email: {}", customer.getEmail());
         
-        // Check if email already exists
-        if (customerRepository.existsByEmail(customer.getEmail())) {
+        // Check if email already exists (optimized single query)
+        Optional<Customer> existingCustomer = customerRepository.findByEmail(customer.getEmail());
+        if (existingCustomer.isPresent()) {
             throw new CustomerEmailAlreadyExistsException(customer.getEmail());
         }
         
@@ -74,10 +75,12 @@ public class CustomerService {
         Customer existingCustomer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomerNotFoundException(id));
         
-        // Check if email already exists for another customer
-        if (!existingCustomer.getEmail().equals(customerData.getEmail()) &&
-            customerRepository.existsByEmailAndIdNot(customerData.getEmail(), id)) {
-            throw new CustomerEmailAlreadyExistsException(customerData.getEmail());
+        // Check if email already exists for another customer (optimized single query)
+        if (!existingCustomer.getEmail().equals(customerData.getEmail())) {
+            Optional<Customer> duplicateEmailCustomer = customerRepository.findByEmail(customerData.getEmail());
+            if (duplicateEmailCustomer.isPresent() && !duplicateEmailCustomer.get().getId().equals(id)) {
+                throw new CustomerEmailAlreadyExistsException(customerData.getEmail());
+            }
         }
         
         // Update fields

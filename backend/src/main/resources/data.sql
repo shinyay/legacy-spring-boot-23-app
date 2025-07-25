@@ -78,6 +78,15 @@ SELECT * FROM (VALUES
 WHERE EXISTS (SELECT 1 FROM books WHERE id = new_inventory.book_id)
 AND NOT EXISTS (SELECT 1 FROM inventory WHERE book_id = new_inventory.book_id);
 
+-- Customers (Initial test data)
+INSERT INTO customers (id, customer_type, name, name_kana, email, phone, birth_date, gender, occupation, company_name, department, postal_code, address, status, notes, created_at, updated_at)
+SELECT * FROM (VALUES
+(1, 'INDIVIDUAL', '山田太郎', 'ヤマダタロウ', 'yamada.taro@example.com', '090-1234-5678', '1985-03-15', 'MALE', 'ソフトウェアエンジニア', '株式会社テックラボ', '開発部', '150-0002', '東京都渋谷区渋谷1-1-1', 'ACTIVE', 'Java開発者として5年の経験', '2025-07-01 10:00:00', '2025-07-01 10:00:00'),
+(2, 'CORPORATE', '株式会社ソフトウェア開発', 'カブシキガイシャソフトウェアカイハツ', 'procurement@softdev.co.jp', '03-1234-5678', NULL, NULL, NULL, '株式会社ソフトウェア開発', '調達部', '100-0001', '東京都千代田区千代田1-1-1', 'ACTIVE', '技術書籍の一括購入担当', '2025-07-02 14:30:00', '2025-07-02 14:30:00'),
+(3, 'INDIVIDUAL', '佐藤花子', 'サトウハナコ', 'sato.hanako@example.com', '080-9876-5432', '1990-08-22', 'FEMALE', 'データサイエンティスト', 'データアナリティクス株式会社', 'AI研究部', '107-0052', '東京都港区赤坂2-2-2', 'ACTIVE', 'Python・機械学習専門', '2025-07-03 09:15:00', '2025-07-03 09:15:00')
+) AS new_customers(id, customer_type, name, name_kana, email, phone, birth_date, gender, occupation, company_name, department, postal_code, address, status, notes, created_at, updated_at)
+WHERE NOT EXISTS (SELECT 1 FROM customers WHERE email = new_customers.email);
+
 -- Orders (Only if books exist and no orders exist)
 INSERT INTO orders (id, order_number, customer_id, status, type, payment_method, total_amount, order_date, confirmed_date, shipped_date, delivered_date, notes, created_at, updated_at)
 SELECT * FROM (VALUES

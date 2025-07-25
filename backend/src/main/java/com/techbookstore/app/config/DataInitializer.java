@@ -21,6 +21,9 @@ public class DataInitializer implements CommandLineRunner {
     private AuthorRepository authorRepository;
     
     @Autowired
+    private PublisherRepository publisherRepository;
+    
+    @Autowired
     private InventoryRepository inventoryRepository;
     
     @Autowired
@@ -40,6 +43,8 @@ public class DataInitializer implements CommandLineRunner {
         // Create sample publishers
         Publisher publisher1 = new Publisher("技術評論社");
         Publisher publisher2 = new Publisher("オライリー・ジャパン");
+        publisher1 = publisherRepository.save(publisher1);
+        publisher2 = publisherRepository.save(publisher2);
         
         // Create sample authors
         Author author1 = new Author("山田太郎");

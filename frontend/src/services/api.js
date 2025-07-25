@@ -83,6 +83,80 @@ export const inventoryApi = {
   },
 };
 
+// Orders API
+export const ordersApi = {
+  // Get all orders with pagination and filters
+  getOrders: (params = {}) => {
+    const { 
+      page = 0, 
+      size = 10, 
+      sortBy = 'orderDate', 
+      sortDir = 'desc', 
+      status, 
+      type, 
+      customerId, 
+      startDate, 
+      endDate, 
+      keyword 
+    } = params;
+    
+    const queryParams = { page, size, sortBy, sortDir };
+    if (status) queryParams.status = status;
+    if (type) queryParams.type = type;
+    if (customerId) queryParams.customerId = customerId;
+    if (startDate) queryParams.startDate = startDate;
+    if (endDate) queryParams.endDate = endDate;
+    if (keyword) queryParams.keyword = keyword;
+    
+    return api.get('/orders', { params: queryParams });
+  },
+
+  // Get order by ID
+  getOrder: (id) => {
+    return api.get(`/orders/${id}`);
+  },
+
+  // Get order by order number
+  getOrderByNumber: (orderNumber) => {
+    return api.get(`/orders/number/${orderNumber}`);
+  },
+
+  // Get orders by customer ID
+  getOrdersByCustomer: (customerId) => {
+    return api.get(`/orders/customer/${customerId}`);
+  },
+
+  // Create new order
+  createOrder: (orderData) => {
+    return api.post('/orders', orderData);
+  },
+
+  // Confirm order
+  confirmOrder: (id) => {
+    return api.post(`/orders/${id}/confirm`);
+  },
+
+  // Mark order as picking
+  pickOrder: (id) => {
+    return api.post(`/orders/${id}/pick`);
+  },
+
+  // Mark order as shipped
+  shipOrder: (id) => {
+    return api.post(`/orders/${id}/ship`);
+  },
+
+  // Mark order as delivered
+  deliverOrder: (id) => {
+    return api.post(`/orders/${id}/deliver`);
+  },
+
+  // Get order status counts
+  getStatusCounts: () => {
+    return api.get('/orders/stats/status-count');
+  },
+};
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {

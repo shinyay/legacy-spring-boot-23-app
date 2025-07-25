@@ -31,11 +31,14 @@ public class DataInitializer implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        // Only initialize if database is empty
-        if (bookRepository.count() > 0) {
+        // Only initialize if database is empty (both books and publishers)
+        // This ensures compatibility with data.sql
+        if (bookRepository.count() > 0 || publisherRepository.count() > 0) {
+            System.out.println("Data already exists. Skipping DataInitializer.");
             return;
         }
         
+        System.out.println("Initializing data via DataInitializer...");
         initializeSampleData();
     }
     

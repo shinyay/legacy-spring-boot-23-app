@@ -76,6 +76,39 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
     
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerNotFound(CustomerNotFoundException ex) {
+        logger.warn("Customer not found: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+            "CUSTOMER_NOT_FOUND",
+            ex.getMessage(),
+            LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+    
+    @ExceptionHandler(CustomerEmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerEmailAlreadyExists(CustomerEmailAlreadyExistsException ex) {
+        logger.warn("Customer email already exists: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+            "EMAIL_ALREADY_EXISTS",
+            ex.getMessage(),
+            LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+    
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        logger.warn("Invalid argument: {}", ex.getMessage());
+        ErrorResponse error = new ErrorResponse(
+            "INVALID_ARGUMENT",
+            ex.getMessage(),
+            LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+    
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
         logger.warn("Validation error: {}", ex.getMessage());

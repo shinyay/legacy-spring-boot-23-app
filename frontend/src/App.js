@@ -6,6 +6,9 @@ import { Dashboard, Book, Storage, ShoppingCart, People, Assessment } from '@mat
 import BookList from './components/BookList';
 import InventoryList from './components/InventoryList';
 import OrderList from './components/OrderList';
+import CustomerList from './components/CustomerList';
+import CustomerDetail from './components/CustomerDetail';
+import CustomerForm from './components/CustomerForm';
 import DashboardPage from './components/Dashboard';
 
 const drawerWidth = 240;
@@ -93,7 +96,10 @@ function App() {
             <Route path="/books" component={BookList} />
             <Route path="/inventory" component={InventoryList} />
             <Route path="/orders" component={OrderList} />
-            <Route path="/customers" render={() => <div>顧客管理ページ（開発中）</div>} />
+            <Route exact path="/customers" component={CustomerList} />
+            <Route exact path="/customers/new" component={CustomerForm} />
+            <Route exact path="/customers/:id" component={CustomerDetail} />
+            <Route exact path="/customers/:id/edit" component={CustomerForm} />
             <Route path="/reports" render={() => <div>レポートページ（開発中）</div>} />
           </Switch>
         </Box>

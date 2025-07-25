@@ -35,6 +35,10 @@ spring:
       mode: always
       data-locations: classpath:data.sql
 
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+
 logging:
   level:
     com.techbookstore: DEBUG
@@ -55,6 +59,10 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL95Dialect
     show-sql: false
 
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://staging.techbookstore.com}
+
 ---
 # 本番環境（Azure）
 spring:
@@ -73,6 +81,10 @@ spring:
     port: 6380
     password: ${AZURE_REDIS_KEY}
     ssl: true
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://techbookstore.com}
 
 # Azure Application Insights
 azure:

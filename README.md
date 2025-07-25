@@ -84,6 +84,34 @@ npm start
 
 - アプリケーション: http://localhost:3000
 
+### 3. 自動起動スクリプト（推奨）
+
+BackendとFrontendを同時に起動・管理するためのスクリプトを提供しています。
+
+#### アプリケーション起動
+
+```bash
+# Backend と Frontend を同時に起動
+./start-app.sh
+```
+
+#### アプリケーション停止
+
+```bash
+# Backend と Frontend を同時に停止
+./stop-app.sh
+
+# ログファイルも削除する場合
+./stop-app.sh --clean-logs
+```
+
+#### ステータス確認
+
+```bash
+# アプリケーションの状態を確認
+./status-app.sh
+```
+
 ## API エンドポイント
 
 ### 書籍管理
@@ -205,7 +233,8 @@ legacy-spring-boot-23-app/
 │   │       ├── dto/         # データ転送オブジェクト
 │   │       └── config/      # 設定クラス
 │   └── src/main/resources/
-│       └── application.yml  # アプリケーション設定
+│       ├── application.yml  # アプリケーション設定
+│       └── data.sql        # 初期データ（SQL）
 ├── frontend/                # React アプリケーション
 │   ├── src/
 │   │   ├── components/      # React コンポーネント
@@ -214,6 +243,9 @@ legacy-spring-boot-23-app/
 │   └── public/
 ├── .devcontainer/          # Dev Container 設定
 ├── .github/workflows/      # GitHub Actions
+├── start-app.sh           # アプリケーション起動スクリプト
+├── stop-app.sh            # アプリケーション停止スクリプト
+├── status-app.sh          # ステータス確認スクリプト
 └── Dockerfile             # プロダクション用 Docker イメージ
 ```
 

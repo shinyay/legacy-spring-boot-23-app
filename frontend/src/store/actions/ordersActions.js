@@ -16,8 +16,31 @@ export const ORDER_UPDATE_ERROR = 'ORDER_UPDATE_ERROR';
 export const ORDER_STATUS_COUNTS_LOADING = 'ORDER_STATUS_COUNTS_LOADING';
 export const ORDER_STATUS_COUNTS_SUCCESS = 'ORDER_STATUS_COUNTS_SUCCESS';
 export const ORDER_STATUS_COUNTS_ERROR = 'ORDER_STATUS_COUNTS_ERROR';
+export const CLEAR_ERROR = 'CLEAR_ERROR';
+
+/**
+ * Helper function to extract error message from API response
+ */
+const getErrorMessage = (error, defaultMessage) => {
+  if (error.response?.data?.message) {
+    return error.response.data.message;
+  }
+  if (error.response?.data?.fieldErrors) {
+    const fieldErrors = error.response.data.fieldErrors;
+    const messages = Object.values(fieldErrors);
+    return messages.length > 0 ? messages.join(', ') : defaultMessage;
+  }
+  if (error.message) {
+    return error.message;
+  }
+  return defaultMessage;
+};
 
 // Action creators
+export const clearError = () => ({
+  type: CLEAR_ERROR
+});
+
 export const fetchOrders = (params = {}) => {
   return async (dispatch) => {
     dispatch({ type: ORDERS_LOADING });
@@ -28,9 +51,10 @@ export const fetchOrders = (params = {}) => {
         payload: response.data
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文一覧の取得に失敗しました');
       dispatch({
         type: ORDERS_ERROR,
-        payload: error.response?.data?.message || 'Failed to fetch orders'
+        payload: errorMessage
       });
     }
   };
@@ -46,9 +70,10 @@ export const fetchOrderById = (id) => {
         payload: response.data
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文詳細の取得に失敗しました');
       dispatch({
         type: ORDER_DETAIL_ERROR,
-        payload: error.response?.data?.message || 'Failed to fetch order details'
+        payload: errorMessage
       });
     }
   };
@@ -64,9 +89,10 @@ export const fetchOrderByNumber = (orderNumber) => {
         payload: response.data
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文詳細の取得に失敗しました');
       dispatch({
         type: ORDER_DETAIL_ERROR,
-        payload: error.response?.data?.message || 'Failed to fetch order details'
+        payload: errorMessage
       });
     }
   };
@@ -83,9 +109,10 @@ export const createOrder = (orderData) => {
       });
       return response.data;
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文の作成に失敗しました');
       dispatch({
         type: ORDER_CREATE_ERROR,
-        payload: error.response?.data?.message || 'Failed to create order'
+        payload: errorMessage
       });
       throw error;
     }
@@ -103,9 +130,10 @@ export const confirmOrder = (id) => {
       });
       return response.data;
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文の確認に失敗しました');
       dispatch({
         type: ORDER_UPDATE_ERROR,
-        payload: error.response?.data?.message || 'Failed to confirm order'
+        payload: errorMessage
       });
       throw error;
     }
@@ -123,9 +151,10 @@ export const pickOrder = (id) => {
       });
       return response.data;
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文の梱包開始に失敗しました');
       dispatch({
         type: ORDER_UPDATE_ERROR,
-        payload: error.response?.data?.message || 'Failed to pick order'
+        payload: errorMessage
       });
       throw error;
     }
@@ -143,9 +172,10 @@ export const shipOrder = (id) => {
       });
       return response.data;
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文の出荷に失敗しました');
       dispatch({
         type: ORDER_UPDATE_ERROR,
-        payload: error.response?.data?.message || 'Failed to ship order'
+        payload: errorMessage
       });
       throw error;
     }
@@ -163,9 +193,10 @@ export const deliverOrder = (id) => {
       });
       return response.data;
     } catch (error) {
+      const errorMessage = getErrorMessage(error, '注文の配達完了に失敗しました');
       dispatch({
         type: ORDER_UPDATE_ERROR,
-        payload: error.response?.data?.message || 'Failed to deliver order'
+        payload: errorMessage
       });
       throw error;
     }
@@ -182,9 +213,10 @@ export const fetchOrderStatusCounts = () => {
         payload: response.data
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error, 'ステータス集計の取得に失敗しました');
       dispatch({
         type: ORDER_STATUS_COUNTS_ERROR,
-        payload: error.response?.data?.message || 'Failed to fetch order status counts'
+        payload: errorMessage
       });
     }
   };

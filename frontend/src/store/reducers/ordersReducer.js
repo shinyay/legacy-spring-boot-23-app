@@ -14,6 +14,7 @@ import {
   ORDER_STATUS_COUNTS_LOADING,
   ORDER_STATUS_COUNTS_SUCCESS,
   ORDER_STATUS_COUNTS_ERROR,
+  CLEAR_ERROR,
 } from '../actions/ordersActions';
 
 const initialState = {
@@ -157,6 +158,16 @@ const ordersReducer = (state = initialState, action) => {
         ...state,
         statusCountsLoading: false,
         statusCountsError: action.payload,
+      };
+    
+    case CLEAR_ERROR:
+      return {
+        ...state,
+        error: null,
+        detailError: null,
+        createError: null,
+        updateError: null,
+        statusCountsError: null,
       };
     
     default:

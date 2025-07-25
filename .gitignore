@@ -21,6 +21,8 @@ yarn-error.log*
 # Production builds
 /build
 /dist
+frontend/build/
+backend/target/
 
 # Test coverage reports
 coverage/
@@ -58,3 +60,8 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# Security and sensitive files
+*.key
+*.pem
+application-local.properties

@@ -157,6 +157,70 @@ export const ordersApi = {
   },
 };
 
+// Customers API
+export const customersApi = {
+  // Get all customers with pagination and filters
+  getCustomers: (params = {}) => {
+    const { 
+      page = 0, 
+      size = 20, 
+      sort = 'name,asc', 
+      keyword, 
+      customerType, 
+      status, 
+      startDate, 
+      endDate 
+    } = params;
+    
+    const queryParams = { page, size, sort };
+    if (keyword) queryParams.keyword = keyword;
+    if (customerType) queryParams.customerType = customerType;
+    if (status) queryParams.status = status;
+    if (startDate) queryParams.startDate = startDate;
+    if (endDate) queryParams.endDate = endDate;
+    
+    return api.get('/customers', { params: queryParams });
+  },
+
+  // Get customer by ID
+  getCustomer: (id) => {
+    return api.get(`/customers/${id}`);
+  },
+
+  // Search customers
+  searchCustomers: (keyword, params = {}) => {
+    const { page = 0, size = 20 } = params;
+    return api.get('/customers/search', {
+      params: { keyword, page, size }
+    });
+  },
+
+  // Get customer orders
+  getCustomerOrders: (id) => {
+    return api.get(`/customers/${id}/orders`);
+  },
+
+  // Get customer statistics
+  getCustomerStats: () => {
+    return api.get('/customers/stats');
+  },
+
+  // Create new customer
+  createCustomer: (customerData) => {
+    return api.post('/customers', customerData);
+  },
+
+  // Update customer
+  updateCustomer: (id, customerData) => {
+    return api.put(`/customers/${id}`, customerData);
+  },
+
+  // Delete customer (logical delete)
+  deleteCustomer: (id) => {
+    return api.delete(`/customers/${id}`);
+  },
+};
+
 // Request interceptor
 api.interceptors.request.use(
   (config) => {

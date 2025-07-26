@@ -6,12 +6,24 @@ import {
   CardContent,
   Button,
   Grid,
-  CircularProgress
+  CircularProgress,
+  Paper
 } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
+import { makeStyles } from '@material-ui/core/styles';
 import api from '../services/api';
 
+const useStyles = makeStyles((theme) => ({
+  errorAlert: {
+    backgroundColor: theme.palette.error.light,
+    color: theme.palette.error.contrastText,
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+  },
+}));
+
 const TestComponent = () => {
+  const classes = useStyles();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -56,9 +68,11 @@ const TestComponent = () => {
       </Card>
 
       {error && (
-        <Alert severity="error" style={{ marginBottom: 20 }}>
-          {error}
-        </Alert>
+        <Paper className={classes.errorAlert}>
+          <Typography variant="body1">
+            {error}
+          </Typography>
+        </Paper>
       )}
 
       {books.length > 0 && (

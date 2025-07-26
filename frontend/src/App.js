@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Box, CssBaseline } from '@material-ui/core';
+import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Box, CssBaseline, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Dashboard, Book, Storage, ShoppingCart, People, Assessment } from '@material-ui/icons';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -82,14 +82,21 @@ function App() {
         <div className={classes.toolbar} />
         <List>
           {menuItems.map((item) => (
-            <ListItem
-              button
-              key={item.id}
-              selected={selectedMenu === item.id}
-              onClick={() => handleMenuClick(item)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
+            <ListItem key={item.id} style={{ padding: 0 }}>
+              <Button
+                fullWidth
+                startIcon={item.icon}
+                onClick={() => handleMenuClick(item)}
+                style={{
+                  justifyContent: 'flex-start',
+                  padding: '8px 16px',
+                  textTransform: 'none',
+                  color: selectedMenu === item.id ? '#1976d2' : 'inherit',
+                  backgroundColor: selectedMenu === item.id ? 'rgba(25, 118, 210, 0.08)' : 'transparent'
+                }}
+              >
+                {item.label}
+              </Button>
             </ListItem>
           ))}
         </List>

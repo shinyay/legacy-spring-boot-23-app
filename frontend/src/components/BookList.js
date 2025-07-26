@@ -17,6 +17,7 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { fetchBooks } from '../store/actions/booksActions';
+import BookDetail from './BookDetail';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,6 +64,8 @@ function BookList() {
 
   // Local state
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedBookId, setSelectedBookId] = useState(null);
   
   // Constants for pagination and sorting (no UI controls)
   const page = 0;
@@ -96,6 +99,16 @@ function BookList() {
       keyword: searchKeyword,
     };
     dispatch(fetchBooks(params));
+  };
+
+  const handleDetailClick = (bookId) => {
+    setSelectedBookId(bookId);
+    setDetailDialogOpen(true);
+  };
+
+  const handleDetailDialogClose = () => {
+    setDetailDialogOpen(false);
+    setSelectedBookId(null);
   };
 
   const getLevelColor = (level) => {
@@ -216,6 +229,7 @@ function BookList() {
                       variant="outlined"
                       size="small"
                       color="primary"
+                      onClick={() => handleDetailClick(book.id)}
                     >
                       詳細
                     </Button>
@@ -226,6 +240,12 @@ function BookList() {
           </Table>
         </TableContainer>
       </Paper>
+
+      <BookDetail
+        open={detailDialogOpen}
+        onClose={handleDetailDialogClose}
+        bookId={selectedBookId}
+      />
     </div>
   );
 }

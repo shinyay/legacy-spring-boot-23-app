@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Box, CssBaseline, Button } from '@material-ui/core';
+import { AppBar, Toolbar, Typography, Drawer, List, ListItem, Box, CssBaseline, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Dashboard, Book, Storage, ShoppingCart, People, Assessment } from '@material-ui/icons';
 import ErrorBoundary from './components/ErrorBoundary';

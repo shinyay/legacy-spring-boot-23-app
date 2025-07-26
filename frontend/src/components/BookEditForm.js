@@ -27,6 +27,18 @@ import {
 const useStyles = makeStyles((theme) => ({
   formCard: {
     marginBottom: theme.spacing(2),
+    transition: 'all 0.3s ease-in-out',
+    animation: '$slideIn 0.5s ease-out',
+  },
+  '@keyframes slideIn': {
+    '0%': {
+      opacity: 0,
+      transform: 'translateY(-20px)',
+    },
+    '100%': {
+      opacity: 1,
+      transform: 'translateY(0)',
+    },
   },
   formTitle: {
     marginBottom: theme.spacing(2),
@@ -41,6 +53,10 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'flex-end',
     gap: theme.spacing(2),
     marginTop: theme.spacing(2),
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'column-reverse',
+      gap: theme.spacing(1),
+    },
   },
   readOnlyField: {
     backgroundColor: theme.palette.grey[100],

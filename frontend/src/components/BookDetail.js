@@ -37,6 +37,11 @@ const useStyles = makeStyles((theme) => ({
       maxWidth: '800px',
       width: '90%',
       maxHeight: '80vh',
+      [theme.breakpoints.down('sm')]: {
+        width: '95%',
+        maxHeight: '90vh',
+        margin: theme.spacing(1),
+      },
     },
   },
   dialogTitle: {
@@ -51,6 +56,9 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     padding: theme.spacing(2),
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(1),
+    },
   },
   loading: {
     display: 'flex',
@@ -60,9 +68,16 @@ const useStyles = makeStyles((theme) => ({
   },
   tabPanel: {
     padding: theme.spacing(2, 0),
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(1, 0),
+    },
   },
   infoCard: {
     marginBottom: theme.spacing(2),
+    transition: 'box-shadow 0.3s ease-in-out',
+    '&:hover': {
+      boxShadow: theme.shadows[4],
+    },
   },
   fieldLabel: {
     fontWeight: 'bold',

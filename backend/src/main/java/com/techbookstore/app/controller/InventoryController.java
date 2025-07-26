@@ -1,8 +1,11 @@
 package com.techbookstore.app.controller;
 
 import com.techbookstore.app.dto.InventoryDto;
+import com.techbookstore.app.dto.InventoryReservationDto;
+import com.techbookstore.app.dto.InventoryTransactionDto;
 import com.techbookstore.app.entity.Inventory;
 import com.techbookstore.app.repository.InventoryRepository;
+import com.techbookstore.app.service.AdvancedInventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +22,9 @@ public class InventoryController {
 
     @Autowired
     private InventoryRepository inventoryRepository;
+
+    @Autowired
+    private AdvancedInventoryService advancedInventoryService;
 
     @GetMapping
     public ResponseEntity<List<InventoryDto>> getAllInventory() {
@@ -150,5 +156,78 @@ public class InventoryController {
         public void setStoreStock(Integer storeStock) { this.storeStock = storeStock; }
         public Integer getWarehouseStock() { return warehouseStock; }
         public void setWarehouseStock(Integer warehouseStock) { this.warehouseStock = warehouseStock; }
+    }
+
+    // New endpoints for advanced inventory management
+
+    @GetMapping("/{inventoryId}/transactions")
+    public ResponseEntity<List<InventoryTransactionDto>> getTransactionHistory(@PathVariable Long inventoryId) {
+        List<InventoryTransactionDto> transactions = advancedInventoryService.getTransactionHistory(inventoryId);
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/{inventoryId}/reservations")
+    public ResponseEntity<List<InventoryReservationDto>> getActiveReservations(@PathVariable Long inventoryId) {
+        List<InventoryReservationDto> reservations = advancedInventoryService.getActiveReservations(inventoryId);
+        return ResponseEntity.ok(reservations);
+    }
+
+    @PostMapping("/transfers")
+    public ResponseEntity<AdvancedInventoryService.TransferResult> transferStock(
+            @RequestBody AdvancedInventoryService.StockTransferRequest request) {
+        try {
+            AdvancedInventoryService.TransferResult result = advancedInventoryService.transferStock(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            AdvancedInventoryService.TransferResult errorResult = 
+                new AdvancedInventoryService.TransferResult(false, e.getMessage(), null);
+            return ResponseEntity.badRequest().body(errorResult);
+        }
+    }
+
+    @PostMapping("/reservations")
+    public ResponseEntity<AdvancedInventoryService.ReservationResult> reserveStock(
+            @RequestBody AdvancedInventoryService.StockReservationRequest request) {
+        try {
+            AdvancedInventoryService.ReservationResult result = advancedInventoryService.reserveStock(request);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            AdvancedInventoryService.ReservationResult errorResult = 
+                new AdvancedInventoryService.ReservationResult(false, e.getMessage(), null);
+            return ResponseEntity.badRequest().body(errorResult);
+        }
+    }
+
+    @DeleteMapping("/reservations/{reservationId}")
+    public ResponseEntity<String> releaseReservation(@PathVariable Long reservationId) {
+        try {
+            advancedInventoryService.releaseReservation(reservationId);
+            return ResponseEntity.ok("Reservation released successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/barcode-scan")
+    public ResponseEntity<InventoryDto> processBarcodeScanned(@RequestBody BarcodeScanRequest request) {
+        try {
+            InventoryDto result = advancedInventoryService.processBarcodeScanned(request.getBarcode(), request.getOperation());
+            return ResponseEntity.ok(result);
+        } catch (UnsupportedOperationException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    // Request DTOs for new endpoints
+    public static class BarcodeScanRequest {
+        private String barcode;
+        private String operation;
+
+        public String getBarcode() { return barcode; }
+        public void setBarcode(String barcode) { this.barcode = barcode; }
+        public String getOperation() { return operation; }
+        public void setOperation(String operation) { this.operation = operation; }
     }
 }

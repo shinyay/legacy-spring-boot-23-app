@@ -13,7 +13,7 @@ import CustomerForm from './components/CustomerForm';
 import DashboardPage from './components/Dashboard';
 import ReportsPage from './components/ReportsPage';
 import SalesReport from './components/SalesReport';
-import DashboardReport from './components/DashboardReport';
+import TestComponent from './components/TestComponent';
 import InventoryReport from './components/InventoryReport';
 
 const drawerWidth = 240;
@@ -109,7 +109,7 @@ function App() {
               <Route exact path="/customers/:id/edit" component={CustomerForm} />
               <Route exact path="/reports" component={ReportsPage} />
               <Route exact path="/reports/sales" component={SalesReport} />
-              <Route exact path="/reports/dashboard" component={DashboardReport} />
+              <Route exact path="/reports/dashboard" component={TestComponent} />
               <Route exact path="/reports/inventory" component={InventoryReport} />
               <Route path="/reports/customers" render={() => <div>顧客分析レポート（開発中）</div>} />
               <Route path="/reports/tech-trends" render={() => <div>技術トレンドレポート（開発中）</div>} />

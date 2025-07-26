@@ -29,6 +29,7 @@ import {
   clearBookDetail,
   setEditMode
 } from '../store/actions/booksActions';
+import BookEditForm from './BookEditForm';
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -217,17 +218,24 @@ const BookDetail = ({ open, onClose, bookId }) => {
 
         {bookDetail && !detailLoading && (
           <>
-            <Tabs
-              value={currentTab}
-              onChange={handleTabChange}
-              indicatorColor="primary"
-              textColor="primary"
-              variant="fullWidth"
-            >
-              <Tab label="基本情報" />
-              <Tab label="関連情報" />
-              <Tab label="在庫情報" />
-            </Tabs>
+            {isEditMode ? (
+              <BookEditForm 
+                book={bookDetail} 
+                onCancel={() => dispatch(setEditMode(false))}
+              />
+            ) : (
+              <>
+                <Tabs
+                  value={currentTab}
+                  onChange={handleTabChange}
+                  indicatorColor="primary"
+                  textColor="primary"
+                  variant="fullWidth"
+                >
+                  <Tab label="基本情報" />
+                  <Tab label="関連情報" />
+                  <Tab label="在庫情報" />
+                </Tabs>
 
             <TabPanel value={currentTab} index={0} className={classes.tabPanel}>
               <Card className={classes.infoCard}>
@@ -321,6 +329,35 @@ const BookDetail = ({ open, onClose, bookId }) => {
                       </Typography>
                     </Grid>
                     
+                    {bookDetail.versionInfo && (
+                      <Grid item xs={12} md={6}>
+                        <Typography className={classes.fieldLabel}>
+                          バージョン情報
+                        </Typography>
+                        <Typography className={classes.fieldValue}>
+                          {bookDetail.versionInfo}
+                        </Typography>
+                      </Grid>
+                    )}
+                    
+                    {bookDetail.sampleCodeUrl && (
+                      <Grid item xs={12} md={6}>
+                        <Typography className={classes.fieldLabel}>
+                          サンプルコードURL
+                        </Typography>
+                        <Typography className={classes.fieldValue}>
+                          <a 
+                            href={bookDetail.sampleCodeUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            style={{ color: '#1976d2', textDecoration: 'none' }}
+                          >
+                            {bookDetail.sampleCodeUrl}
+                          </a>
+                        </Typography>
+                      </Grid>
+                    )}
+                    
                     {bookDetail.description && (
                       <Grid item xs={12}>
                         <Typography className={classes.fieldLabel}>
@@ -340,11 +377,38 @@ const BookDetail = ({ open, onClose, bookId }) => {
               <Card className={classes.infoCard}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    関連情報
+                    著者情報
                   </Typography>
-                  <Typography color="textSecondary">
-                    関連情報の表示機能は Phase 2 で実装予定です。
+                  <Typography color="textSecondary" paragraph>
+                    著者情報の表示機能は Phase 2 で実装予定です。
                   </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    将来的に以下の情報が表示されます：
+                  </Typography>
+                  <ul style={{ color: '#757575', fontSize: '0.875rem' }}>
+                    <li>著者名・プロフィール</li>
+                    <li>著者の他の書籍</li>
+                    <li>経歴・専門分野</li>
+                  </ul>
+                </CardContent>
+              </Card>
+              
+              <Card className={classes.infoCard}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    技術カテゴリ
+                  </Typography>
+                  <Typography color="textSecondary" paragraph>
+                    カテゴリ情報の表示機能は Phase 2 で実装予定です。
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    将来的に以下の情報が表示されます：
+                  </Typography>
+                  <ul style={{ color: '#757575', fontSize: '0.875rem' }}>
+                    <li>技術分野（プログラミング言語、フレームワーク等）</li>
+                    <li>関連技術キーワード</li>
+                    <li>同カテゴリの関連書籍</li>
+                  </ul>
                 </CardContent>
               </Card>
             </TabPanel>
@@ -353,19 +417,51 @@ const BookDetail = ({ open, onClose, bookId }) => {
               <Card className={classes.infoCard}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
-                    在庫情報
+                    在庫状況
                   </Typography>
-                  <Typography color="textSecondary">
+                  <Typography color="textSecondary" paragraph>
                     在庫情報の表示機能は Phase 2 で実装予定です。
                   </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    将来的に以下の情報が表示されます：
+                  </Typography>
+                  <ul style={{ color: '#757575', fontSize: '0.875rem' }}>
+                    <li>店頭在庫数</li>
+                    <li>倉庫在庫数</li>
+                    <li>総在庫数</li>
+                    <li>予約注文数</li>
+                    <li>発注予定数</li>
+                    <li>在庫アラート設定</li>
+                  </ul>
+                </CardContent>
+              </Card>
+              
+              <Card className={classes.infoCard}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    販売実績
+                  </Typography>
+                  <Typography color="textSecondary" paragraph>
+                    販売実績の表示機能は Phase 2 で実装予定です。
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    将来的に以下の情報が表示されます：
+                  </Typography>
+                  <ul style={{ color: '#757575', fontSize: '0.875rem' }}>
+                    <li>月別売上数量</li>
+                    <li>売上推移グラフ</li>
+                    <li>人気ランキング</li>
+                  </ul>
                 </CardContent>
               </Card>
             </TabPanel>
+              </>
+            )}
           </>
         )}
       </DialogContent>
 
-      {bookDetail && !detailLoading && (
+      {bookDetail && !detailLoading && !isEditMode && (
         <DialogActions>
           <Button onClick={handleClose} color="default">
             閉じる
@@ -375,7 +471,6 @@ const BookDetail = ({ open, onClose, bookId }) => {
             color="primary"
             variant="contained"
             startIcon={<EditIcon />}
-            disabled={isEditMode}
           >
             編集
           </Button>

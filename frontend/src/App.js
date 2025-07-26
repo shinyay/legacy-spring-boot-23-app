@@ -3,6 +3,7 @@ import { Switch, Route, useHistory } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Drawer, List, ListItem, ListItemIcon, ListItemText, Box, CssBaseline } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Dashboard, Book, Storage, ShoppingCart, People, Assessment } from '@material-ui/icons';
+import ErrorBoundary from './components/ErrorBoundary';
 import BookList from './components/BookList';
 import InventoryList from './components/InventoryList';
 import OrderList from './components/OrderList';
@@ -10,6 +11,10 @@ import CustomerList from './components/CustomerList';
 import CustomerDetail from './components/CustomerDetail';
 import CustomerForm from './components/CustomerForm';
 import DashboardPage from './components/Dashboard';
+import ReportsPage from './components/ReportsPage';
+import SalesReport from './components/SalesReport';
+import DashboardReport from './components/DashboardReport';
+import InventoryReport from './components/InventoryReport';
 
 const drawerWidth = 240;
 
@@ -92,17 +97,24 @@ function App() {
       <main className={classes.content}>
         <div className={classes.toolbar} />
         <Box>
-          <Switch>
-            <Route exact path="/" component={DashboardPage} />
-            <Route path="/books" component={BookList} />
-            <Route path="/inventory" component={InventoryList} />
-            <Route path="/orders" component={OrderList} />
-            <Route exact path="/customers" component={CustomerList} />
-            <Route exact path="/customers/new" component={CustomerForm} />
-            <Route exact path="/customers/:id" component={CustomerDetail} />
-            <Route exact path="/customers/:id/edit" component={CustomerForm} />
-            <Route path="/reports" render={() => <div>レポートページ（開発中）</div>} />
-          </Switch>
+          <ErrorBoundary>
+            <Switch>
+              <Route exact path="/" component={DashboardPage} />
+              <Route path="/books" component={BookList} />
+              <Route path="/inventory" component={InventoryList} />
+              <Route path="/orders" component={OrderList} />
+              <Route exact path="/customers" component={CustomerList} />
+              <Route exact path="/customers/new" component={CustomerForm} />
+              <Route exact path="/customers/:id" component={CustomerDetail} />
+              <Route exact path="/customers/:id/edit" component={CustomerForm} />
+              <Route exact path="/reports" component={ReportsPage} />
+              <Route exact path="/reports/sales" component={SalesReport} />
+              <Route exact path="/reports/dashboard" component={DashboardReport} />
+              <Route exact path="/reports/inventory" component={InventoryReport} />
+              <Route path="/reports/customers" render={() => <div>顧客分析レポート（開発中）</div>} />
+              <Route path="/reports/tech-trends" render={() => <div>技術トレンドレポート（開発中）</div>} />
+            </Switch>
+          </ErrorBoundary>
         </Box>
       </main>
     </div>

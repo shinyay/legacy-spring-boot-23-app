@@ -201,10 +201,8 @@ public class ReportService {
         BigDecimal revenue = new BigDecimal("45000.00");
         
         // Cache the result
-        AggregationCache cache = new AggregationCache();
-        cache.setKeyName(cacheKey);
-        cache.setValueData(revenue.toString());
-        cache.setCreatedAt(LocalDateTime.now());
+        AggregationCache cache = new AggregationCache(cacheKey, revenue.toString(), 
+                                                      LocalDateTime.now().plusHours(1));
         cacheRepository.save(cache);
         
         return revenue;
@@ -224,10 +222,8 @@ public class ReportService {
         Integer orders = 125;
         
         // Cache the result
-        AggregationCache cache = new AggregationCache();
-        cache.setKeyName(cacheKey);
-        cache.setValueData(orders.toString());
-        cache.setCreatedAt(LocalDateTime.now());
+        AggregationCache cache = new AggregationCache(cacheKey, orders.toString(), 
+                                                      LocalDateTime.now().plusHours(1));
         cacheRepository.save(cache);
         
         return orders;

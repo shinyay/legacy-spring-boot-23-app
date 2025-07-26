@@ -21,6 +21,13 @@ public interface AggregationCacheRepository extends JpaRepository<AggregationCac
     Optional<AggregationCache> findByCacheKey(String cacheKey);
     
     /**
+     * Find cached aggregation by key name (alias for findByCacheKey).
+     */
+    default Optional<AggregationCache> findByKeyName(String keyName) {
+        return findByCacheKey(keyName);
+    }
+    
+    /**
      * Find all cached aggregations by type and date.
      */
     List<AggregationCache> findByAggregationTypeAndAggregationDate(String aggregationType, LocalDate aggregationDate);

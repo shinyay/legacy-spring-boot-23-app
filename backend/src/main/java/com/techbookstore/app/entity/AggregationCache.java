@@ -55,6 +55,16 @@ public class AggregationCache {
         this.expiresAt = expiresAt;
     }
     
+    // Convenience constructor for simple caching
+    public AggregationCache(String cacheKey, String aggregationData, LocalDateTime expiresAt) {
+        this();
+        this.cacheKey = cacheKey;
+        this.aggregationType = "general";
+        this.aggregationDate = LocalDate.now();
+        this.aggregationData = aggregationData;
+        this.expiresAt = expiresAt;
+    }
+    
     // Getters and Setters
     public Long getId() {
         return id;
@@ -115,5 +125,22 @@ public class AggregationCache {
     // Utility methods
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(this.expiresAt);
+    }
+    
+    // Alias methods for backward compatibility
+    public String getKeyName() {
+        return this.cacheKey;
+    }
+    
+    public void setKeyName(String keyName) {
+        this.cacheKey = keyName;
+    }
+    
+    public String getValueData() {
+        return this.aggregationData;
+    }
+    
+    public void setValueData(String valueData) {
+        this.aggregationData = valueData;
     }
 }

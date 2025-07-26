@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import {
   Box,
   Grid,
@@ -110,9 +111,9 @@ const ReportsPage = () => {
     },
   ];
 
-  const handleReportClick = (reportType) => {
+  const handleReportClick = useCallback((reportType) => {
     history.push(reportType.path);
-  };
+  }, [history]);
 
   return (
     <Container maxWidth="lg" className={classes.root}>

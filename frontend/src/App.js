@@ -13,6 +13,7 @@ import DashboardPage from './components/Dashboard';
 import ReportsPage from './components/ReportsPage';
 import SalesReport from './components/SalesReport';
 import DashboardReport from './components/DashboardReport';
+import InventoryReport from './components/InventoryReport';
 
 const drawerWidth = 240;
 
@@ -107,7 +108,7 @@ function App() {
             <Route exact path="/reports" component={ReportsPage} />
             <Route exact path="/reports/sales" component={SalesReport} />
             <Route exact path="/reports/dashboard" component={DashboardReport} />
-            <Route path="/reports/inventory" render={() => <div>在庫レポート（開発中）</div>} />
+            <Route exact path="/reports/inventory" component={InventoryReport} />
             <Route path="/reports/customers" render={() => <div>顧客分析レポート（開発中）</div>} />
             <Route path="/reports/tech-trends" render={() => <div>技術トレンドレポート（開発中）</div>} />
           </Switch>

@@ -185,15 +185,52 @@ public class ReportService {
         return dashboard;
     }
     
-    // Helper methods for calculations
+    // Helper methods for calculations with caching
     private BigDecimal calculateTotalRevenue(LocalDate startDate, LocalDate endDate) {
-        // Simplified calculation - in real implementation would query order repository
-        return new BigDecimal("45000.00");
+        // Check cache first
+        String cacheKey = "revenue_" + startDate + "_" + endDate;
+        Optional<AggregationCache> cached = cacheRepository.findByKeyName(cacheKey);
+        
+        if (cached.isPresent() && 
+            cached.get().getCreatedAt().isAfter(LocalDateTime.now().minusHours(1))) {
+            // Return cached value if less than 1 hour old
+            return new BigDecimal(cached.get().getValueData());
+        }
+        
+        // Simplified calculation - in production would query order repository
+        BigDecimal revenue = new BigDecimal("45000.00");
+        
+        // Cache the result
+        AggregationCache cache = new AggregationCache();
+        cache.setKeyName(cacheKey);
+        cache.setValueData(revenue.toString());
+        cache.setCreatedAt(LocalDateTime.now());
+        cacheRepository.save(cache);
+        
+        return revenue;
     }
     
     private Integer calculateTotalOrders(LocalDate startDate, LocalDate endDate) {
-        // Simplified calculation - in real implementation would query order repository
-        return 125;
+        // Check cache first
+        String cacheKey = "orders_" + startDate + "_" + endDate;
+        Optional<AggregationCache> cached = cacheRepository.findByKeyName(cacheKey);
+        
+        if (cached.isPresent() && 
+            cached.get().getCreatedAt().isAfter(LocalDateTime.now().minusHours(1))) {
+            return Integer.valueOf(cached.get().getValueData());
+        }
+        
+        // Simplified calculation - in production would query order repository
+        Integer orders = 125;
+        
+        // Cache the result
+        AggregationCache cache = new AggregationCache();
+        cache.setKeyName(cacheKey);
+        cache.setValueData(orders.toString());
+        cache.setCreatedAt(LocalDateTime.now());
+        cacheRepository.save(cache);
+        
+        return orders;
     }
     
     private List<SalesReportDto.SalesTrendItem> generateSalesTrends(LocalDate startDate, LocalDate endDate) {

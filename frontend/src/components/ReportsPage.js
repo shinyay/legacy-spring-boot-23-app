@@ -64,6 +64,62 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// Memoized ReportCard component for better performance
+const ReportCard = React.memo(({ reportType, onReportClick }) => {
+  const classes = useStyles();
+  
+  return (
+    <Grid item xs={12} sm={6} md={4}>
+      <Card className={classes.card}>
+        <CardContent className={classes.cardContent}>
+          <Box display="flex" justifyContent="center">
+            {reportType.icon}
+          </Box>
+          <Typography 
+            variant="h6" 
+            component="h2" 
+            className={classes.cardTitle}
+            align="center"
+          >
+            {reportType.title}
+          </Typography>
+          <Typography 
+            variant="body2" 
+            className={classes.cardDescription}
+            align="center"
+          >
+            {reportType.description}
+          </Typography>
+        </CardContent>
+        <CardActions className={classes.cardActions}>
+          <Button
+            size="large"
+            color="primary"
+            variant="contained"
+            fullWidth
+            onClick={() => onReportClick(reportType)}
+            style={{ backgroundColor: reportType.color }}
+          >
+            レポートを表示
+          </Button>
+        </CardActions>
+      </Card>
+    </Grid>
+  );
+});
+
+ReportCard.propTypes = {
+  reportType: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    icon: PropTypes.element.isRequired,
+    path: PropTypes.string.isRequired,
+    color: PropTypes.string.isRequired,
+  }).isRequired,
+  onReportClick: PropTypes.func.isRequired,
+};
+
 const ReportsPage = () => {
   const classes = useStyles();
   const history = useHistory();
@@ -135,42 +191,11 @@ const ReportsPage = () => {
 
       <Grid container spacing={3}>
         {reportTypes.map((reportType) => (
-          <Grid item xs={12} sm={6} md={4} key={reportType.id}>
-            <Card className={classes.card}>
-              <CardContent className={classes.cardContent}>
-                <Box display="flex" justifyContent="center">
-                  {reportType.icon}
-                </Box>
-                <Typography 
-                  variant="h6" 
-                  component="h2" 
-                  className={classes.cardTitle}
-                  align="center"
-                >
-                  {reportType.title}
-                </Typography>
-                <Typography 
-                  variant="body2" 
-                  className={classes.cardDescription}
-                  align="center"
-                >
-                  {reportType.description}
-                </Typography>
-              </CardContent>
-              <CardActions className={classes.cardActions}>
-                <Button
-                  size="large"
-                  color="primary"
-                  variant="contained"
-                  fullWidth
-                  onClick={() => handleReportClick(reportType)}
-                  style={{ backgroundColor: reportType.color }}
-                >
-                  レポートを表示
-                </Button>
-              </CardActions>
-            </Card>
-          </Grid>
+          <ReportCard
+            key={reportType.id}
+            reportType={reportType}
+            onReportClick={handleReportClick}
+          />
         ))}
       </Grid>
 
@@ -196,4 +221,4 @@ const ReportsPage = () => {
   );
 };
 
-export default ReportsPage;
+export default React.memo(ReportsPage);

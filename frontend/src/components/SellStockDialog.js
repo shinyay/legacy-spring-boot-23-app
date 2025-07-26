@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Dialog,
@@ -60,7 +60,7 @@ const SellStockDialog = ({ open, onClose, inventory, onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (field) => (event) => {
+  const handleInputChange = useCallback((field) => (event) => {
     setFormData({
       ...formData,
       [field]: event.target.value,
@@ -72,22 +72,31 @@ const SellStockDialog = ({ open, onClose, inventory, onSuccess }) => {
         [field]: '',
       });
     }
-  };
+  }, [formData, errors]);
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.quantity || formData.quantity <= 0) {
-      newErrors.quantity = '販売数量は正の整数を入力してください';
+    // Quantity validation
+    if (!formData.quantity || formData.quantity.toString().trim() === '') {
+      newErrors.quantity = '販売数量は必須です';
+    } else {
+      const quantity = Number(formData.quantity);
+      if (isNaN(quantity) || quantity <= 0) {
+        newErrors.quantity = '販売数量は正の数値を入力してください';
+      } else if (!Number.isInteger(quantity)) {
+        newErrors.quantity = '販売数量は整数を入力してください';
+      } else if (quantity > inventory.storeStock) {
+        newErrors.quantity = `店頭在庫が不足しています（在庫: ${inventory.storeStock}）`;
+      }
     }
 
-    if (!Number.isInteger(Number(formData.quantity))) {
-      newErrors.quantity = '販売数量は整数を入力してください';
-    }
-
-    const quantity = parseInt(formData.quantity);
-    if (quantity > inventory.storeStock) {
-      newErrors.quantity = `店頭在庫が不足しています（在庫: ${inventory.storeStock}）`;
+    // Customer ID validation (optional but if provided should be valid)
+    if (formData.customerId && formData.customerId.trim().length > 0) {
+      const customerIdPattern = /^[A-Za-z0-9_-]+$/;
+      if (!customerIdPattern.test(formData.customerId.trim())) {
+        newErrors.customerId = '顧客IDは英数字、ハイフン、アンダースコアのみ使用できます';
+      }
     }
 
     setErrors(newErrors);
@@ -100,19 +109,22 @@ const SellStockDialog = ({ open, onClose, inventory, onSuccess }) => {
     }
 
     setLoading(true);
+    setErrors({});
+    
     try {
       await dispatch(sellStock({
         bookId: inventory.bookId,
         quantity: parseInt(formData.quantity),
-        customerId: formData.customerId || undefined,
-        reason: formData.reason || undefined,
+        customerId: formData.customerId?.trim() || undefined,
+        reason: formData.reason?.trim() || undefined,
       }));
       
       onSuccess();
       handleClose();
     } catch (error) {
+      console.error('Sell stock error:', error);
       setErrors({
-        general: error.message || 'エラーが発生しました',
+        general: error.response?.data?.message || error.message || '販売処理中にエラーが発生しました',
       });
     } finally {
       setLoading(false);
@@ -143,7 +155,7 @@ const SellStockDialog = ({ open, onClose, inventory, onSuccess }) => {
       fullWidth
     >
       <DialogTitle className={classes.title}>
-        <Typography variant="h6">販売処理</Typography>
+        <span>販売処理</span>
         <IconButton onClick={handleClose} size="small">
           <CloseIcon />
         </IconButton>
@@ -174,43 +186,53 @@ const SellStockDialog = ({ open, onClose, inventory, onSuccess }) => {
           </Typography>
         )}
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="販売数量 *"
-              type="number"
-              value={formData.quantity}
-              onChange={handleInputChange('quantity')}
-              error={!!errors.quantity}
-              helperText={errors.quantity}
-              className={classes.formControl}
-              inputProps={{ min: 1, max: inventory.storeStock }}
-              disabled={inventory.storeStock <= 0}
-            />
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="販売数量 *"
+                type="number"
+                value={formData.quantity}
+                onChange={handleInputChange('quantity')}
+                error={!!errors.quantity}
+                helperText={errors.quantity}
+                className={classes.formControl}
+                inputProps={{ min: 1, max: inventory.storeStock, 'aria-label': '販売数量' }}
+                disabled={inventory.storeStock <= 0}
+                id="sell-quantity-input"
+                autoFocus={inventory.storeStock > 0}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="顧客ID"
+                value={formData.customerId}
+                onChange={handleInputChange('customerId')}
+                className={classes.formControl}
+                placeholder="例: CUST001"
+                id="customer-id-input"
+                aria-label="顧客ID"
+                error={!!errors.customerId}
+                helperText={errors.customerId}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="販売理由・備考"
+                multiline
+                rows={2}
+                value={formData.reason}
+                onChange={handleInputChange('reason')}
+                className={classes.formControl}
+                id="sell-reason-input"
+                aria-label="販売理由・備考"
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="顧客ID"
-              value={formData.customerId}
-              onChange={handleInputChange('customerId')}
-              className={classes.formControl}
-              placeholder="例: CUST001"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="販売理由・備考"
-              multiline
-              rows={2}
-              value={formData.reason}
-              onChange={handleInputChange('reason')}
-              className={classes.formControl}
-            />
-          </Grid>
-        </Grid>
+        </form>
 
         {parseInt(formData.quantity) > 0 && parseInt(formData.quantity) <= inventory.storeStock && (
           <Typography variant="body2" className={classes.warning}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Dialog,
@@ -61,7 +61,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (field) => (event) => {
+  const handleInputChange = useCallback((field) => (event) => {
     setFormData({
       ...formData,
       [field]: event.target.value,
@@ -73,17 +73,28 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
         [field]: '',
       });
     }
-  };
+  }, [formData, errors]);
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.quantity || formData.quantity <= 0) {
-      newErrors.quantity = '入荷数量は正の整数を入力してください';
+    // Quantity validation
+    if (!formData.quantity || formData.quantity.toString().trim() === '') {
+      newErrors.quantity = '入荷数量は必須です';
+    } else {
+      const quantity = Number(formData.quantity);
+      if (isNaN(quantity) || quantity <= 0) {
+        newErrors.quantity = '入荷数量は正の数値を入力してください';
+      } else if (!Number.isInteger(quantity)) {
+        newErrors.quantity = '入荷数量は整数を入力してください';
+      } else if (quantity > 10000) {
+        newErrors.quantity = '入荷数量は10,000以下で入力してください';
+      }
     }
 
-    if (!Number.isInteger(Number(formData.quantity))) {
-      newErrors.quantity = '入荷数量は整数を入力してください';
+    // Location validation
+    if (!formData.location || !['STORE', 'WAREHOUSE'].includes(formData.location)) {
+      newErrors.location = '入荷場所を選択してください';
     }
 
     setErrors(newErrors);
@@ -96,20 +107,23 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
     }
 
     setLoading(true);
+    setErrors({});
+    
     try {
       await dispatch(receiveStock({
         bookId: inventory.bookId,
         quantity: parseInt(formData.quantity),
         location: formData.location,
-        reason: formData.reason || undefined,
-        deliveryNote: formData.deliveryNote || undefined,
+        reason: formData.reason?.trim() || undefined,
+        deliveryNote: formData.deliveryNote?.trim() || undefined,
       }));
       
       onSuccess();
       handleClose();
     } catch (error) {
+      console.error('Receive stock error:', error);
       setErrors({
-        general: error.message || 'エラーが発生しました',
+        general: error.response?.data?.message || error.message || '入荷処理中にエラーが発生しました',
       });
     } finally {
       setLoading(false);
@@ -141,7 +155,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
       fullWidth
     >
       <DialogTitle className={classes.title}>
-        <Typography variant="h6">入荷処理</Typography>
+        <span>入荷処理</span>
         <IconButton onClick={handleClose} size="small">
           <CloseIcon />
         </IconButton>
@@ -166,53 +180,69 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
           </Typography>
         </Box>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="入荷数量 *"
-              type="number"
-              value={formData.quantity}
-              onChange={handleInputChange('quantity')}
-              error={!!errors.quantity}
-              helperText={errors.quantity}
-              className={classes.formControl}
-              inputProps={{ min: 1 }}
-            />
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="入荷数量 *"
+                type="number"
+                value={formData.quantity}
+                onChange={handleInputChange('quantity')}
+                error={!!errors.quantity}
+                helperText={errors.quantity}
+                className={classes.formControl}
+                inputProps={{ min: 1, 'aria-label': '入荷数量' }}
+                id="receive-quantity-input"
+                autoFocus
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth className={classes.formControl}>
+                <InputLabel id="location-select-label">入荷場所 *</InputLabel>
+                <Select
+                  labelId="location-select-label"
+                  value={formData.location}
+                  onChange={handleInputChange('location')}
+                  aria-label="入荷場所"
+                  error={!!errors.location}
+                >
+                  <MenuItem value="STORE">店頭</MenuItem>
+                  <MenuItem value="WAREHOUSE">倉庫</MenuItem>
+                </Select>
+                {errors.location && (
+                  <Typography variant="caption" color="error" className={classes.error}>
+                    {errors.location}
+                  </Typography>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="入荷理由・備考"
+                multiline
+                rows={2}
+                value={formData.reason}
+                onChange={handleInputChange('reason')}
+                className={classes.formControl}
+                id="receive-reason-input"
+                aria-label="入荷理由・備考"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="納品書番号"
+                value={formData.deliveryNote}
+                onChange={handleInputChange('deliveryNote')}
+                className={classes.formControl}
+                id="delivery-note-input"
+                aria-label="納品書番号"
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth className={classes.formControl}>
-              <InputLabel>入荷場所 *</InputLabel>
-              <Select
-                value={formData.location}
-                onChange={handleInputChange('location')}
-              >
-                <MenuItem value="STORE">店頭</MenuItem>
-                <MenuItem value="WAREHOUSE">倉庫</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="入荷理由・備考"
-              multiline
-              rows={2}
-              value={formData.reason}
-              onChange={handleInputChange('reason')}
-              className={classes.formControl}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="納品書番号"
-              value={formData.deliveryNote}
-              onChange={handleInputChange('deliveryNote')}
-              className={classes.formControl}
-            />
-          </Grid>
-        </Grid>
+        </form>
 
         {errors.general && (
           <Typography variant="body2" className={classes.error}>

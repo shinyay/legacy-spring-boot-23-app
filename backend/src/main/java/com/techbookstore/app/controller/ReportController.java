@@ -8,7 +8,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.time.LocalDate;
 
 /**
@@ -44,9 +47,7 @@ public class ReportController {
         
         logger.info("Generating sales report from {} to {}", startDate, endDate);
         
-        if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date must be before end date");
-        }
+        validateDateRange(startDate, endDate);
         
         SalesReportDto report = reportService.generateSalesReport(startDate, endDate);
         return ResponseEntity.ok(report);
@@ -66,14 +67,10 @@ public class ReportController {
         
         logger.info("Getting sales trend from {} to {}", startDate, endDate);
         
-        SalesReportDto report = reportService.generateSalesReport(startDate, endDate);
-        // Return only trend data by creating a simplified report
-        SalesReportDto trendReport = new SalesReportDto();
-        trendReport.setStartDate(startDate);
-        trendReport.setEndDate(endDate);
-        trendReport.setTrends(report.getTrends());
+        validateDateRange(startDate, endDate);
         
-        return ResponseEntity.ok(trendReport);
+        SalesReportDto report = reportService.generateSalesTrendReport(startDate, endDate);
+        return ResponseEntity.ok(report);
     }
     
     /**
@@ -86,16 +83,12 @@ public class ReportController {
     @GetMapping("/sales/ranking")
     public ResponseEntity<SalesReportDto> getSalesRanking(
             @RequestParam(required = false) String category,
-            @RequestParam(defaultValue = "10") int limit) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int limit) {
         
         logger.info("Getting sales ranking for category: {}, limit: {}", category, limit);
         
-        SalesReportDto report = reportService.generateSalesReport(LocalDate.now().minusDays(30), LocalDate.now());
-        // Return only ranking data
-        SalesReportDto rankingReport = new SalesReportDto();
-        rankingReport.setRankings(report.getRankings());
-        
-        return ResponseEntity.ok(rankingReport);
+        SalesReportDto report = reportService.generateSalesRankingReport(category, limit);
+        return ResponseEntity.ok(report);
     }
     
     /**
@@ -123,12 +116,8 @@ public class ReportController {
         
         logger.info("Getting inventory turnover for category: {}", category);
         
-        InventoryReportDto report = reportService.generateInventoryReport();
-        // Return only turnover data
-        InventoryReportDto turnoverReport = new InventoryReportDto();
-        turnoverReport.setTurnoverSummary(report.getTurnoverSummary());
-        
-        return ResponseEntity.ok(turnoverReport);
+        InventoryReportDto report = reportService.generateInventoryTurnoverReport(category);
+        return ResponseEntity.ok(report);
     }
     
     /**
@@ -140,12 +129,8 @@ public class ReportController {
     public ResponseEntity<InventoryReportDto> getReorderSuggestions() {
         logger.info("Getting reorder suggestions");
         
-        InventoryReportDto report = reportService.generateInventoryReport();
-        // Return only reorder suggestions
-        InventoryReportDto reorderReport = new InventoryReportDto();
-        reorderReport.setReorderSuggestions(report.getReorderSuggestions());
-        
-        return ResponseEntity.ok(reorderReport);
+        InventoryReportDto report = reportService.generateReorderSuggestionsReport();
+        return ResponseEntity.ok(report);
     }
     
     /**
@@ -170,12 +155,8 @@ public class ReportController {
     public ResponseEntity<CustomerAnalyticsDto> getRFMAnalysis() {
         logger.info("Getting RFM analysis");
         
-        CustomerAnalyticsDto report = reportService.generateCustomerAnalytics();
-        // Return only RFM data
-        CustomerAnalyticsDto rfmReport = new CustomerAnalyticsDto();
-        rfmReport.setRfmAnalysis(report.getRfmAnalysis());
-        
-        return ResponseEntity.ok(rfmReport);
+        CustomerAnalyticsDto report = reportService.generateRFMAnalysisReport();
+        return ResponseEntity.ok(report);
     }
     
     /**
@@ -187,25 +168,22 @@ public class ReportController {
     public ResponseEntity<CustomerAnalyticsDto> getCustomerSegments() {
         logger.info("Getting customer segments");
         
-        CustomerAnalyticsDto report = reportService.generateCustomerAnalytics();
-        // Return only segments data
-        CustomerAnalyticsDto segmentsReport = new CustomerAnalyticsDto();
-        segmentsReport.setSegments(report.getSegments());
-        
-        return ResponseEntity.ok(segmentsReport);
+        CustomerAnalyticsDto report = reportService.generateCustomerSegmentsReport();
+        return ResponseEntity.ok(report);
     }
     
     /**
-     * Generate tech trends report.
+     * Get tech trends report.
      * 
+     * @param days number of days to analyze (default 90)
      * @return tech trends data
      */
     @GetMapping("/tech-trends")
-    public ResponseEntity<SalesReportDto> getTechTrends() {
-        logger.info("Generating tech trends report");
+    public ResponseEntity<SalesReportDto> getTechTrends(
+            @RequestParam(defaultValue = "90") @Min(1) @Max(365) int days) {
+        logger.info("Generating tech trends report for {} days", days);
         
-        // For now, return sales data filtered by categories as tech trends
-        SalesReportDto report = reportService.generateSalesReport(LocalDate.now().minusDays(90), LocalDate.now());
+        SalesReportDto report = reportService.generateTechTrendsReport(days);
         return ResponseEntity.ok(report);
     }
     
@@ -213,13 +191,16 @@ public class ReportController {
      * Get category-specific trend analysis.
      * 
      * @param category category to analyze
+     * @param days number of days to analyze (default 90)
      * @return category trend data
      */
     @GetMapping("/tech-trends/categories")
-    public ResponseEntity<SalesReportDto> getCategoryTrends(@RequestParam String category) {
-        logger.info("Getting trends for category: {}", category);
+    public ResponseEntity<SalesReportDto> getCategoryTrends(
+            @RequestParam @NotNull String category,
+            @RequestParam(defaultValue = "90") @Min(1) @Max(365) int days) {
+        logger.info("Getting trends for category: {} over {} days", category, days);
         
-        SalesReportDto report = reportService.generateSalesReport(LocalDate.now().minusDays(90), LocalDate.now());
+        SalesReportDto report = reportService.generateCategoryTrendsReport(category, days);
         return ResponseEntity.ok(report);
     }
     
@@ -245,12 +226,8 @@ public class ReportController {
     public ResponseEntity<DashboardKpiDto> getDashboardTrends() {
         logger.info("Getting dashboard trends");
         
-        DashboardKpiDto dashboard = reportService.generateDashboardKpis();
-        // Return only trends data
-        DashboardKpiDto trendsReport = new DashboardKpiDto();
-        trendsReport.setTrends(dashboard.getTrends());
-        
-        return ResponseEntity.ok(trendsReport);
+        DashboardKpiDto dashboard = reportService.generateDashboardTrends();
+        return ResponseEntity.ok(dashboard);
     }
     
     /**
@@ -260,41 +237,39 @@ public class ReportController {
      * @return custom report data
      */
     @PostMapping("/custom")
-    public ResponseEntity<SalesReportDto> generateCustomReport(@RequestBody CustomReportRequest request) {
+    public ResponseEntity<SalesReportDto> generateCustomReport(@Valid @RequestBody CustomReportRequest request) {
         logger.info("Generating custom report: {}", request.getReportType());
         
-        // For now, return a basic sales report
-        SalesReportDto report = reportService.generateSalesReport(
-            request.getStartDate() != null ? request.getStartDate() : LocalDate.now().minusDays(30),
-            request.getEndDate() != null ? request.getEndDate() : LocalDate.now()
-        );
+        if (!request.isValidDateRange()) {
+            throw new IllegalArgumentException("Invalid date range: start date must be before end date");
+        }
         
+        SalesReportDto report = reportService.generateCustomReport(request);
         return ResponseEntity.ok(report);
     }
     
+    // Helper methods
+    
     /**
-     * Request DTO for custom reports.
+     * Validates that the start date is not after the end date.
+     * 
+     * @param startDate the start date
+     * @param endDate the end date
+     * @throws IllegalArgumentException if start date is after end date
      */
-    public static class CustomReportRequest {
-        private String reportType;
-        private LocalDate startDate;
-        private LocalDate endDate;
-        private String category;
-        private String parameters;
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
         
-        // Constructors
-        public CustomReportRequest() {}
+        LocalDate maxPastDate = LocalDate.now().minusYears(5);
+        if (startDate.isBefore(maxPastDate)) {
+            throw new IllegalArgumentException("Start date cannot be more than 5 years in the past");
+        }
         
-        // Getters and Setters
-        public String getReportType() { return reportType; }
-        public void setReportType(String reportType) { this.reportType = reportType; }
-        public LocalDate getStartDate() { return startDate; }
-        public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
-        public LocalDate getEndDate() { return endDate; }
-        public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-        public String getCategory() { return category; }
-        public void setCategory(String category) { this.category = category; }
-        public String getParameters() { return parameters; }
-        public void setParameters(String parameters) { this.parameters = parameters; }
+        LocalDate maxFutureDate = LocalDate.now().plusDays(1);
+        if (endDate.isAfter(maxFutureDate)) {
+            throw new IllegalArgumentException("End date cannot be in the future");
+        }
     }
 }

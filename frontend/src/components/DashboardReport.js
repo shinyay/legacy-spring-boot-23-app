@@ -13,7 +13,9 @@ import {
   IconButton,
   Chip,
   CircularProgress,
+  Button,
 } from '@material-ui/core';
+import { Alert, AlertTitle } from '@material-ui/lab';
 import {
   Dashboard,
   TrendingUp,
@@ -108,17 +110,20 @@ const useStyles = makeStyles((theme) => ({
 const DashboardReport = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
   const fetchDashboardData = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await reports.getDashboardKpis();
-      setDashboardData(response.data);
+      const data = await reports.getDashboardKpis();
+      setDashboardData(data);
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      setError(error.message || 'ダッシュボードデータの取得に失敗しました');
     } finally {
       setLoading(false);
     }
@@ -193,6 +198,32 @@ const DashboardReport = () => {
   const trendData = generateTrendData();
 
   if (loading && !dashboardData) {
+    return (
+      <Container maxWidth="lg" className={classes.root}>
+        <Box display="flex" justifyContent="center" alignItems="center" height="400px">
+          <CircularProgress size={60} />
+          <Box ml={2}>
+            <Typography variant="h6">ダッシュボードを読み込んでいます...</Typography>
+          </Box>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" className={classes.root}>
+        <Alert severity="error" action={
+          <Button color="inherit" size="small" onClick={fetchDashboardData}>
+            再試行
+          </Button>
+        }>
+          <AlertTitle>エラーが発生しました</AlertTitle>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
     return (
       <Container maxWidth="lg" className={classes.root}>
         <Box className={classes.loadingBox}>

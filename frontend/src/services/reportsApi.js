@@ -9,78 +9,213 @@ const reportsApi = axios.create({
   },
 });
 
-// Reports API
+// Request interceptor for authentication
+reportsApi.interceptors.request.use(
+  (config) => {
+    // Add authentication token if available
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+reportsApi.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    // Handle common error scenarios
+    if (error.response) {
+      // Server responded with error status
+      const { status, data } = error.response;
+      
+      if (status === 400) {
+        throw new Error(data.message || 'リクエストが無効です');
+      } else if (status === 401) {
+        throw new Error('認証が必要です');
+      } else if (status === 403) {
+        throw new Error('アクセス権限がありません');
+      } else if (status === 404) {
+        throw new Error('データが見つかりません');
+      } else if (status >= 500) {
+        throw new Error('サーバーエラーが発生しました');
+      }
+      
+      throw new Error(data.message || 'エラーが発生しました');
+    } else if (error.request) {
+      // Network error
+      throw new Error('ネットワークエラーが発生しました');
+    } else {
+      // Something else happened
+      throw new Error('予期しないエラーが発生しました');
+    }
+  }
+);
+
+// Reports API with enhanced error handling
 export const reports = {
   // Sales Reports
-  getSalesReport: (startDate, endDate) => {
-    return reportsApi.get('/reports/sales', {
-      params: { startDate, endDate }
-    });
+  getSalesReport: async (startDate, endDate) => {
+    try {
+      const response = await reportsApi.get('/reports/sales', {
+        params: { startDate, endDate }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Sales report error:', error);
+      throw error;
+    }
   },
 
-  getSalesTrend: (startDate, endDate) => {
-    return reportsApi.get('/reports/sales/trend', {
-      params: { startDate, endDate }
-    });
+  getSalesTrend: async (startDate, endDate) => {
+    try {
+      const response = await reportsApi.get('/reports/sales/trend', {
+        params: { startDate, endDate }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Sales trend error:', error);
+      throw error;
+    }
   },
 
-  getSalesRanking: (category = null, limit = 10) => {
-    const params = { limit };
-    if (category) params.category = category;
-    return reportsApi.get('/reports/sales/ranking', { params });
+  getSalesRanking: async (category = null, limit = 10) => {
+    try {
+      const params = { limit };
+      if (category) params.category = category;
+      const response = await reportsApi.get('/reports/sales/ranking', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Sales ranking error:', error);
+      throw error;
+    }
   },
 
   // Inventory Reports
-  getInventoryReport: () => {
-    return reportsApi.get('/reports/inventory');
+  getInventoryReport: async () => {
+    try {
+      const response = await reportsApi.get('/reports/inventory');
+      return response.data;
+    } catch (error) {
+      console.error('Inventory report error:', error);
+      throw error;
+    }
   },
 
-  getInventoryTurnover: (category = null) => {
-    const params = {};
-    if (category) params.category = category;
-    return reportsApi.get('/reports/inventory/turnover', { params });
+  getInventoryTurnover: async (category = null) => {
+    try {
+      const params = {};
+      if (category) params.category = category;
+      const response = await reportsApi.get('/reports/inventory/turnover', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Inventory turnover error:', error);
+      throw error;
+    }
   },
 
-  getReorderSuggestions: () => {
-    return reportsApi.get('/reports/inventory/reorder');
+  getReorderSuggestions: async () => {
+    try {
+      const response = await reportsApi.get('/reports/inventory/reorder');
+      return response.data;
+    } catch (error) {
+      console.error('Reorder suggestions error:', error);
+      throw error;
+    }
   },
 
   // Customer Reports
-  getCustomerAnalytics: () => {
-    return reportsApi.get('/reports/customers');
+  getCustomerAnalytics: async () => {
+    try {
+      const response = await reportsApi.get('/reports/customers');
+      return response.data;
+    } catch (error) {
+      console.error('Customer analytics error:', error);
+      throw error;
+    }
   },
 
-  getRFMAnalysis: () => {
-    return reportsApi.get('/reports/customers/rfm');
+  getRFMAnalysis: async () => {
+    try {
+      const response = await reportsApi.get('/reports/customers/rfm');
+      return response.data;
+    } catch (error) {
+      console.error('RFM analysis error:', error);
+      throw error;
+    }
   },
 
-  getCustomerSegments: () => {
-    return reportsApi.get('/reports/customers/segments');
+  getCustomerSegments: async () => {
+    try {
+      const response = await reportsApi.get('/reports/customers/segments');
+      return response.data;
+    } catch (error) {
+      console.error('Customer segments error:', error);
+      throw error;
+    }
   },
 
   // Tech Trends
-  getTechTrends: () => {
-    return reportsApi.get('/reports/tech-trends');
+  getTechTrends: async (days = 90) => {
+    try {
+      const response = await reportsApi.get('/reports/tech-trends', {
+        params: { days }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Tech trends error:', error);
+      throw error;
+    }
   },
 
-  getCategoryTrends: (category) => {
-    return reportsApi.get('/reports/tech-trends/categories', {
-      params: { category }
-    });
+  getCategoryTrends: async (category, days = 90) => {
+    try {
+      const response = await reportsApi.get('/reports/tech-trends/categories', {
+        params: { category, days }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Category trends error:', error);
+      throw error;
+    }
   },
 
   // Dashboard
-  getDashboardKpis: () => {
-    return reportsApi.get('/reports/dashboard/kpis');
+  getDashboardKpis: async () => {
+    try {
+      const response = await reportsApi.get('/reports/dashboard/kpis');
+      return response.data;
+    } catch (error) {
+      console.error('Dashboard KPIs error:', error);
+      throw error;
+    }
   },
 
-  getDashboardTrends: () => {
-    return reportsApi.get('/reports/dashboard/trends');
+  getDashboardTrends: async () => {
+    try {
+      const response = await reportsApi.get('/reports/dashboard/trends');
+      return response.data;
+    } catch (error) {
+      console.error('Dashboard trends error:', error);
+      throw error;
+    }
   },
 
   // Custom Reports
-  generateCustomReport: (reportData) => {
-    return reportsApi.post('/reports/custom', reportData);
+  generateCustomReport: async (reportData) => {
+    try {
+      const response = await reportsApi.post('/reports/custom', reportData);
+      return response.data;
+    } catch (error) {
+      console.error('Custom report error:', error);
+      throw error;
+    }
   },
 };
 

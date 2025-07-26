@@ -62,7 +62,7 @@ public class ReportService {
         report.setTrends(generateSalesTrends(startDate, endDate));
         
         // Add rankings (simplified for now - using mock data)
-        report.setRankings(generateSalesRankings());
+        report.setRankings(generateSalesRankings(null, 10));
         
         // Add breakdown
         report.setBreakdown(generateSalesBreakdown(startDate, endDate));
@@ -211,16 +211,6 @@ public class ReportService {
         return trends;
     }
     
-    private List<SalesReportDto.SalesRankingItem> generateSalesRankings() {
-        return Arrays.asList(
-            new SalesReportDto.SalesRankingItem("Java", "Javaプログラミング入門", new BigDecimal("8640.00"), 3, 1),
-            new SalesReportDto.SalesRankingItem("Spring", "Spring Boot実践ガイド", new BigDecimal("8100.00"), 2, 2),
-            new SalesReportDto.SalesRankingItem("React", "React開発現場のテクニック", new BigDecimal("6840.00"), 2, 3),
-            new SalesReportDto.SalesRankingItem("Python", "Python機械学習プログラミング", new BigDecimal("7560.00"), 2, 4),
-            new SalesReportDto.SalesRankingItem("AWS", "AWSクラウド設計・構築ガイド", new BigDecimal("6480.00"), 2, 5)
-        );
-    }
-    
     private SalesReportDto.SalesBreakdown generateSalesBreakdown(LocalDate startDate, LocalDate endDate) {
         return new SalesReportDto.SalesBreakdown(
             new BigDecimal("28000.00"), // Online
@@ -287,5 +277,151 @@ public class ReportService {
             new DashboardKpiDto.TrendSummary("Customers", "Month", 5.8, "UP"),
             new DashboardKpiDto.TrendSummary("AOV", "Month", 4.2, "UP")
         );
+    }
+    
+    // Additional report generation methods
+    
+    /**
+     * Generate sales trend report for the specified date range.
+     */
+    public SalesReportDto generateSalesTrendReport(LocalDate startDate, LocalDate endDate) {
+        logger.info("Generating sales trend report from {} to {}", startDate, endDate);
+        
+        SalesReportDto report = new SalesReportDto();
+        report.setStartDate(startDate);
+        report.setEndDate(endDate);
+        report.setTrends(generateSalesTrends(startDate, endDate));
+        
+        return report;
+    }
+    
+    /**
+     * Generate sales ranking report with optional category filter.
+     */
+    public SalesReportDto generateSalesRankingReport(String category, int limit) {
+        logger.info("Generating sales ranking report for category: {}, limit: {}", category, limit);
+        
+        SalesReportDto report = new SalesReportDto();
+        report.setRankings(generateSalesRankings(category, limit));
+        
+        return report;
+    }
+    
+    /**
+     * Generate inventory turnover report with optional category filter.
+     */
+    public InventoryReportDto generateInventoryTurnoverReport(String category) {
+        logger.info("Generating inventory turnover report for category: {}", category);
+        
+        InventoryReportDto report = new InventoryReportDto();
+        report.setTurnoverSummary(new InventoryReportDto.InventoryTurnoverSummary(
+            4.2, category != null ? category : "All", "Top performing category"));
+        
+        return report;
+    }
+    
+    /**
+     * Generate reorder suggestions report.
+     */
+    public InventoryReportDto generateReorderSuggestionsReport() {
+        logger.info("Generating reorder suggestions report");
+        
+        InventoryReportDto report = new InventoryReportDto();
+        report.setReorderSuggestions(generateReorderSuggestions());
+        
+        return report;
+    }
+    
+    /**
+     * Generate RFM analysis report.
+     */
+    public CustomerAnalyticsDto generateRFMAnalysisReport() {
+        logger.info("Generating RFM analysis report");
+        
+        CustomerAnalyticsDto report = new CustomerAnalyticsDto();
+        report.setRfmAnalysis(generateRFMAnalysis());
+        
+        return report;
+    }
+    
+    /**
+     * Generate customer segments report.
+     */
+    public CustomerAnalyticsDto generateCustomerSegmentsReport() {
+        logger.info("Generating customer segments report");
+        
+        CustomerAnalyticsDto report = new CustomerAnalyticsDto();
+        report.setSegments(generateCustomerSegments());
+        
+        return report;
+    }
+    
+    /**
+     * Generate dashboard trends report.
+     */
+    public DashboardKpiDto generateDashboardTrends() {
+        logger.info("Generating dashboard trends report");
+        
+        DashboardKpiDto dashboard = new DashboardKpiDto();
+        dashboard.setTrends(generateTrendSummaries());
+        
+        return dashboard;
+    }
+    
+    /**
+     * Generate tech trends report.
+     */
+    public SalesReportDto generateTechTrendsReport(int days) {
+        logger.info("Generating tech trends report for {} days", days);
+        
+        LocalDate startDate = LocalDate.now().minusDays(days);
+        LocalDate endDate = LocalDate.now();
+        
+        return generateSalesReport(startDate, endDate);
+    }
+    
+    /**
+     * Generate category trends report.
+     */
+    public SalesReportDto generateCategoryTrendsReport(String category, int days) {
+        logger.info("Generating category trends report for {} over {} days", category, days);
+        
+        LocalDate startDate = LocalDate.now().minusDays(days);
+        LocalDate endDate = LocalDate.now();
+        
+        SalesReportDto report = new SalesReportDto();
+        report.setStartDate(startDate);
+        report.setEndDate(endDate);
+        report.setTrends(generateSalesTrends(startDate, endDate));
+        
+        return report;
+    }
+    
+    /**
+     * Generate custom report based on request parameters.
+     */
+    public SalesReportDto generateCustomReport(CustomReportRequest request) {
+        logger.info("Generating custom report of type: {}", request.getReportType());
+        
+        LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now().minusDays(30);
+        LocalDate endDate = request.getEndDate() != null ? request.getEndDate() : LocalDate.now();
+        
+        return generateSalesReport(startDate, endDate);
+    }
+    
+    // Updated helper method to support filtering
+    private List<SalesReportDto.SalesRankingItem> generateSalesRankings(String category, int limit) {
+        List<SalesReportDto.SalesRankingItem> allRankings = Arrays.asList(
+            new SalesReportDto.SalesRankingItem("Java", "Javaプログラミング入門", new BigDecimal("8640.00"), 3, 1),
+            new SalesReportDto.SalesRankingItem("Spring", "Spring Boot実践ガイド", new BigDecimal("8100.00"), 2, 2),
+            new SalesReportDto.SalesRankingItem("React", "React開発現場のテクニック", new BigDecimal("6840.00"), 2, 3),
+            new SalesReportDto.SalesRankingItem("Python", "Python機械学習プログラミング", new BigDecimal("7560.00"), 2, 4),
+            new SalesReportDto.SalesRankingItem("AWS", "AWSクラウド設計・構築ガイド", new BigDecimal("6480.00"), 2, 5)
+        );
+        
+        return allRankings.stream()
+                .filter(item -> category == null || item.getCategory().equalsIgnoreCase(category))
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 }

@@ -57,9 +57,13 @@ code .
 
 #### VS Code エディタ設定
 
-Java開発のためのVS Code設定が必要です（`.vscode/`ディレクトリは`.gitignore`で除外されているため、各開発者が個別に設定する必要があります）。
+**Dev Container環境を使用している場合、以下の設定は自動的に行われます。**
 
-プロジェクトルートに`.vscode/settings.json`ファイルを作成してください：
+Java開発のためのVS Code設定は、Dev Container起動時に自動的に構成されます。`.vscode/settings.json`ファイルが自動生成され、適切なJava Homeパスが設定されます。
+
+**ローカル環境での手動設定：**
+
+ローカル環境で開発する場合は、プロジェクトルートに`.vscode/settings.json`ファイルを手動で作成してください：
 
 ```json
 {
@@ -67,7 +71,7 @@ Java開発のためのVS Code設定が必要です（`.vscode/`ディレクト�
 }
 ```
 
-**設定手順：**
+**設定手順（ローカル環境のみ）：**
 
 1. プロジェクトルートに`.vscode`ディレクトリを作成
 2. 上記の内容で`settings.json`ファイルを作成

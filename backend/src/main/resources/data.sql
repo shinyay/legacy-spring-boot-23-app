@@ -2,6 +2,8 @@
 -- This file provides initial data for the TechBookStore application
 -- Works alongside DataInitializer.java
 
+-- System user will be created programmatically by AdvancedInventoryService
+
 -- Publishers
 INSERT INTO publishers (id, name, address, contact, email, phone) VALUES 
 (1, '技術評論社', '東京都新宿区新宿1-1-1', '技術評論社編集部', 'contact@gihyo.co.jp', '03-1234-5678'),

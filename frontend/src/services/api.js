@@ -81,6 +81,38 @@ export const inventoryApi = {
   adjustStock: (data) => {
     return api.put('/inventory/adjust', data);
   },
+
+  // Advanced inventory management APIs - Phase 1
+  
+  // Get transaction history for inventory item
+  getTransactionHistory: (inventoryId) => {
+    return api.get(`/inventory/${inventoryId}/transactions`);
+  },
+
+  // Get active reservations for inventory item
+  getActiveReservations: (inventoryId) => {
+    return api.get(`/inventory/${inventoryId}/reservations`);
+  },
+
+  // Transfer stock between store and warehouse
+  transferStock: (transferData) => {
+    return api.post('/inventory/transfers', transferData);
+  },
+
+  // Create stock reservation
+  createReservation: (reservationData) => {
+    return api.post('/inventory/reservations', reservationData);
+  },
+
+  // Release stock reservation
+  releaseReservation: (reservationId) => {
+    return api.delete(`/inventory/reservations/${reservationId}`);
+  },
+
+  // Process barcode scan
+  processBarcodeScanned: (barcodeData) => {
+    return api.post('/inventory/barcode-scan', barcodeData);
+  },
 };
 
 // Orders API

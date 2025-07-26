@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.time.LocalDate;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * REST controller for report and analytics operations.
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/v1/reports")
 @CrossOrigin(origins = "${app.cors.allowed-origins:http://localhost:3000}")
+@Validated
 public class ReportController {
     
     private static final Logger logger = LoggerFactory.getLogger(ReportController.class);

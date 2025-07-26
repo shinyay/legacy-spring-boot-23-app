@@ -112,3 +112,26 @@ SELECT * FROM (VALUES
 ) AS new_order_items(id, order_id, book_id, quantity, unit_price, total_price)
 WHERE EXISTS (SELECT 1 FROM orders WHERE id = new_order_items.order_id)
 AND EXISTS (SELECT 1 FROM books WHERE id = new_order_items.book_id);
+
+-- Report Configurations
+INSERT INTO report_configs (id, report_type, report_name, description, config_json, created_at, updated_at) VALUES
+(1, 'SALES', '売上レポート', '日次・月次の売上分析レポート', '{"defaultPeriod": "month", "includeCharts": true}', '2025-07-26 00:00:00', '2025-07-26 00:00:00'),
+(2, 'INVENTORY', '在庫レポート', '在庫状況と発注提案レポート', '{"includeReorderSuggestions": true, "lowStockThreshold": 10}', '2025-07-26 00:00:00', '2025-07-26 00:00:00'),
+(3, 'CUSTOMER', '顧客分析レポート', 'RFM分析と顧客セグメント', '{"includeRFM": true, "segmentationRules": "standard"}', '2025-07-26 00:00:00', '2025-07-26 00:00:00'),
+(4, 'DASHBOARD', 'ダッシュボードKPI', '経営ダッシュボード指標', '{"refreshInterval": 300, "includeAlerts": true}', '2025-07-26 00:00:00', '2025-07-26 00:00:00'),
+(5, 'TREND', '技術トレンド分析', '技術カテゴリ別のトレンド分析', '{"categories": ["Java", "Python", "React"], "period": "quarter"}', '2025-07-26 00:00:00', '2025-07-26 00:00:00');
+
+-- Report Executions (Recent execution history)
+INSERT INTO report_executions (id, report_config_id, executed_by, executed_at, parameters, status, result_path, execution_time_ms, created_at) VALUES
+(1, 1, 'admin', '2025-07-26 00:00:00', '{"startDate": "2025-06-01", "endDate": "2025-06-30"}', 'COMPLETED', '/reports/sales_202506.json', 1250, '2025-07-26 00:00:00'),
+(2, 2, 'admin', '2025-07-26 00:05:00', '{}', 'COMPLETED', '/reports/inventory_20250726.json', 800, '2025-07-26 00:05:00'),
+(3, 3, 'admin', '2025-07-26 00:10:00', '{"includeRFM": true}', 'COMPLETED', '/reports/customer_20250726.json', 2100, '2025-07-26 00:10:00'),
+(4, 4, 'system', '2025-07-26 00:15:00', '{}', 'COMPLETED', '/reports/dashboard_20250726.json', 450, '2025-07-26 00:15:00'),
+(5, 5, 'admin', '2025-07-26 00:20:00', '{"category": "Java"}', 'COMPLETED', '/reports/trends_java_20250726.json', 1650, '2025-07-26 00:20:00');
+
+-- Aggregation Cache (Sample cached data)
+INSERT INTO aggregation_cache (id, cache_key, aggregation_type, aggregation_date, aggregation_data, created_at, expires_at) VALUES
+(1, 'sales_daily_2025-07-25', 'DAILY_SALES', '2025-07-25', '{"totalRevenue": 12450.00, "orderCount": 15, "avgOrderValue": 830.00}', '2025-07-26 00:00:00', '2025-07-27 00:00:00'),
+(2, 'inventory_summary_2025-07-26', 'INVENTORY_SUMMARY', '2025-07-26', '{"totalProducts": 50, "lowStock": 5, "outOfStock": 2, "totalValue": 150000.00}', '2025-07-26 00:00:00', '2025-07-26 12:00:00'),
+(3, 'customer_metrics_2025-07-26', 'CUSTOMER_METRICS', '2025-07-26', '{"totalCustomers": 25, "activeCustomers": 20, "newThisMonth": 3}', '2025-07-26 00:00:00', '2025-07-26 06:00:00'),
+(4, 'kpi_snapshot_2025-07-26', 'DASHBOARD_KPI', '2025-07-26', '{"revenue": {"today": 2500, "week": 18000}, "orders": {"today": 8, "week": 45}}', '2025-07-26 00:00:00', '2025-07-26 01:00:00');

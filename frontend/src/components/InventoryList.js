@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
@@ -13,9 +13,13 @@ import {
   Box,
   Button,
   CircularProgress,
+  Snackbar,
 } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fetchInventory } from '../store/actions/inventoryActions';
+import ReceiveStockDialog from './ReceiveStockDialog';
+import SellStockDialog from './SellStockDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -58,6 +62,16 @@ function InventoryList() {
   const loading = useSelector((state) => state.inventory?.loading || false);
   const error = useSelector((state) => state.inventory?.error);
 
+  // Local state for dialog management
+  const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
+  const [sellDialogOpen, setSellDialogOpen] = useState(false);
+  const [selectedInventory, setSelectedInventory] = useState(null);
+  const [notification, setNotification] = useState({ 
+    open: false, 
+    message: '', 
+    severity: 'success' 
+  });
+
   useEffect(() => {
     dispatch(fetchInventory());
   }, [dispatch]);
@@ -84,6 +98,30 @@ function InventoryList() {
 
   const formatLocation = (locationCode) => {
     return locationCode || '-';
+  };
+
+  // Dialog handlers
+  const handleReceiveClick = (inventory) => {
+    setSelectedInventory(inventory);
+    setReceiveDialogOpen(true);
+  };
+
+  const handleSellClick = (inventory) => {
+    setSelectedInventory(inventory);
+    setSellDialogOpen(true);
+  };
+
+  const handleOperationSuccess = () => {
+    dispatch(fetchInventory());
+    setNotification({
+      open: true,
+      message: '操作が完了しました',
+      severity: 'success'
+    });
+  };
+
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
   };
 
   if (loading) {
@@ -161,6 +199,7 @@ function InventoryList() {
                         variant="outlined"
                         size="small"
                         color="primary"
+                        onClick={() => handleReceiveClick(item)}
                       >
                         入荷
                       </Button>
@@ -168,6 +207,7 @@ function InventoryList() {
                         variant="outlined"
                         size="small"
                         color="secondary"
+                        onClick={() => handleSellClick(item)}
                       >
                         販売
                       </Button>
@@ -188,6 +228,33 @@ function InventoryList() {
           </Table>
         </TableContainer>
       </Paper>
+
+      {/* Dialogs */}
+      <ReceiveStockDialog
+        open={receiveDialogOpen}
+        onClose={() => setReceiveDialogOpen(false)}
+        inventory={selectedInventory}
+        onSuccess={handleOperationSuccess}
+      />
+
+      <SellStockDialog
+        open={sellDialogOpen}
+        onClose={() => setSellDialogOpen(false)}
+        inventory={selectedInventory}
+        onSuccess={handleOperationSuccess}
+      />
+
+      {/* Notification */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={4000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseNotification} severity={notification.severity}>
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

@@ -11,7 +11,6 @@ import {
   Paper,
   Button,
   TextField,
-  Box,
   Typography,
   Chip,
   CircularProgress,
@@ -45,7 +44,6 @@ import {
   searchCustomers,
   deleteCustomer,
   fetchCustomerStats,
-  clearCustomerError
 } from '../store/actions/customersActions';
 
 const useStyles = makeStyles((theme) => ({
@@ -104,7 +102,6 @@ const CustomerList = () => {
     statsLoading,
     deleteLoading,
     error,
-    deleteError,
   } = useSelector(state => state.customers);
 
   const [searchKeyword, setSearchKeyword] = useState('');

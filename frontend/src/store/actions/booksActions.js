@@ -21,6 +21,13 @@ export const DELETE_BOOK_START = 'DELETE_BOOK_START';
 export const DELETE_BOOK_SUCCESS = 'DELETE_BOOK_SUCCESS';
 export const DELETE_BOOK_FAILURE = 'DELETE_BOOK_FAILURE';
 
+export const FETCH_BOOK_DETAIL_START = 'FETCH_BOOK_DETAIL_START';
+export const FETCH_BOOK_DETAIL_SUCCESS = 'FETCH_BOOK_DETAIL_SUCCESS';
+export const FETCH_BOOK_DETAIL_FAILURE = 'FETCH_BOOK_DETAIL_FAILURE';
+
+export const SET_EDIT_MODE = 'SET_EDIT_MODE';
+export const CLEAR_BOOK_DETAIL = 'CLEAR_BOOK_DETAIL';
+
 // Action Creators
 export const fetchBooks = (params = {}) => {
   return async (dispatch) => {
@@ -124,5 +131,39 @@ export const deleteBook = (id) => {
       });
       throw error;
     }
+  };
+};
+
+export const fetchBookDetail = (id) => {
+  return async (dispatch) => {
+    dispatch({ type: FETCH_BOOK_DETAIL_START });
+    
+    try {
+      const response = await booksApi.getBook(id);
+      dispatch({
+        type: FETCH_BOOK_DETAIL_SUCCESS,
+        payload: response.data
+      });
+      return response.data;
+    } catch (error) {
+      dispatch({
+        type: FETCH_BOOK_DETAIL_FAILURE,
+        payload: error.response?.data?.message || error.message
+      });
+      throw error;
+    }
+  };
+};
+
+export const setEditMode = (isEditMode) => {
+  return {
+    type: SET_EDIT_MODE,
+    payload: isEditMode
+  };
+};
+
+export const clearBookDetail = () => {
+  return {
+    type: CLEAR_BOOK_DETAIL
   };
 };

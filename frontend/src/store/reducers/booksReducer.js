@@ -14,13 +14,21 @@ import {
   DELETE_BOOK_START,
   DELETE_BOOK_SUCCESS,
   DELETE_BOOK_FAILURE,
+  FETCH_BOOK_DETAIL_START,
+  FETCH_BOOK_DETAIL_SUCCESS,
+  FETCH_BOOK_DETAIL_FAILURE,
+  SET_EDIT_MODE,
+  CLEAR_BOOK_DETAIL,
 } from '../actions/booksActions';
 
 const initialState = {
   books: [],
   selectedBook: null,
+  bookDetail: null,
   loading: false,
+  detailLoading: false,
   error: null,
+  isEditMode: false,
 };
 
 const booksReducer = (state = initialState, action) => {
@@ -33,6 +41,13 @@ const booksReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
+        error: null,
+      };
+
+    case FETCH_BOOK_DETAIL_START:
+      return {
+        ...state,
+        detailLoading: true,
         error: null,
       };
 
@@ -49,6 +64,14 @@ const booksReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         selectedBook: action.payload,
+        error: null,
+      };
+
+    case FETCH_BOOK_DETAIL_SUCCESS:
+      return {
+        ...state,
+        detailLoading: false,
+        bookDetail: action.payload,
         error: null,
       };
 
@@ -75,6 +98,7 @@ const booksReducer = (state = initialState, action) => {
           ),
         },
         selectedBook: action.payload,
+        bookDetail: state.bookDetail?.id === action.payload.id ? action.payload : state.bookDetail,
         error: null,
       };
 
@@ -99,6 +123,28 @@ const booksReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         error: action.payload,
+      };
+
+    case FETCH_BOOK_DETAIL_FAILURE:
+      return {
+        ...state,
+        detailLoading: false,
+        error: action.payload,
+      };
+
+    case SET_EDIT_MODE:
+      return {
+        ...state,
+        isEditMode: action.payload,
+      };
+
+    case CLEAR_BOOK_DETAIL:
+      return {
+        ...state,
+        bookDetail: null,
+        isEditMode: false,
+        detailLoading: false,
+        error: null,
       };
 
     default:

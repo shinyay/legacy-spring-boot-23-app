@@ -1,7 +1,11 @@
+// Mock axios for testing
+jest.mock('../services/api');
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
 import CustomerList from '../components/CustomerList';
 
 // Mock store for testing
@@ -18,12 +22,15 @@ const mockStore = createStore(() => ({
       totalCustomers: 0,
       activeCustomers: 0,
       inactiveCustomers: 0,
-      deletedCustomers: 0,
+      privateCustomers: 0,
+      corporateCustomers: 0,
     },
     loading: false,
+    statsLoading: false,
+    deleteLoading: false,
     error: null,
   }
-}));
+}), applyMiddleware(thunk));
 
 // Mock react-router-dom
 jest.mock('react-router-dom', () => ({
@@ -40,8 +47,9 @@ describe('Customer Management Components', () => {
       </Provider>
     );
     
-    expect(screen.getByText('顧客管理')).toBeInTheDocument();
-    expect(screen.getByText('新規顧客追加')).toBeInTheDocument();
+    // Check if main elements are present (basic smoke test)
+    expect(screen.getByText('顧客管理')).toBeDefined();
+    expect(screen.getByText('新規顧客追加')).toBeDefined();
   });
 
   test('Customer API endpoints are properly configured', () => {

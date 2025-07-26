@@ -1,5 +1,17 @@
 # 在庫管理機能アップグレード PRD (Product Requirements Document)
 
+## 🚨 緊急対応事項
+
+**現在の問題:** 在庫管理画面の「入荷」「販売」ボタンがクリックしても動作しない
+
+**影響:** 基本的な在庫操作ができず、店舗運営に支障をきたしている
+
+**原因:** フロントエンド（InventoryList.js）でonClickハンドラーが未実装
+
+**解決策:** 入荷・販売ダイアログの実装とイベントハンドラーの追加（Phase 0で即座対応）
+
+---
+
 ## 1. エグゼクティブサマリー
 
 ### 1.1 目的
@@ -72,6 +84,12 @@
 - POSシステム統合
 - 配送システム連携
 
+❌ **基本操作の改善が必要**
+- 在庫一覧画面の入荷・販売ボタンが機能しない
+- 入荷・販売時の詳細情報入力ダイアログが未実装
+- 操作結果のフィードバックが不十分
+- 在庫操作の確認ステップが不足
+
 ### 2.2 技術的制約
 - **レガシー技術スタック**: Java 8, Spring Boot 2.3.x
 - **データベース制約**: H2（開発）、PostgreSQL（本番）
@@ -80,9 +98,47 @@
 
 ## 3. 要件定義
 
-### 3.1 機能要件
+### 3.1 緊急対応事項（Priority: 最高）
 
-#### 3.1.1 高度な在庫管理機能
+#### 3.1.1 在庫一覧画面の基本操作修復
+
+**A. 入荷・販売ボタンの機能実装**
+- **問題**: 在庫一覧画面の「入荷」「販売」ボタンがクリックしても動作しない
+- **原因**: onClickハンドラーが未実装
+- **解決策**: 入荷・販売ダイアログの実装とイベントハンドラーの追加
+
+**B. 入荷処理ダイアログ**
+```
+入荷処理フォーム:
+- 書籍情報表示（タイトル、ISBN、現在在庫）
+- 入荷数量入力（必須、数値検証）
+- 入荷場所選択（店頭/倉庫、デフォルト：店頭）
+- 入荷理由/備考（オプション）
+- 納品書番号（オプション）
+- 実行確認ダイアログ
+- 処理結果通知
+```
+
+**C. 販売処理ダイアログ**
+```
+販売処理フォーム:
+- 書籍情報表示（タイトル、ISBN、店頭在庫）
+- 販売数量入力（必須、在庫数量以下の検証）
+- 顧客情報（オプション、既存顧客検索）
+- 販売理由/備考（オプション）
+- 実行確認ダイアログ
+- 処理結果通知
+```
+
+**D. エラーハンドリング強化**
+- 在庫不足時の明確なエラーメッセージ
+- ネットワークエラー時の再試行機能
+- 操作完了後の在庫一覧自動更新
+- ユーザーフレンドリーな成功・失敗通知
+
+### 3.2 機能要件
+
+#### 3.2.1 高度な在庫管理機能
 
 **A. スマート入荷管理**
 - **バーコード/QRコードスキャン対応**
@@ -138,7 +194,7 @@
   - 在庫調整履歴管理
   - 改善提案機能
 
-#### 3.1.2 高度なレポート・分析機能
+#### 3.2.2 高度なレポート・分析機能
 
 **A. リアルタイム在庫ダッシュボード**
 - **KPI可視化**
@@ -179,7 +235,7 @@
   - 制約条件考慮（予算、保管容量）
   - シミュレーション機能
 
-#### 3.1.3 システム統合・連携機能
+#### 3.2.3 システム統合・連携機能
 
 **A. サプライヤー連携**
 - **EDI統合**
@@ -208,9 +264,9 @@
   - 返品処理自動化
   - 配送コスト最適化
 
-### 3.2 非機能要件
+### 3.3 非機能要件
 
-#### 3.2.1 パフォーマンス要件
+#### 3.3.1 パフォーマンス要件
 - **応答時間**
   - 在庫照会: 100ms以内
   - 在庫更新: 500ms以内
@@ -222,13 +278,13 @@
   - 1日あたり取引数: 10,000件
   - ピーク時処理能力: 100取引/分
 
-#### 3.2.2 可用性・信頼性
+#### 3.3.2 可用性・信頼性
 - **システム稼働率**: 99.5%以上
 - **データバックアップ**: 日次自動バックアップ
 - **災害復旧**: RTO 4時間、RPO 1時間
 - **データ整合性**: ACID特性保証
 
-#### 3.2.3 セキュリティ要件
+#### 3.3.3 セキュリティ要件
 - **アクセス制御**
   - ロールベースアクセス制御（RBAC）
   - 在庫操作権限の細分化
@@ -856,6 +912,209 @@ ALTER TABLE books ADD COLUMN trend_factor DECIMAL(3,2) DEFAULT 1.0;
 
 ### 5.1 段階的実装アプローチ
 
+#### Phase 0: 緊急修復 (1週間) - **即座実行**
+**優先度: 緊急**
+
+**基本在庫操作の修復**
+- InventoryList.jsの入荷・販売ボタン機能実装
+- 入荷処理ダイアログコンポーネント作成
+- 販売処理ダイアログコンポーネント作成
+- エラーハンドリング強化
+- ユーザビリティ改善
+
+**実装詳細:**
+```javascript
+// 実装が必要なコンポーネント
+<ReceiveStockDialog />     // 入荷処理ダイアログ
+<SellStockDialog />        // 販売処理ダイアログ
+<StockOperationConfirm />  // 操作確認ダイアログ
+<OperationNotification />  // 結果通知コンポーネント
+
+// 修正が必要なファイル
+- /frontend/src/components/InventoryList.js
+- /frontend/src/components/ (新規ダイアログ作成)
+- /frontend/src/store/actions/inventoryActions.js (必要に応じて)
+```
+
+**技術仕様:**
+
+1. **ReceiveStockDialog コンポーネント**
+```javascript
+const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    quantity: '',
+    location: 'STORE', // STORE or WAREHOUSE
+    reason: '',
+    deliveryNote: ''
+  });
+  
+  const handleSubmit = async () => {
+    try {
+      await dispatch(receiveStock({
+        bookId: inventory.bookId,
+        quantity: parseInt(formData.quantity),
+        location: formData.location,
+        reason: formData.reason,
+        deliveryNote: formData.deliveryNote
+      }));
+      onSuccess();
+      onClose();
+    } catch (error) {
+      // エラーハンドリング
+    }
+  };
+  
+  // Material-UI Dialog with form fields
+};
+```
+
+2. **SellStockDialog コンポーネント**
+```javascript
+const SellStockDialog = ({ open, onClose, inventory, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    quantity: '',
+    customerId: '',
+    reason: ''
+  });
+  
+  const handleSubmit = async () => {
+    // 在庫チェック
+    if (formData.quantity > inventory.storeStock) {
+      setError('店頭在庫が不足しています');
+      return;
+    }
+    
+    try {
+      await dispatch(sellStock({
+        bookId: inventory.bookId,
+        quantity: parseInt(formData.quantity),
+        customerId: formData.customerId || null,
+        reason: formData.reason
+      }));
+      onSuccess();
+      onClose();
+    } catch (error) {
+      // エラーハンドリング
+    }
+  };
+  
+  // Material-UI Dialog with form fields and validation
+};
+```
+
+3. **InventoryList.js の修正**
+```javascript
+// State追加
+const [receiveDialogOpen, setReceiveDialogOpen] = useState(false);
+const [sellDialogOpen, setSellDialogOpen] = useState(false);
+const [selectedInventory, setSelectedInventory] = useState(null);
+
+// アクションボタンのonClickハンドラー追加
+const handleReceiveClick = (inventory) => {
+  setSelectedInventory(inventory);
+  setReceiveDialogOpen(true);
+};
+
+const handleSellClick = (inventory) => {
+  setSelectedInventory(inventory);
+  setSellDialogOpen(true);
+};
+
+// 成功時のコールバック
+const handleOperationSuccess = () => {
+  dispatch(fetchInventory()); // 在庫一覧を再読み込み
+  setNotification({
+    open: true,
+    message: '操作が完了しました',
+    severity: 'success'
+  });
+};
+
+// JSX内でボタンにonClickを追加
+<Button
+  variant="outlined"
+  size="small"
+  color="primary"
+  onClick={() => handleReceiveClick(item)}
+>
+  入荷
+</Button>
+<Button
+  variant="outlined"
+  size="small"
+  color="secondary"
+  onClick={() => handleSellClick(item)}
+>
+  販売
+</Button>
+```
+
+**検収基準:**
+- [ ] 入荷・販売ボタンがクリック可能
+- [ ] 入荷ダイアログが正常に表示される
+- [ ] 販売ダイアログが正常に表示される
+- [ ] フォームバリデーションが動作する
+- [ ] API呼び出しが成功する
+- [ ] エラーハンドリングが適切に動作する
+- [ ] 操作完了後に在庫一覧が更新される
+- [ ] ユーザーフレンドリーな通知が表示される
+
+**成果物:**
+- 動作する入荷・販売ボタン
+- 直感的な操作ダイアログ
+- 適切なエラーハンドリング
+- ユーザーフレンドリーな通知
+
+---
+
+## Coding Agent開発依頼事項 #github-pull-request_copilot-coding-agent
+
+### 緊急修復タスク: 在庫管理機能の入荷・販売ボタン実装
+
+**背景:**
+現在の在庫管理画面で「入荷」「販売」ボタンをクリックしても何も動作しません。これは`InventoryList.js`でonClickハンドラーが実装されていないためです。バックエンドAPIとReduxアクションは既に実装済みです。
+
+**実装要件:**
+
+1. **入荷処理ダイアログの作成**
+   - コンポーネント名: `ReceiveStockDialog`
+   - フィールド: 数量、入荷場所（店頭/倉庫）、理由、納品書番号
+   - バリデーション: 数量必須、正の整数
+   - API: `inventoryApi.receiveStock()`
+
+2. **販売処理ダイアログの作成**
+   - コンポーネント名: `SellStockDialog`
+   - フィールド: 数量、顧客ID（オプション）、理由
+   - バリデーション: 数量必須、店頭在庫以下
+   - API: `inventoryApi.sellStock()`
+
+3. **InventoryList.jsの修正**
+   - 入荷・販売ボタンにonClickハンドラー追加
+   - ダイアログ状態管理
+   - 操作完了後の在庫一覧更新
+   - エラーハンドリングと通知
+
+4. **UI/UX改善**
+   - Material-UI Dialogベース
+   - フォームバリデーション
+   - ローディング状態表示
+   - 成功/エラー通知
+
+**成功基準:**
+- 入荷・販売ボタンがクリック可能
+- ダイアログが正常に動作
+- API呼び出しが成功
+- 在庫一覧の自動更新
+- 適切なエラーハンドリング
+
+**ファイル:**
+- `/frontend/src/components/InventoryList.js` (修正)
+- `/frontend/src/components/ReceiveStockDialog.js` (新規)
+- `/frontend/src/components/SellStockDialog.js` (新規)
+
+---
+
+#### Phase 1: 基盤機能強化 (4週間)
 #### Phase 1: 基盤機能強化 (4週間)
 **優先度: 最高**
 

@@ -51,6 +51,7 @@ function App() {
   ];
 
   const handleMenuClick = (item) => {
+    console.log('Menu clicked:', item);
     setSelectedMenu(item.id);
     history.push(item.path);
   };

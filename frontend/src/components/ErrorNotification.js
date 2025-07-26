@@ -1,10 +1,12 @@
 import React from 'react';
 import { 
-  Alert, 
-  AlertTitle,
   Snackbar,
   IconButton 
 } from '@material-ui/core';
+import { 
+  Alert, 
+  AlertTitle 
+} from '@material-ui/lab';
 import { Close as CloseIcon } from '@material-ui/icons';
 
 /**

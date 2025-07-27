@@ -597,22 +597,20 @@ public class ReportController {
         try {
             batchProcessingService.runManualBatch(batchType);
             
-            Map<String, String> response = Map.of(
-                "status", "SUCCESS",
-                "message", "Batch " + batchType + " executed successfully",
-                "timestamp", LocalDate.now().toString()
-            );
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "SUCCESS");
+            response.put("message", "Batch " + batchType + " executed successfully");
+            response.put("timestamp", LocalDate.now().toString());
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             logger.error("Manual batch execution failed", e);
             
-            Map<String, String> response = Map.of(
-                "status", "FAILED",
-                "message", "Batch execution failed: " + e.getMessage(),
-                "timestamp", LocalDate.now().toString()
-            );
+            Map<String, String> response = new HashMap<>();
+            response.put("status", "FAILED");
+            response.put("message", "Batch execution failed: " + e.getMessage());
+            response.put("timestamp", LocalDate.now().toString());
             
             return ResponseEntity.badRequest().body(response);
         }
@@ -777,157 +775,260 @@ public class ReportController {
     
     private Map<String, Object> generateTechCategoryBreakdown(LocalDate startDate, LocalDate endDate) {
         // Implementation for tech category breakdown
-        return Map.of(
-            "categories", Arrays.asList("AI/ML", "Cloud", "Web Development", "Mobile", "DevOps"),
-            "revenues", Arrays.asList(125000, 98000, 87000, 76000, 65000),
-            "growthRates", Arrays.asList(24.8, 18.5, 8.3, 12.1, 15.7)
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("categories", Arrays.asList("AI/ML", "Cloud", "Web Development", "Mobile", "DevOps"));
+        result.put("revenues", Arrays.asList(125000, 98000, 87000, 76000, 65000));
+        result.put("growthRates", Arrays.asList(24.8, 18.5, 8.3, 12.1, 15.7));
+        return result;
     }
     
     private Map<String, Object> generateTechLevelAnalysis(LocalDate startDate, LocalDate endDate, String techLevel) {
-        return Map.of(
-            "level", techLevel,
-            "salesVolume", 450000,
-            "customerSegments", Map.of("students", 35, "professionals", 65),
-            "popularTopics", Arrays.asList("Fundamentals", "Best Practices", "Advanced Techniques")
-        );
+        Map<String, Object> customerSegments = new HashMap<>();
+        customerSegments.put("students", 35);
+        customerSegments.put("professionals", 65);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("level", techLevel);
+        result.put("salesVolume", 450000);
+        result.put("customerSegments", customerSegments);
+        result.put("popularTopics", Arrays.asList("Fundamentals", "Best Practices", "Advanced Techniques"));
+        return result;
     }
     
     private Map<String, Object> generateSeasonalAnalysis(LocalDate startDate, LocalDate endDate) {
-        return Map.of(
-            "seasonalPatterns", Map.of("spring", 28, "summer", 18, "fall", 35, "winter", 19),
-            "academicCalendarImpact", "High correlation with semester starts",
-            "techEventImpact", "Conferences drive 15% sales increase"
-        );
+        Map<String, Object> seasonalPatterns = new HashMap<>();
+        seasonalPatterns.put("spring", 28);
+        seasonalPatterns.put("summer", 18);
+        seasonalPatterns.put("fall", 35);
+        seasonalPatterns.put("winter", 19);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("seasonalPatterns", seasonalPatterns);
+        result.put("academicCalendarImpact", "High correlation with semester starts");
+        result.put("techEventImpact", "Conferences drive 15% sales increase");
+        return result;
     }
     
     private Map<String, Object> generatePriceStrategyAnalysis(LocalDate startDate, LocalDate endDate) {
-        return Map.of(
-            "priceRangePerformance", Map.of("under3000", 45, "3000-5000", 35, "over5000", 20),
-            "discountEffectiveness", Map.of("10percent", 1.2, "20percent", 1.8, "30percent", 2.1),
-            "recommendations", "Optimal discount range: 15-25%"
-        );
+        Map<String, Object> priceRangePerformance = new HashMap<>();
+        priceRangePerformance.put("under3000", 45);
+        priceRangePerformance.put("3000-5000", 35);
+        priceRangePerformance.put("over5000", 20);
+        
+        Map<String, Object> discountEffectiveness = new HashMap<>();
+        discountEffectiveness.put("10percent", 1.2);
+        discountEffectiveness.put("20percent", 1.8);
+        discountEffectiveness.put("30percent", 2.1);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("priceRangePerformance", priceRangePerformance);
+        result.put("discountEffectiveness", discountEffectiveness);
+        result.put("recommendations", "Optimal discount range: 15-25%");
+        return result;
     }
     
     private List<Map<String, Object>> generateIntelligentReorderSuggestions(String categoryCode, String riskLevel) {
-        return Arrays.asList(
-            Map.of("bookId", 101, "title", "Advanced React Patterns", "suggestedQuantity", 15, 
-                   "priority", "HIGH", "reason", "Trending technology + low stock"),
-            Map.of("bookId", 102, "title", "Kubernetes in Action", "suggestedQuantity", 12, 
-                   "priority", "MEDIUM", "reason", "Steady demand + seasonal pattern")
-        );
+        Map<String, Object> suggestion1 = new HashMap<>();
+        suggestion1.put("bookId", 101);
+        suggestion1.put("title", "Advanced React Patterns");
+        suggestion1.put("suggestedQuantity", 15);
+        suggestion1.put("priority", "HIGH");
+        suggestion1.put("reason", "Trending technology + low stock");
+        
+        Map<String, Object> suggestion2 = new HashMap<>();
+        suggestion2.put("bookId", 102);
+        suggestion2.put("title", "Kubernetes in Action");
+        suggestion2.put("suggestedQuantity", 12);
+        suggestion2.put("priority", "MEDIUM");
+        suggestion2.put("reason", "Steady demand + seasonal pattern");
+        
+        return Arrays.asList(suggestion1, suggestion2);
     }
     
     private Map<String, Object> generateDeadStockWarning() {
-        return Map.of(
-            "60dayThreshold", Arrays.asList(
-                Map.of("bookId", 201, "title", "jQuery Mastery", "daysWithoutSales", 75),
-                Map.of("bookId", 202, "title", "Flash Development", "daysWithoutSales", 120)
-            ),
-            "90dayThreshold", Arrays.asList(
-                Map.of("bookId", 203, "title", "Perl Programming", "daysWithoutSales", 180)
-            )
-        );
+        Map<String, Object> book1 = new HashMap<>();
+        book1.put("bookId", 201);
+        book1.put("title", "jQuery Mastery");
+        book1.put("daysWithoutSales", 75);
+        
+        Map<String, Object> book2 = new HashMap<>();
+        book2.put("bookId", 202);
+        book2.put("title", "Flash Development");
+        book2.put("daysWithoutSales", 120);
+        
+        Map<String, Object> book3 = new HashMap<>();
+        book3.put("bookId", 203);
+        book3.put("title", "Perl Programming");
+        book3.put("daysWithoutSales", 180);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("60dayThreshold", Arrays.asList(book1, book2));
+        result.put("90dayThreshold", Arrays.asList(book3));
+        return result;
     }
     
     private Map<String, Object> generateTechObsolescenceRisk() {
-        return Map.of(
-            "highRisk", Arrays.asList("Flash", "Silverlight", "jQuery"),
-            "mediumRisk", Arrays.asList("AngularJS", "Backbone.js"),
-            "lowRisk", Arrays.asList("React", "Vue.js", "Angular")
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("highRisk", Arrays.asList("Flash", "Silverlight", "jQuery"));
+        result.put("mediumRisk", Arrays.asList("AngularJS", "Backbone.js"));
+        result.put("lowRisk", Arrays.asList("React", "Vue.js", "Angular"));
+        return result;
     }
     
     private Map<String, Object> generateTurnoverOptimization(String categoryCode) {
-        return Map.of(
-            "currentTurnover", 4.2,
-            "targetTurnover", 6.0,
-            "optimizationActions", Arrays.asList(
-                "Reduce slow-moving inventory by 20%",
-                "Increase popular title stock by 15%",
-                "Implement dynamic pricing for aged inventory"
-            )
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("currentTurnover", 4.2);
+        result.put("targetTurnover", 6.0);
+        result.put("optimizationActions", Arrays.asList(
+            "Reduce slow-moving inventory by 20%",
+            "Increase popular title stock by 15%",
+            "Implement dynamic pricing for aged inventory"
+        ));
+        return result;
     }
     
     private Map<String, Object> generateTechSkillProgression(Long customerId) {
-        return Map.of(
-            "skillPath", Arrays.asList("HTML/CSS", "JavaScript", "React", "Node.js"),
-            "currentLevel", "Intermediate React",
-            "nextRecommendations", Arrays.asList("Advanced React Patterns", "React Testing"),
-            "progressRate", "Normal (3 months per level)"
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("skillPath", Arrays.asList("HTML/CSS", "JavaScript", "React", "Node.js"));
+        result.put("currentLevel", "Intermediate React");
+        result.put("nextRecommendations", Arrays.asList("Advanced React Patterns", "React Testing"));
+        result.put("progressRate", "Normal (3 months per level)");
+        return result;
     }
     
     private Map<String, Object> generateLearningPathAnalysis(Long customerId) {
-        return Map.of(
-            "commonPaths", Arrays.asList(
-                "Frontend: HTML -> CSS -> JS -> Framework",
-                "Backend: Programming Language -> Framework -> Database",
-                "Full-stack: Frontend + Backend + DevOps"
-            ),
-            "successRates", Map.of("frontend", 85.7, "backend", 79.3, "fullstack", 72.1)
-        );
+        Map<String, Object> successRates = new HashMap<>();
+        successRates.put("frontend", 85.7);
+        successRates.put("backend", 79.3);
+        successRates.put("fullstack", 72.1);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("commonPaths", Arrays.asList(
+            "Frontend: HTML -> CSS -> JS -> Framework",
+            "Backend: Programming Language -> Framework -> Database",
+            "Full-stack: Frontend + Backend + DevOps"
+        ));
+        result.put("successRates", successRates);
+        return result;
     }
     
     private Map<String, Object> generateCustomerLifecycleAnalysis() {
-        return Map.of(
-            "stages", Map.of(
-                "newcomer", Map.of("count", 45, "avgValue", 2800),
-                "developing", Map.of("count", 78, "avgValue", 5200),
-                "advanced", Map.of("count", 34, "avgValue", 8900),
-                "expert", Map.of("count", 12, "avgValue", 15600)
-            )
-        );
+        Map<String, Object> newcomer = new HashMap<>();
+        newcomer.put("count", 45);
+        newcomer.put("avgValue", 2800);
+        
+        Map<String, Object> developing = new HashMap<>();
+        developing.put("count", 78);
+        developing.put("avgValue", 5200);
+        
+        Map<String, Object> advanced = new HashMap<>();
+        advanced.put("count", 34);
+        advanced.put("avgValue", 8900);
+        
+        Map<String, Object> expert = new HashMap<>();
+        expert.put("count", 12);
+        expert.put("avgValue", 15600);
+        
+        Map<String, Object> stages = new HashMap<>();
+        stages.put("newcomer", newcomer);
+        stages.put("developing", developing);
+        stages.put("advanced", advanced);
+        stages.put("expert", expert);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("stages", stages);
+        return result;
     }
     
     private Map<String, Object> generateExtendedRfmAnalysis() {
-        return Map.of(
-            "techRfmSegments", Map.of(
-                "techChampions", Map.of("recency", 5, "frequency", 5, "monetary", 5, "techDiversity", 5),
-                "techLoyal", Map.of("recency", 4, "frequency", 4, "monetary", 4, "techDiversity", 3),
-                "emergingTechAdopters", Map.of("recency", 5, "frequency", 3, "monetary", 3, "techDiversity", 4)
-            )
-        );
+        Map<String, Object> techChampions = new HashMap<>();
+        techChampions.put("recency", 5);
+        techChampions.put("frequency", 5);
+        techChampions.put("monetary", 5);
+        techChampions.put("techDiversity", 5);
+        
+        Map<String, Object> techLoyal = new HashMap<>();
+        techLoyal.put("recency", 4);
+        techLoyal.put("frequency", 4);
+        techLoyal.put("monetary", 4);
+        techLoyal.put("techDiversity", 3);
+        
+        Map<String, Object> emergingTechAdopters = new HashMap<>();
+        emergingTechAdopters.put("recency", 5);
+        emergingTechAdopters.put("frequency", 3);
+        emergingTechAdopters.put("monetary", 3);
+        emergingTechAdopters.put("techDiversity", 4);
+        
+        Map<String, Object> techRfmSegments = new HashMap<>();
+        techRfmSegments.put("techChampions", techChampions);
+        techRfmSegments.put("techLoyal", techLoyal);
+        techRfmSegments.put("emergingTechAdopters", emergingTechAdopters);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("techRfmSegments", techRfmSegments);
+        return result;
     }
     
     private Map<String, Object> generateTechLifecycleAnalysis() {
-        return Map.of(
-            "emerging", Arrays.asList("Quantum Computing", "Web3", "Edge Computing"),
-            "growth", Arrays.asList("AI/ML", "Cloud Native", "DevSecOps"),
-            "mature", Arrays.asList("Java", "Python", "React"),
-            "declining", Arrays.asList("jQuery", "Flash", "Perl")
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("emerging", Arrays.asList("Quantum Computing", "Web3", "Edge Computing"));
+        result.put("growth", Arrays.asList("AI/ML", "Cloud Native", "DevSecOps"));
+        result.put("mature", Arrays.asList("Java", "Python", "React"));
+        result.put("declining", Arrays.asList("jQuery", "Flash", "Perl"));
+        return result;
     }
     
     private Map<String, Object> generateEmergingTechDetection() {
-        return Map.of(
-            "newTechnologies", Arrays.asList(
-                Map.of("tech", "Rust", "growthRate", 156.7, "confidence", 0.87),
-                Map.of("tech", "Svelte", "growthRate", 134.2, "confidence", 0.82),
-                Map.of("tech", "Deno", "growthRate", 98.4, "confidence", 0.75)
-            )
-        );
+        Map<String, Object> tech1 = new HashMap<>();
+        tech1.put("tech", "Rust");
+        tech1.put("growthRate", 156.7);
+        tech1.put("confidence", 0.87);
+        
+        Map<String, Object> tech2 = new HashMap<>();
+        tech2.put("tech", "Svelte");
+        tech2.put("growthRate", 134.2);
+        tech2.put("confidence", 0.82);
+        
+        Map<String, Object> tech3 = new HashMap<>();
+        tech3.put("tech", "Deno");
+        tech3.put("growthRate", 98.4);
+        tech3.put("confidence", 0.75);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("newTechnologies", Arrays.asList(tech1, tech2, tech3));
+        return result;
     }
     
     private Map<String, Object> generateTechCorrelationAnalysis() {
-        return Map.of(
-            "strongCorrelations", Map.of(
-                "React", Arrays.asList("Node.js", "TypeScript", "GraphQL"),
-                "Kubernetes", Arrays.asList("Docker", "Microservices", "DevOps"),
-                "Python", Arrays.asList("Data Science", "AI/ML", "Django")
-            )
-        );
+        Map<String, Object> strongCorrelations = new HashMap<>();
+        strongCorrelations.put("React", Arrays.asList("Node.js", "TypeScript", "GraphQL"));
+        strongCorrelations.put("Kubernetes", Arrays.asList("Docker", "Microservices", "DevOps"));
+        strongCorrelations.put("Python", Arrays.asList("Data Science", "AI/ML", "Django"));
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("strongCorrelations", strongCorrelations);
+        return result;
     }
     
     private Map<String, Object> generateTrendPredictions(int horizonDays) {
-        return Map.of(
-            "predictions", Arrays.asList(
-                Map.of("tech", "AI/ML", "predictedGrowth", 45.7, "confidence", 0.92),
-                Map.of("tech", "Cloud", "predictedGrowth", 32.1, "confidence", 0.88),
-                Map.of("tech", "DevOps", "predictedGrowth", 28.5, "confidence", 0.85)
-            ),
-            "horizon", horizonDays + " days"
-        );
+        Map<String, Object> prediction1 = new HashMap<>();
+        prediction1.put("tech", "AI/ML");
+        prediction1.put("predictedGrowth", 45.7);
+        prediction1.put("confidence", 0.92);
+        
+        Map<String, Object> prediction2 = new HashMap<>();
+        prediction2.put("tech", "Cloud");
+        prediction2.put("predictedGrowth", 32.1);
+        prediction2.put("confidence", 0.88);
+        
+        Map<String, Object> prediction3 = new HashMap<>();
+        prediction3.put("tech", "DevOps");
+        prediction3.put("predictedGrowth", 28.5);
+        prediction3.put("confidence", 0.85);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("predictions", Arrays.asList(prediction1, prediction2, prediction3));
+        result.put("horizon", horizonDays + " days");
+        return result;
     }
 }

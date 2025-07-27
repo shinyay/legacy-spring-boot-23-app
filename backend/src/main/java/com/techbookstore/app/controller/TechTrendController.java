@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * REST Controller for Tech Trend Analysis
@@ -140,11 +141,10 @@ public class TechTrendController {
      */
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> healthCheck() {
-        Map<String, Object> health = Map.of(
-            "status", "OK",
-            "service", "TechTrendAnalysisService",
-            "timestamp", System.currentTimeMillis()
-        );
+        Map<String, Object> health = new HashMap<>();
+        health.put("status", "OK");
+        health.put("service", "TechTrendAnalysisService");
+        health.put("timestamp", System.currentTimeMillis());
         return ResponseEntity.ok(health);
     }
 }

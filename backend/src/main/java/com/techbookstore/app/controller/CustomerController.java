@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -149,7 +150,9 @@ public class CustomerController {
         logger.info("Deleting customer with ID: {}", id);
         
         customerService.deleteCustomer(id);
-        return ResponseEntity.ok(Map.of("message", "Customer deleted successfully"));
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Customer deleted successfully");
+        return ResponseEntity.ok(response);
     }
     
     /**
@@ -205,12 +208,11 @@ public class CustomerController {
         Long inactiveCustomers = customerService.getCustomerCountByStatus(Customer.CustomerStatus.INACTIVE);
         Long deletedCustomers = customerService.getCustomerCountByStatus(Customer.CustomerStatus.DELETED);
         
-        Map<String, Object> stats = Map.of(
-                "totalCustomers", totalCustomers,
-                "inactiveCustomers", inactiveCustomers,
-                "deletedCustomers", deletedCustomers,
-                "activeCustomers", totalCustomers
-        );
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalCustomers", totalCustomers);
+        stats.put("inactiveCustomers", inactiveCustomers);
+        stats.put("deletedCustomers", deletedCustomers);
+        stats.put("activeCustomers", totalCustomers);
         
         return ResponseEntity.ok(stats);
     }

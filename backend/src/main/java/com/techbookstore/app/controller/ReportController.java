@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -230,6 +231,19 @@ public class ReportController {
         
         DashboardKpiDto dashboard = reportService.generateDashboardTrends();
         return ResponseEntity.ok(dashboard);
+    }
+    
+    /**
+     * Get tech trend alerts for dashboard.
+     * 
+     * @return tech trend alerts data
+     */
+    @GetMapping("/dashboard/alerts")
+    public ResponseEntity<List<TechTrendAlertDto>> getDashboardAlerts() {
+        logger.info("Getting dashboard alerts");
+        
+        List<TechTrendAlertDto> alerts = reportService.getTechTrendAlerts();
+        return ResponseEntity.ok(alerts);
     }
     
     /**

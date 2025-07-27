@@ -224,14 +224,6 @@ const DashboardReport = () => {
       </Container>
     );
   }
-    return (
-      <Container maxWidth="lg" className={classes.root}>
-        <Box className={classes.loadingBox}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
 
   return (
     <Container maxWidth="lg" className={classes.root}>

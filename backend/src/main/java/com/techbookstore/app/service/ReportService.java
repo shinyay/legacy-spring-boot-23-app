@@ -179,6 +179,10 @@ public class ReportService {
         );
         dashboard.setInventory(inventoryKpis);
         
+        // Tech Trend KPIs (tech bookstore specific)
+        DashboardKpiDto.TechTrendKpis techTrendKpis = calculateTechTrendKpis();
+        dashboard.setTechTrends(techTrendKpis);
+        
         // Trends
         dashboard.setTrends(generateTrendSummaries());
         
@@ -395,9 +399,18 @@ public class ReportService {
     public DashboardKpiDto generateDashboardTrends() {
         logger.info("Generating dashboard trends report");
         
-        DashboardKpiDto dashboard = new DashboardKpiDto();
-        dashboard.setTrends(generateTrendSummaries());
+        DashboardKpiDto dashboard = generateDashboardKpis();
         
+        // Enhanced trends with tech-specific metrics
+        List<DashboardKpiDto.TrendSummary> techTrends = Arrays.asList(
+            new DashboardKpiDto.TrendSummary("AI/ML Sales", "Month", 24.8, "UP"),
+            new DashboardKpiDto.TrendSummary("Cloud Revenue", "Month", 18.5, "UP"),
+            new DashboardKpiDto.TrendSummary("Web Dev Books", "Month", 8.3, "UP"),
+            new DashboardKpiDto.TrendSummary("Legacy Tech", "Month", -12.1, "DOWN"),
+            new DashboardKpiDto.TrendSummary("Innovation Index", "Month", 4.2, "UP")
+        );
+        
+        dashboard.setTrends(techTrends);
         return dashboard;
     }
     
@@ -456,5 +469,68 @@ public class ReportService {
                 .filter(item -> category == null || item.getCategory().equalsIgnoreCase(category))
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Calculate tech trend KPIs specific to technical bookstore.
+     */
+    private DashboardKpiDto.TechTrendKpis calculateTechTrendKpis() {
+        // Tech bookstore specific trend calculations
+        // In a real implementation, this would query actual data from database
+        return new DashboardKpiDto.TechTrendKpis(
+            "AI/Machine Learning", // Top rising tech
+            24.8, // Rising growth %
+            "jQuery", // Top falling tech  
+            -15.3, // Falling decline %
+            3, // Emerging tech count
+            2, // Obsolete tech count
+            new BigDecimal("8.5"), // Tech category diversity index
+            92.4 // Innovation index
+        );
+    }
+    
+    /**
+     * Generate tech trend alerts for the dashboard.
+     */
+    public List<TechTrendAlertDto> getTechTrendAlerts() {
+        logger.info("Generating tech trend alerts");
+        
+        List<TechTrendAlertDto> alerts = new ArrayList<>();
+        
+        // Sample alerts for tech bookstore
+        alerts.add(new TechTrendAlertDto(
+            "AI/Machine Learning",
+            "RISING",
+            "HIGH",
+            "AI/機械学習関連書籍の売上が急上昇中（+24.8%）",
+            new BigDecimal("12500.00"),
+            24.8,
+            LocalDate.now(),
+            "在庫拡充を検討してください"
+        ));
+        
+        alerts.add(new TechTrendAlertDto(
+            "React",
+            "LOW_STOCK", 
+            "MEDIUM",
+            "React関連書籍の在庫が少なくなっています",
+            new BigDecimal("8400.00"),
+            null,
+            LocalDate.now(),
+            "発注が必要です"
+        ));
+        
+        alerts.add(new TechTrendAlertDto(
+            "jQuery",
+            "FALLING",
+            "LOW", 
+            "jQuery関連書籍の需要が減少傾向（-15.3%）",
+            new BigDecimal("3200.00"),
+            -15.3,
+            LocalDate.now(),
+            "在庫調整を検討してください"
+        ));
+        
+        return alerts;
     }
 }

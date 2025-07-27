@@ -140,11 +140,6 @@ function OrderList() {
   const [sortDir] = useState('desc');
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
-  useEffect(() => {
-    loadOrders();
-    dispatch(fetchOrderStatusCounts());
-  }, [dispatch, page, rowsPerPage, sortBy, sortDir, statusFilter, typeFilter, loadOrders]);
-
   const loadOrders = useCallback(() => {
     const params = {
       page,
@@ -159,6 +154,11 @@ function OrderList() {
     
     dispatch(fetchOrders(params));
   }, [dispatch, page, rowsPerPage, sortBy, sortDir, searchKeyword, statusFilter, typeFilter]);
+
+  useEffect(() => {
+    loadOrders();
+    dispatch(fetchOrderStatusCounts());
+  }, [dispatch, page, rowsPerPage, sortBy, sortDir, statusFilter, typeFilter, loadOrders]);
 
   const handleSearch = () => {
     setPage(0);

@@ -11,6 +11,7 @@ public class DashboardKpiDto {
     private OrderKpis orders;
     private CustomerKpis customers;
     private InventoryKpis inventory;
+    private TechTrendKpis techTrends;
     private List<TrendSummary> trends;
     
     // Constructors
@@ -145,6 +146,50 @@ public class DashboardKpiDto {
         public void setInventoryTurnover(Double inventoryTurnover) { this.inventoryTurnover = inventoryTurnover; }
     }
     
+    public static class TechTrendKpis {
+        private String topRisingTech;
+        private Double topRisingGrowth;
+        private String topFallingTech;
+        private Double topFallingDecline;
+        private Integer emergingTechCount;
+        private Integer obsoleteTechCount;
+        private BigDecimal techCategoryDiversity;
+        private Double innovationIndex;
+        
+        public TechTrendKpis() {}
+        
+        public TechTrendKpis(String topRisingTech, Double topRisingGrowth, String topFallingTech, 
+                           Double topFallingDecline, Integer emergingTechCount, Integer obsoleteTechCount,
+                           BigDecimal techCategoryDiversity, Double innovationIndex) {
+            this.topRisingTech = topRisingTech;
+            this.topRisingGrowth = topRisingGrowth;
+            this.topFallingTech = topFallingTech;
+            this.topFallingDecline = topFallingDecline;
+            this.emergingTechCount = emergingTechCount;
+            this.obsoleteTechCount = obsoleteTechCount;
+            this.techCategoryDiversity = techCategoryDiversity;
+            this.innovationIndex = innovationIndex;
+        }
+        
+        // Getters and Setters
+        public String getTopRisingTech() { return topRisingTech; }
+        public void setTopRisingTech(String topRisingTech) { this.topRisingTech = topRisingTech; }
+        public Double getTopRisingGrowth() { return topRisingGrowth; }
+        public void setTopRisingGrowth(Double topRisingGrowth) { this.topRisingGrowth = topRisingGrowth; }
+        public String getTopFallingTech() { return topFallingTech; }
+        public void setTopFallingTech(String topFallingTech) { this.topFallingTech = topFallingTech; }
+        public Double getTopFallingDecline() { return topFallingDecline; }
+        public void setTopFallingDecline(Double topFallingDecline) { this.topFallingDecline = topFallingDecline; }
+        public Integer getEmergingTechCount() { return emergingTechCount; }
+        public void setEmergingTechCount(Integer emergingTechCount) { this.emergingTechCount = emergingTechCount; }
+        public Integer getObsoleteTechCount() { return obsoleteTechCount; }
+        public void setObsoleteTechCount(Integer obsoleteTechCount) { this.obsoleteTechCount = obsoleteTechCount; }
+        public BigDecimal getTechCategoryDiversity() { return techCategoryDiversity; }
+        public void setTechCategoryDiversity(BigDecimal techCategoryDiversity) { this.techCategoryDiversity = techCategoryDiversity; }
+        public Double getInnovationIndex() { return innovationIndex; }
+        public void setInnovationIndex(Double innovationIndex) { this.innovationIndex = innovationIndex; }
+    }
+    
     public static class TrendSummary {
         private String metric;
         private String period;
@@ -182,6 +227,8 @@ public class DashboardKpiDto {
     public void setCustomers(CustomerKpis customers) { this.customers = customers; }
     public InventoryKpis getInventory() { return inventory; }
     public void setInventory(InventoryKpis inventory) { this.inventory = inventory; }
+    public TechTrendKpis getTechTrends() { return techTrends; }
+    public void setTechTrends(TechTrendKpis techTrends) { this.techTrends = techTrends; }
     public List<TrendSummary> getTrends() { return trends; }
     public void setTrends(List<TrendSummary> trends) { this.trends = trends; }
 }

@@ -13,7 +13,6 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
-  Warning,
   TrendingUp,
   TrendingDown,
   Storage,

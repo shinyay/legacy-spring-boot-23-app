@@ -59,7 +59,7 @@ const techCategoryData = [
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#ff0000'];
 
-const TrendChartGrid = ({ data, loading }) => {
+const TrendChartGrid = ({ loading }) => {
   const classes = useStyles();
 
   if (loading) {

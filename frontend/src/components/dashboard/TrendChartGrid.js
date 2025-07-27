@@ -17,7 +17,6 @@ import {
 import { makeStyles } from '@material-ui/core/styles';
 import { TrendingUp, TrendingDown, Assessment } from '@material-ui/icons';
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -105,8 +104,6 @@ const customerJourneyData = [
   { stage: 'Advanced', count: 34, avgValue: 8900, techCategories: 4.5 },
   { stage: 'Expert', count: 12, avgValue: 15600, techCategories: 6.8 },
 ];
-
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff00', '#ff0000'];
 
 const TrendChartGrid = ({ data, loading, onDrillDown }) => {
   const classes = useStyles();

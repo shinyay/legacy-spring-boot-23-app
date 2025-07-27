@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Container,
   Paper,
@@ -31,19 +31,17 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import {
-  Add,
   Assessment,
   Save,
-  Download,
+  GetApp,
   Visibility,
   TrendingUp,
   People,
-  Inventory,
+  Storage,
   Timeline,
 } from '@material-ui/icons';
 import { Alert } from '@material-ui/lab';
-import { DatePicker } from '@material-ui/pickers';
-import api from '../../services/api';
+import api from '../services/api';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -143,7 +141,7 @@ const templateCategories = [
   {
     id: 'inventory',
     name: '在庫分析',
-    icon: <Inventory />,
+    icon: <Storage />,
     templates: [
       {
         id: 'INVENTORY_OPTIMIZATION',
@@ -376,13 +374,16 @@ const CustomReportCreator = () => {
             {selectedTemplate.parameters.map(param => (
               <Grid item xs={12} md={6} key={param}>
                 {param.includes('Date') ? (
-                  <DatePicker
-                    label={getParameterLabel(param)}
-                    value={parameters[param] || null}
-                    onChange={(date) => handleParameterChange(param, date)}
-                    format="YYYY-MM-DD"
-                    inputVariant="outlined"
+                  <TextField
                     fullWidth
+                    type="date"
+                    label={getParameterLabel(param)}
+                    value={parameters[param] ? parameters[param].toISOString().split('T')[0] : ''}
+                    onChange={(e) => handleParameterChange(param, new Date(e.target.value))}
+                    variant="outlined"
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
                   />
                 ) : param.includes('Level') || param.includes('Type') ? (
                   <FormControl fullWidth variant="outlined">
@@ -491,15 +492,15 @@ const CustomReportCreator = () => {
                 </Typography>
                 <List>
                   <ListItem>
-                    <ListItemIcon><Download /></ListItemIcon>
+                    <ListItemIcon><GetApp /></ListItemIcon>
                     <ListItemText primary="PDF" secondary="印刷・配布用" />
                   </ListItem>
                   <ListItem>
-                    <ListItemIcon><Download /></ListItemIcon>
+                    <ListItemIcon><GetApp /></ListItemIcon>
                     <ListItemText primary="Excel" secondary="データ分析用" />
                   </ListItem>
                   <ListItem>
-                    <ListItemIcon><Download /></ListItemIcon>
+                    <ListItemIcon><GetApp /></ListItemIcon>
                     <ListItemText primary="CSV" secondary="データベース連携用" />
                   </ListItem>
                 </List>
@@ -509,7 +510,7 @@ const CustomReportCreator = () => {
                   variant="outlined"
                   onClick={() => exportReport('PDF')}
                   disabled={loading}
-                  startIcon={<Download />}
+                  startIcon={<GetApp />}
                 >
                   PDF
                 </Button>
@@ -517,7 +518,7 @@ const CustomReportCreator = () => {
                   variant="outlined"
                   onClick={() => exportReport('EXCEL')}
                   disabled={loading}
-                  startIcon={<Download />}
+                  startIcon={<GetApp />}
                 >
                   Excel
                 </Button>
@@ -525,7 +526,7 @@ const CustomReportCreator = () => {
                   variant="outlined"
                   onClick={() => exportReport('CSV')}
                   disabled={loading}
-                  startIcon={<Download />}
+                  startIcon={<GetApp />}
                 >
                   CSV
                 </Button>

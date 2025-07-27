@@ -111,17 +111,6 @@ const CustomerList = () => {
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, customer: null });
 
-  useEffect(() => {
-    loadCustomers();
-    dispatch(fetchCustomerStats());
-  }, [dispatch, page, rowsPerPage]);
-
-  useEffect(() => {
-    if (error) {
-      console.error('Customer error:', error);
-    }
-  }, [error]);
-
   const loadCustomers = useCallback(() => {
     const params = {
       page,
@@ -138,6 +127,17 @@ const CustomerList = () => {
       dispatch(fetchCustomers(params));
     }
   }, [dispatch, page, rowsPerPage, customerTypeFilter, statusFilter, searchKeyword]);
+
+  useEffect(() => {
+    loadCustomers();
+    dispatch(fetchCustomerStats());
+  }, [dispatch, page, rowsPerPage, loadCustomers]);
+
+  useEffect(() => {
+    if (error) {
+      console.error('Customer error:', error);
+    }
+  }, [error]);
 
   const handleSearch = useCallback(() => {
     setPage(0);

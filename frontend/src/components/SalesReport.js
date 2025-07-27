@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -103,7 +103,7 @@ const SalesReport = () => {
     new Date().toISOString().split('T')[0]
   );
 
-  const fetchSalesReport = async () => {
+  const fetchSalesReport = useCallback(async () => {
     setLoading(true);
     try {
       const response = await reports.getSalesReport(startDate, endDate);
@@ -113,11 +113,11 @@ const SalesReport = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate]);
 
   useEffect(() => {
     fetchSalesReport();
-  }, []);
+  }, [fetchSalesReport]);
 
   const handleDateChange = () => {
     fetchSalesReport();

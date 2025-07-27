@@ -3,6 +3,7 @@ package com.techbookstore.app.controller;
 import com.techbookstore.app.dto.CustomReportRequest;
 import com.techbookstore.app.dto.SalesReportDto;
 import com.techbookstore.app.service.ReportService;
+import com.techbookstore.app.service.AnalyticsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(ReportController.class)
+@WebMvcTest({ReportController.class, com.techbookstore.app.exception.GlobalExceptionHandler.class})
 class ReportControllerTest {
 
     @Autowired
@@ -31,6 +32,9 @@ class ReportControllerTest {
 
     @MockBean
     private ReportService reportService;
+
+    @MockBean
+    private AnalyticsService analyticsService;
 
     @Autowired
     private ObjectMapper objectMapper;

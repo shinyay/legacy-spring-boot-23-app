@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Card,
-  CardContent,
   Typography,
   Button,
   TextField,
@@ -123,14 +121,8 @@ const AdvancedInventoryManagement = ({ open, onClose, inventory }) => {
     operation: 'LOOKUP',
   });
 
-  useEffect(() => {
-    if (open && inventory) {
-      loadTransactionHistory();
-      loadActiveReservations();
-    }
-  }, [open, inventory]);
-
-  const loadTransactionHistory = async () => {
+  const loadTransactionHistory = useCallback(async () => {
+    if (!inventory?.id) return;
     try {
       setLoading(true);
       const response = await inventoryApi.getTransactionHistory(inventory.id);
@@ -140,16 +132,24 @@ const AdvancedInventoryManagement = ({ open, onClose, inventory }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [inventory?.id]);
 
-  const loadActiveReservations = async () => {
+  const loadActiveReservations = useCallback(async () => {
+    if (!inventory?.id) return;
     try {
       const response = await inventoryApi.getActiveReservations(inventory.id);
       setReservations(response.data);
     } catch (error) {
       setError('予約情報の読み込みに失敗しました');
     }
-  };
+  }, [inventory?.id]);
+
+  useEffect(() => {
+    if (open && inventory) {
+      loadTransactionHistory();
+      loadActiveReservations();
+    }
+  }, [open, inventory, loadTransactionHistory, loadActiveReservations]);
 
   const handleTransfer = async () => {
     try {
@@ -235,7 +235,7 @@ const AdvancedInventoryManagement = ({ open, onClose, inventory }) => {
         operation: barcodeForm.operation,
       };
 
-      const response = await inventoryApi.processBarcodeScanned(barcodeData);
+      await inventoryApi.processBarcodeScanned(barcodeData);
       setSuccess('バーコード処理が完了しました');
       setBarcodeForm({ barcode: '', operation: 'LOOKUP' });
     } catch (error) {

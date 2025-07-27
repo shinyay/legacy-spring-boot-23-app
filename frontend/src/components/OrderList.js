@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Table,
@@ -140,12 +140,7 @@ function OrderList() {
   const [sortDir] = useState('desc');
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
-  useEffect(() => {
-    loadOrders();
-    dispatch(fetchOrderStatusCounts());
-  }, [dispatch, page, rowsPerPage, sortBy, sortDir, statusFilter, typeFilter]);
-
-  const loadOrders = () => {
+  const loadOrders = useCallback(() => {
     const params = {
       page,
       size: rowsPerPage,
@@ -158,7 +153,12 @@ function OrderList() {
     if (typeFilter) params.type = typeFilter;
     
     dispatch(fetchOrders(params));
-  };
+  }, [dispatch, page, rowsPerPage, sortBy, sortDir, searchKeyword, statusFilter, typeFilter]);
+
+  useEffect(() => {
+    loadOrders();
+    dispatch(fetchOrderStatusCounts());
+  }, [dispatch, page, rowsPerPage, sortBy, sortDir, statusFilter, typeFilter, loadOrders]);
 
   const handleSearch = () => {
     setPage(0);
@@ -194,6 +194,8 @@ function OrderList() {
         case 'deliver':
           await dispatch(deliverOrder(orderId));
           break;
+        default:
+          console.warn('Unknown action:', action);
       }
       loadOrders();
       dispatch(fetchOrderStatusCounts());
@@ -268,6 +270,9 @@ function OrderList() {
             配達完了
           </Button>
         );
+        break;
+      default:
+        // No actions for other statuses
         break;
     }
 

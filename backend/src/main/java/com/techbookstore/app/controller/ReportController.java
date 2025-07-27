@@ -2,6 +2,7 @@ package com.techbookstore.app.controller;
 
 import com.techbookstore.app.dto.*;
 import com.techbookstore.app.service.ReportService;
+import com.techbookstore.app.service.AnalyticsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,8 +13,11 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -28,12 +32,14 @@ public class ReportController {
     private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
     
     private final ReportService reportService;
+    private final AnalyticsService analyticsService;
     
     /**
      * Constructor injection for dependencies.
      */
-    public ReportController(ReportService reportService) {
+    public ReportController(ReportService reportService, AnalyticsService analyticsService) {
         this.reportService = reportService;
+        this.analyticsService = analyticsService;
     }
     
     /**
@@ -287,5 +293,197 @@ public class ReportController {
         if (endDate.isAfter(maxFutureDate)) {
             throw new IllegalArgumentException("End date cannot be in the future");
         }
+    }
+    
+    // ============ PHASE 2: ADVANCED ANALYTICS ENDPOINTS ============
+    
+    /**
+     * Get detailed sales analysis with multi-dimensional filtering.
+     * 
+     * @param startDate start date for analysis
+     * @param endDate end date for analysis  
+     * @param categoryCode optional technology category filter
+     * @param customerSegment optional customer segment filter
+     * @return detailed sales analysis
+     */
+    @GetMapping("/sales/analysis")
+    public ResponseEntity<SalesAnalysisDto> getSalesAnalysis(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String categoryCode,
+            @RequestParam(required = false) String customerSegment) {
+        
+        logger.info("Getting sales analysis from {} to {}, category: {}, segment: {}", 
+                   startDate, endDate, categoryCode, customerSegment);
+        
+        validateDateRange(startDate, endDate);
+        
+        SalesAnalysisDto analysis = analyticsService.generateSalesAnalysis(startDate, endDate, 
+                                                                          categoryCode, customerSegment);
+        return ResponseEntity.ok(analysis);
+    }
+    
+    /**
+     * Get detailed inventory analysis with turnover and obsolescence risk.
+     * 
+     * @param categoryCode optional category filter
+     * @param analysisType type of analysis (TURNOVER, DEAD_STOCK, OBSOLESCENCE)
+     * @return detailed inventory analysis
+     */
+    @GetMapping("/inventory/analysis")
+    public ResponseEntity<InventoryAnalysisDto> getInventoryAnalysis(
+            @RequestParam(required = false) String categoryCode,
+            @RequestParam(defaultValue = "COMPREHENSIVE") String analysisType) {
+        
+        logger.info("Getting inventory analysis for category: {}, type: {}", categoryCode, analysisType);
+        
+        InventoryAnalysisDto analysis = analyticsService.generateInventoryAnalysis(categoryCode, analysisType);
+        return ResponseEntity.ok(analysis);
+    }
+    
+    /**
+     * Get demand predictions using advanced algorithms.
+     * 
+     * @param timeHorizon prediction time horizon (SHORT_TERM, MEDIUM_TERM, LONG_TERM)
+     * @param categoryCode optional category filter  
+     * @param algorithm prediction algorithm (MOVING_AVERAGE, SEASONAL, TREND_ANALYSIS)
+     * @return demand predictions
+     */
+    @GetMapping("/predictions/demand")
+    public ResponseEntity<PredictionDto> getDemandPredictions(
+            @RequestParam(defaultValue = "MEDIUM_TERM") String timeHorizon,
+            @RequestParam(required = false) String categoryCode,
+            @RequestParam(defaultValue = "SEASONAL") String algorithm) {
+        
+        logger.info("Getting demand predictions with horizon: {}, category: {}, algorithm: {}", 
+                   timeHorizon, categoryCode, algorithm);
+        
+        PredictionDto predictions = analyticsService.predictDemand(timeHorizon, categoryCode, algorithm);
+        return ResponseEntity.ok(predictions);
+    }
+    
+    /**
+     * Get intelligent order suggestions.
+     * 
+     * @param suggestionType type of suggestions (REORDER, NEW_STOCK, SEASONAL_PREP, TREND_BASED)
+     * @param priority priority level (HIGH, MEDIUM, LOW)
+     * @param budget optional budget constraint
+     * @return order suggestions
+     */
+    @GetMapping("/suggestions/orders")
+    public ResponseEntity<OrderSuggestionDto> getOrderSuggestions(
+            @RequestParam(defaultValue = "REORDER") String suggestionType,
+            @RequestParam(defaultValue = "MEDIUM") String priority,
+            @RequestParam(required = false) BigDecimal budget) {
+        
+        logger.info("Getting order suggestions type: {}, priority: {}, budget: {}", 
+                   suggestionType, priority, budget);
+        
+        OrderSuggestionDto suggestions = analyticsService.generateOrderSuggestions(suggestionType, priority, budget);
+        return ResponseEntity.ok(suggestions);
+    }
+    
+    /**
+     * Get technology category trend analysis.
+     * 
+     * @param categoryCode technology category code
+     * @return tech category analysis
+     */
+    @GetMapping("/trends/tech-categories")
+    public ResponseEntity<TechCategoryAnalysisDto> getTechCategoryTrends(
+            @RequestParam(required = false) String categoryCode) {
+        
+        logger.info("Getting tech category trends for: {}", categoryCode);
+        
+        // If no category specified, analyze the top category
+        if (categoryCode == null || categoryCode.isEmpty()) {
+            categoryCode = "JAVA"; // Default to Java for demo
+        }
+        
+        TechCategoryAnalysisDto analysis = analyticsService.analyzeTechTrends(categoryCode);
+        return ResponseEntity.ok(analysis);
+    }
+    
+    /**
+     * Get seasonal trend analysis.
+     * 
+     * @param seasonType type of seasonal analysis (QUARTERLY, MONTHLY, ACADEMIC_YEAR)
+     * @param categoryCode optional category filter
+     * @return seasonal trend analysis
+     */
+    @GetMapping("/trends/seasonal")
+    public ResponseEntity<SeasonalTrendDto> getSeasonalTrends(
+            @RequestParam(defaultValue = "QUARTERLY") String seasonType,
+            @RequestParam(required = false) String categoryCode) {
+        
+        logger.info("Getting seasonal trends type: {}, category: {}", seasonType, categoryCode);
+        
+        // Mock implementation for now - in real implementation, call analyticsService
+        SeasonalTrendDto seasonalTrend = new SeasonalTrendDto(LocalDate.now(), seasonType, "Q1");
+        return ResponseEntity.ok(seasonalTrend);
+    }
+    
+    /**
+     * Get competitor analysis.
+     * 
+     * @param analysisScope scope of analysis (CATEGORY, MARKET, PRICE, TECHNOLOGY)
+     * @param categoryCode optional category filter
+     * @return competitor analysis
+     */
+    @GetMapping("/analysis/competitors")
+    public ResponseEntity<CompetitorAnalysisDto> getCompetitorAnalysis(
+            @RequestParam(defaultValue = "CATEGORY") String analysisScope,
+            @RequestParam(required = false) String categoryCode) {
+        
+        logger.info("Getting competitor analysis scope: {}, category: {}", analysisScope, categoryCode);
+        
+        // Mock implementation for now - in real implementation, call analyticsService
+        CompetitorAnalysisDto competitorAnalysis = new CompetitorAnalysisDto(LocalDate.now(), analysisScope);
+        return ResponseEntity.ok(competitorAnalysis);
+    }
+    
+    /**
+     * Execute custom analysis query.
+     * 
+     * @param request custom analysis request
+     * @return analysis results
+     */
+    @PostMapping("/analysis/custom")
+    public ResponseEntity<Map<String, Object>> executeCustomAnalysis(
+            @Valid @RequestBody CustomReportRequest request) {
+        
+        logger.info("Executing custom analysis: {}", request.getReportType());
+        
+        // Custom analysis implementation - for now return mock data
+        Map<String, Object> results = new HashMap<>();
+        results.put("analysisType", request.getReportType());
+        results.put("analysisDate", LocalDate.now());
+        results.put("status", "COMPLETED");
+        results.put("message", "Custom analysis completed successfully");
+        
+        return ResponseEntity.ok(results);
+    }
+    
+    /**
+     * Get profitability analysis with tech book specific metrics.
+     * 
+     * @param startDate start date for analysis
+     * @param endDate end date for analysis
+     * @param analysisLevel analysis level (BOOK, CATEGORY, SEGMENT)
+     * @return profitability analysis
+     */
+    @GetMapping("/profitability")
+    public ResponseEntity<List<SalesAnalysisDto.ProfitabilityItem>> getProfitabilityAnalysis(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "CATEGORY") String analysisLevel) {
+        
+        logger.info("Getting profitability analysis from {} to {}, level: {}", startDate, endDate, analysisLevel);
+        
+        validateDateRange(startDate, endDate);
+        
+        List<SalesAnalysisDto.ProfitabilityItem> profitability = 
+            analyticsService.calculateProfitability(startDate, endDate, analysisLevel);
+        return ResponseEntity.ok(profitability);
     }
 }

@@ -361,78 +361,160 @@ public class CustomReportService {
     // Helper methods for generating various data types
     private List<Map<String, Object>> generateTechCategoryBreakdown() {
         // Implementation would analyze actual sales data by tech category
-        return Arrays.asList(
-            Map.of("category", "AI/ML", "revenue", new BigDecimal("125000"), "growth", 24.8),
-            Map.of("category", "Cloud", "revenue", new BigDecimal("98000"), "growth", 18.5),
-            Map.of("category", "Web Dev", "revenue", new BigDecimal("87000"), "growth", 8.3)
-        );
+        Map<String, Object> category1 = new HashMap<>();
+        category1.put("category", "AI/ML");
+        category1.put("revenue", new BigDecimal("125000"));
+        category1.put("growth", 24.8);
+        
+        Map<String, Object> category2 = new HashMap<>();
+        category2.put("category", "Cloud");
+        category2.put("revenue", new BigDecimal("98000"));
+        category2.put("growth", 18.5);
+        
+        Map<String, Object> category3 = new HashMap<>();
+        category3.put("category", "Web Dev");
+        category3.put("revenue", new BigDecimal("87000"));
+        category3.put("growth", 8.3);
+        
+        return Arrays.asList(category1, category2, category3);
     }
     
     private Map<String, Object> generateTechCategoryGrowthRates() {
-        return Map.of(
-            "quarterlyGrowth", Map.of("AI/ML", 24.8, "Cloud", 18.5, "WebDev", 8.3),
-            "yearOverYear", Map.of("AI/ML", 45.2, "Cloud", 32.1, "WebDev", 12.8)
-        );
+        Map<String, Object> quarterlyGrowth = new HashMap<>();
+        quarterlyGrowth.put("AI/ML", 24.8);
+        quarterlyGrowth.put("Cloud", 18.5);
+        quarterlyGrowth.put("WebDev", 8.3);
+        
+        Map<String, Object> yearOverYear = new HashMap<>();
+        yearOverYear.put("AI/ML", 45.2);
+        yearOverYear.put("Cloud", 32.1);
+        yearOverYear.put("WebDev", 12.8);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("quarterlyGrowth", quarterlyGrowth);
+        result.put("yearOverYear", yearOverYear);
+        return result;
     }
     
     private List<Map<String, Object>> generateLearningPaths() {
-        return Arrays.asList(
-            Map.of("path", "Java -> Spring -> Microservices", "frequency", 45, "successRate", 87.5),
-            Map.of("path", "Python -> ML -> AI", "frequency", 38, "successRate", 82.3),
-            Map.of("path", "HTML/CSS -> React -> Node.js", "frequency", 32, "successRate", 79.1)
-        );
+        Map<String, Object> path1 = new HashMap<>();
+        path1.put("path", "Java -> Spring -> Microservices");
+        path1.put("frequency", 45);
+        path1.put("successRate", 87.5);
+        
+        Map<String, Object> path2 = new HashMap<>();
+        path2.put("path", "Python -> ML -> AI");
+        path2.put("frequency", 38);
+        path2.put("successRate", 82.3);
+        
+        Map<String, Object> path3 = new HashMap<>();
+        path3.put("path", "HTML/CSS -> React -> Node.js");
+        path3.put("frequency", 32);
+        path3.put("successRate", 79.1);
+        
+        return Arrays.asList(path1, path2, path3);
     }
     
     private Map<String, Object> generateSkillProgression() {
-        return Map.of(
-            "averageProgressionTime", Map.of("Java", 6, "Python", 4, "React", 3),
-            "retentionRates", Map.of("Beginner", 92.1, "Intermediate", 85.7, "Advanced", 78.9)
-        );
+        Map<String, Object> averageProgressionTime = new HashMap<>();
+        averageProgressionTime.put("Java", 6);
+        averageProgressionTime.put("Python", 4);
+        averageProgressionTime.put("React", 3);
+        
+        Map<String, Object> retentionRates = new HashMap<>();
+        retentionRates.put("Beginner", 92.1);
+        retentionRates.put("Intermediate", 85.7);
+        retentionRates.put("Advanced", 78.9);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("averageProgressionTime", averageProgressionTime);
+        result.put("retentionRates", retentionRates);
+        return result;
     }
     
     private List<Map<String, Object>> generateObsolescenceRisk() {
-        return Arrays.asList(
-            Map.of("book", "jQuery in Action", "riskLevel", "HIGH", "daysWithoutSales", 120),
-            Map.of("book", "Flash Development", "riskLevel", "CRITICAL", "daysWithoutSales", 365),
-            Map.of("book", "AngularJS Basics", "riskLevel", "MEDIUM", "daysWithoutSales", 75)
-        );
+        Map<String, Object> book1 = new HashMap<>();
+        book1.put("book", "jQuery in Action");
+        book1.put("riskLevel", "HIGH");
+        book1.put("daysWithoutSales", 120);
+        
+        Map<String, Object> book2 = new HashMap<>();
+        book2.put("book", "Flash Development");
+        book2.put("riskLevel", "CRITICAL");
+        book2.put("daysWithoutSales", 365);
+        
+        Map<String, Object> book3 = new HashMap<>();
+        book3.put("book", "AngularJS Basics");
+        book3.put("riskLevel", "MEDIUM");
+        book3.put("daysWithoutSales", 75);
+        
+        return Arrays.asList(book1, book2, book3);
     }
     
     private Map<String, Object> generateTrendForecast() {
-        return Map.of(
-            "risingTrends", Arrays.asList("AI/ML", "Cloud Native", "DevOps"),
-            "decliningTrends", Arrays.asList("jQuery", "Flash", "Perl"),
-            "emergingTrends", Arrays.asList("Quantum Computing", "Web3", "Edge Computing")
-        );
+        Map<String, Object> result = new HashMap<>();
+        result.put("risingTrends", Arrays.asList("AI/ML", "Cloud Native", "DevOps"));
+        result.put("decliningTrends", Arrays.asList("jQuery", "Flash", "Perl"));
+        result.put("emergingTrends", Arrays.asList("Quantum Computing", "Web3", "Edge Computing"));
+        return result;
     }
     
     private List<Map<String, Object>> generateEmergingTechAnalysis() {
-        return Arrays.asList(
-            Map.of("tech", "Quantum Computing", "stage", "EMERGING", "predictedGrowth", 156.7),
-            Map.of("tech", "Web3", "stage", "EARLY_ADOPTION", "predictedGrowth", 89.4),
-            Map.of("tech", "Edge Computing", "stage", "GROWTH", "predictedGrowth", 67.2)
-        );
+        Map<String, Object> tech1 = new HashMap<>();
+        tech1.put("tech", "Quantum Computing");
+        tech1.put("stage", "EMERGING");
+        tech1.put("predictedGrowth", 156.7);
+        
+        Map<String, Object> tech2 = new HashMap<>();
+        tech2.put("tech", "Web3");
+        tech2.put("stage", "EARLY_ADOPTION");
+        tech2.put("predictedGrowth", 89.4);
+        
+        Map<String, Object> tech3 = new HashMap<>();
+        tech3.put("tech", "Edge Computing");
+        tech3.put("stage", "GROWTH");
+        tech3.put("predictedGrowth", 67.2);
+        
+        return Arrays.asList(tech1, tech2, tech3);
     }
     
     // Drill-down report generation methods
     private Map<String, Object> generateTechCategoryDrillDown(Map<String, Object> filters) {
         // Implementation for tech category drill-down
-        return Map.of("drillDownType", "tech_category", "data", generateTechCategoryBreakdown());
+        Map<String, Object> result = new HashMap<>();
+        result.put("drillDownType", "tech_category");
+        result.put("data", generateTechCategoryBreakdown());
+        return result;
     }
     
     private Map<String, Object> generateCustomerSegmentDrillDown(Map<String, Object> filters) {
         // Implementation for customer segment drill-down
-        return Map.of("drillDownType", "customer_segment", "data", generateLearningPaths());
+        Map<String, Object> result = new HashMap<>();
+        result.put("drillDownType", "customer_segment");
+        result.put("data", generateLearningPaths());
+        return result;
     }
     
     private Map<String, Object> generateTimePeriodDrillDown(Map<String, Object> filters) {
         // Implementation for time period drill-down
-        return Map.of("drillDownType", "time_period", "data", Map.of("timeBreakdown", "quarterly"));
+        Map<String, Object> data = new HashMap<>();
+        data.put("timeBreakdown", "quarterly");
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("drillDownType", "time_period");
+        result.put("data", data);
+        return result;
     }
     
     private Map<String, Object> generateBookLevelDrillDown(Map<String, Object> filters) {
         // Implementation for book level drill-down
-        return Map.of("drillDownType", "book_level", "data", Map.of("levelBreakdown", "skill_based"));
+        Map<String, Object> data = new HashMap<>();
+        data.put("levelBreakdown", "skill_based");
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("drillDownType", "book_level");
+        result.put("data", data);
+        return result;
     }
     
     // Export generation methods (simplified implementations)

@@ -17,6 +17,7 @@ import ExecutiveDashboard from './components/ExecutiveDashboard';
 import InventoryReport from './components/InventoryReport';
 import SalesAnalysisPage from './components/SalesAnalysisPage';
 import InventoryAnalysisPage from './components/InventoryAnalysisPage';
+import TechTrendReportPage from './components/TechTrendReportPage';
 
 const drawerWidth = 240;
 
@@ -123,7 +124,7 @@ function App() {
               <Route exact path="/reports/sales/analysis" component={SalesAnalysisPage} />
               <Route exact path="/reports/inventory/analysis" component={InventoryAnalysisPage} />
               <Route path="/reports/customers" render={() => <div>顧客分析レポート（開発中）</div>} />
-              <Route path="/reports/tech-trends" render={() => <div>技術トレンドレポート（開発中）</div>} />
+              <Route path="/reports/tech-trends" component={TechTrendReportPage} />
             </Switch>
           </ErrorBoundary>
         </Box>

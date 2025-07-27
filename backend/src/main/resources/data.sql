@@ -137,3 +137,193 @@ INSERT INTO aggregation_cache (id, cache_key, aggregation_type, aggregation_date
 (2, 'inventory_summary_2025-07-26', 'INVENTORY_SUMMARY', '2025-07-26', '{"totalProducts": 50, "lowStock": 5, "outOfStock": 2, "totalValue": 150000.00}', '2025-07-26 00:00:00', '2025-07-26 12:00:00'),
 (3, 'customer_metrics_2025-07-26', 'CUSTOMER_METRICS', '2025-07-26', '{"totalCustomers": 25, "activeCustomers": 20, "newThisMonth": 3}', '2025-07-26 00:00:00', '2025-07-26 06:00:00'),
 (4, 'kpi_snapshot_2025-07-26', 'DASHBOARD_KPI', '2025-07-26', '{"revenue": {"today": 2500, "week": 18000}, "orders": {"today": 8, "week": 45}}', '2025-07-26 00:00:00', '2025-07-26 01:00:00');
+
+-- =================================================================
+-- TECH TREND ANALYSIS SAMPLE DATA
+-- =================================================================
+
+-- Insert Tech Trend Analysis data for major technology categories
+INSERT INTO tech_trend_analysis (
+    analysis_date, tech_category_id, lifecycle_stage, trend_direction, growth_rate, 
+    market_share, total_revenue, total_units_sold, emerging_score, obsolescence_risk,
+    trend_analysis, investment_recommendation, created_at, updated_at
+)
+SELECT 
+    CURRENT_DATE - INTERVAL '30' DAY as analysis_date,
+    tc.id as tech_category_id,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 'GROWTH'
+        WHEN 'REACT' THEN 'GROWTH' 
+        WHEN 'JAVA' THEN 'MATURITY'
+        WHEN 'JAVASCRIPT' THEN 'GROWTH'
+        WHEN 'SPRING' THEN 'MATURITY'
+        WHEN 'MYSQL' THEN 'MATURITY'
+        ELSE 'EMERGING'
+    END as lifecycle_stage,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 'RISING'
+        WHEN 'REACT' THEN 'RISING'
+        WHEN 'JAVA' THEN 'STABLE'
+        WHEN 'JAVASCRIPT' THEN 'RISING'
+        WHEN 'SPRING' THEN 'STABLE'
+        WHEN 'MYSQL' THEN 'STABLE'
+        ELSE 'RISING'
+    END as trend_direction,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 15.2
+        WHEN 'REACT' THEN 22.8
+        WHEN 'JAVA' THEN 5.1
+        WHEN 'JAVASCRIPT' THEN 18.7
+        WHEN 'SPRING' THEN 3.2
+        WHEN 'MYSQL' THEN 2.8
+        ELSE 12.0
+    END as growth_rate,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 22.5
+        WHEN 'REACT' THEN 18.3
+        WHEN 'JAVA' THEN 25.8
+        WHEN 'JAVASCRIPT' THEN 35.2
+        WHEN 'SPRING' THEN 15.7
+        WHEN 'MYSQL' THEN 12.1
+        ELSE 5.0
+    END as market_share,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 45600.00
+        WHEN 'REACT' THEN 32400.00
+        WHEN 'JAVA' THEN 68200.00
+        WHEN 'JAVASCRIPT' THEN 58700.00
+        WHEN 'SPRING' THEN 28900.00
+        WHEN 'MYSQL' THEN 21300.00
+        ELSE 8500.00
+    END as total_revenue,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 1250
+        WHEN 'REACT' THEN 890
+        WHEN 'JAVA' THEN 1820
+        WHEN 'JAVASCRIPT' THEN 1650
+        WHEN 'SPRING' THEN 780
+        WHEN 'MYSQL' THEN 620
+        ELSE 200
+    END as total_units_sold,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 88.5
+        WHEN 'REACT' THEN 92.1
+        WHEN 'JAVA' THEN 65.8
+        WHEN 'JAVASCRIPT' THEN 95.2
+        WHEN 'SPRING' THEN 72.3
+        WHEN 'MYSQL' THEN 68.9
+        ELSE 75.0
+    END as emerging_score,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 12.5
+        WHEN 'REACT' THEN 8.3
+        WHEN 'JAVA' THEN 25.1
+        WHEN 'JAVASCRIPT' THEN 5.2
+        WHEN 'SPRING' THEN 18.7
+        WHEN 'MYSQL' THEN 35.8
+        ELSE 15.0
+    END as obsolescence_risk,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 'Python continues strong growth in data science and AI. Market demand increasing rapidly.'
+        WHEN 'REACT' THEN 'React maintains dominant position in frontend development. Strong ecosystem and community support.'
+        WHEN 'JAVA' THEN 'Java remains stable in enterprise development. Gradual adoption of modern features.'
+        WHEN 'JAVASCRIPT' THEN 'JavaScript growth driven by full-stack development and new frameworks.'
+        WHEN 'SPRING' THEN 'Spring framework stable with consistent enterprise adoption. Cloud-native features growing.'
+        WHEN 'MYSQL' THEN 'MySQL maintains steady position despite NoSQL competition. Performance improvements continue.'
+        ELSE 'Technology showing emerging potential with growing market interest.'
+    END as trend_analysis,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 'STRONG BUY - Increase inventory 25-30%. Focus on data science and ML titles.'
+        WHEN 'REACT' THEN 'BUY - Increase inventory 20-25%. Frontend development demand remains high.'
+        WHEN 'JAVA' THEN 'HOLD - Maintain current levels. Focus on modern Java and enterprise patterns.'
+        WHEN 'JAVASCRIPT' THEN 'STRONG BUY - Increase inventory 30-35%. Full-stack development trend continues.'
+        WHEN 'SPRING' THEN 'HOLD - Maintain current levels. Cloud-native and microservices focus.'
+        WHEN 'MYSQL' THEN 'HOLD - Maintain current levels. Performance and optimization titles preferred.'
+        ELSE 'EVALUATE - Monitor market trends before major inventory changes.'
+    END as investment_recommendation,
+    CURRENT_TIMESTAMP as created_at,
+    CURRENT_TIMESTAMP as updated_at
+FROM tech_categories tc
+WHERE tc.category_code IN ('PYTHON', 'REACT', 'JAVA', 'JAVASCRIPT', 'SPRING', 'MYSQL');
+
+-- Insert Technology Relationships
+INSERT INTO tech_relationships (
+    primary_tech_id, related_tech_id, relationship_type, correlation_strength, 
+    analysis_date, confidence_level, statistical_significance, created_at
+)
+SELECT 
+    t1.id as primary_tech_id,
+    t2.id as related_tech_id,
+    rel.relationship_type,
+    rel.correlation_strength,
+    CURRENT_DATE as analysis_date,
+    rel.confidence_level,
+    rel.statistical_significance,
+    CURRENT_TIMESTAMP as created_at
+FROM tech_categories t1
+CROSS JOIN tech_categories t2
+JOIN (
+    SELECT 'JAVA' as code1, 'SPRING' as code2, 'COMPLEMENTARY' as relationship_type, 
+           9.2 as correlation_strength, 'HIGH' as confidence_level, 0.9851 as statistical_significance
+    UNION ALL
+    SELECT 'REACT', 'JAVASCRIPT', 'PREREQUISITE', 8.8, 'HIGH', 0.9723
+    UNION ALL  
+    SELECT 'PYTHON', 'JAVA', 'COMPETITIVE', 6.5, 'MEDIUM', 0.8456
+    UNION ALL
+    SELECT 'MYSQL', 'JAVA', 'COMPLEMENTARY', 7.8, 'HIGH', 0.9123
+    UNION ALL
+    SELECT 'MYSQL', 'PYTHON', 'COMPLEMENTARY', 8.1, 'HIGH', 0.9267
+    UNION ALL
+    SELECT 'SPRING', 'MYSQL', 'COMPLEMENTARY', 8.5, 'HIGH', 0.9431
+) rel ON t1.category_code = rel.code1 AND t2.category_code = rel.code2;
+
+-- Insert Technology Predictions
+INSERT INTO tech_predictions (
+    tech_category_id, prediction_date, prediction_for_date, 
+    predicted_revenue, predicted_growth_rate, confidence_interval, 
+    prediction_model, model_accuracy, created_at
+)
+SELECT 
+    tc.id as tech_category_id,
+    CURRENT_DATE as prediction_date,
+    CURRENT_DATE + INTERVAL '180' DAY as prediction_for_date,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 54200.00
+        WHEN 'REACT' THEN 41800.00
+        WHEN 'JAVA' THEN 71500.00
+        WHEN 'JAVASCRIPT' THEN 69600.00
+        WHEN 'SPRING' THEN 31200.00
+        WHEN 'MYSQL' THEN 22800.00
+        ELSE 12000.00
+    END as predicted_revenue,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 18.8
+        WHEN 'REACT' THEN 29.0
+        WHEN 'JAVA' THEN 4.8
+        WHEN 'JAVASCRIPT' THEN 18.5
+        WHEN 'SPRING' THEN 7.8
+        WHEN 'MYSQL' THEN 7.0
+        ELSE 15.0
+    END as predicted_growth_rate,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 8.2
+        WHEN 'REACT' THEN 12.5
+        WHEN 'JAVA' THEN 3.1
+        WHEN 'JAVASCRIPT' THEN 9.8
+        WHEN 'SPRING' THEN 5.2
+        WHEN 'MYSQL' THEN 4.8
+        ELSE 15.0
+    END as confidence_interval,
+    'ENHANCED_LINEAR_REGRESSION' as prediction_model,
+    CASE tc.category_code
+        WHEN 'PYTHON' THEN 87.2
+        WHEN 'REACT' THEN 82.8
+        WHEN 'JAVA' THEN 92.1
+        WHEN 'JAVASCRIPT' THEN 89.5
+        WHEN 'SPRING' THEN 85.8
+        WHEN 'MYSQL' THEN 88.2
+        ELSE 75.0
+    END as model_accuracy,
+    CURRENT_TIMESTAMP as created_at
+FROM tech_categories tc
+WHERE tc.category_code IN ('PYTHON', 'REACT', 'JAVA', 'JAVASCRIPT', 'SPRING', 'MYSQL');

@@ -36,6 +36,12 @@ class ReportControllerTest {
     @MockBean
     private AnalyticsService analyticsService;
 
+    @MockBean
+    private com.techbookstore.app.service.CustomReportService customReportService;
+
+    @MockBean
+    private com.techbookstore.app.service.BatchProcessingService batchProcessingService;
+
     @Autowired
     private ObjectMapper objectMapper;
 

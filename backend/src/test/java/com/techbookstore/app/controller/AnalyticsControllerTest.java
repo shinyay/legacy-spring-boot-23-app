@@ -30,6 +30,12 @@ public class AnalyticsControllerTest {
     @MockBean 
     private ReportService reportService;
 
+    @MockBean
+    private com.techbookstore.app.service.CustomReportService customReportService;
+
+    @MockBean
+    private com.techbookstore.app.service.BatchProcessingService batchProcessingService;
+
     @Test
     public void testGetSalesAnalysis() throws Exception {
         // Create mock sales analysis data

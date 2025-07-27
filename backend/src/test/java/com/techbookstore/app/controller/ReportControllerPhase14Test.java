@@ -50,6 +50,11 @@ public class ReportControllerPhase14Test {
     @Test
     public void testGetDashboardKpis() throws Exception {
         // Phase 1: Test basic dashboard KPI endpoint
+        // Mock the service response
+        com.techbookstore.app.dto.DashboardKpiDto mockKpis = 
+            new com.techbookstore.app.dto.DashboardKpiDto(LocalDate.now());
+        when(reportService.generateDashboardKpis()).thenReturn(mockKpis);
+        
         mockMvc.perform(get("/api/v1/reports/dashboard/kpis"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -58,6 +63,11 @@ public class ReportControllerPhase14Test {
     @Test
     public void testGetDashboardTrends() throws Exception {
         // Phase 1: Test dashboard trends endpoint
+        // Mock the service response
+        com.techbookstore.app.dto.DashboardKpiDto mockTrends = 
+            new com.techbookstore.app.dto.DashboardKpiDto(LocalDate.now());
+        when(reportService.generateDashboardTrends()).thenReturn(mockTrends);
+        
         mockMvc.perform(get("/api/v1/reports/dashboard/trends"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
@@ -122,6 +132,14 @@ public class ReportControllerPhase14Test {
         request.setStartDate(LocalDate.of(2024, 1, 1));
         request.setEndDate(LocalDate.of(2024, 1, 31));
 
+        // Mock the service response
+        com.techbookstore.app.dto.CustomReportDto mockReport = 
+            new com.techbookstore.app.dto.CustomReportDto("Test Sales Report", 
+                "SALES_BY_TECH_CATEGORY", "test_user");
+        mockReport.setReportId("test-report-id");
+        when(customReportService.createCustomReport(any(CustomReportRequest.class)))
+            .thenReturn(mockReport);
+
         mockMvc.perform(post("/api/v1/reports/custom-reports")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -155,6 +173,16 @@ public class ReportControllerPhase14Test {
         Map<String, Object> filters = new HashMap<>();
         filters.put("category", "AI_ML");
         filters.put("timeRange", "6months");
+
+        // Mock the service response
+        Map<String, Object> mockFilters = new HashMap<>();
+        Map<String, Object> mockData = new HashMap<>();
+        mockData.put("result", "drill down data");
+        com.techbookstore.app.dto.DrillDownReportDto mockDrillDown = 
+            new com.techbookstore.app.dto.DrillDownReportDto("sales_trend", 
+                "tech_category", mockFilters, mockData);
+        when(customReportService.generateDrillDownReport(anyString(), anyString(), any(Map.class)))
+            .thenReturn(mockDrillDown);
 
         mockMvc.perform(post("/api/v1/reports/drill-down")
                 .param("reportType", "sales_trend")

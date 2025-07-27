@@ -217,6 +217,130 @@ export const reports = {
       throw error;
     }
   },
+
+  // ============ PHASE 2: ADVANCED ANALYTICS APIs ============
+
+  // Sales Analysis
+  getSalesAnalysis: async (startDate, endDate, categoryCode = null, customerSegment = null) => {
+    try {
+      const params = { startDate, endDate };
+      if (categoryCode) params.categoryCode = categoryCode;
+      if (customerSegment) params.customerSegment = customerSegment;
+      
+      const response = await reportsApi.get('/reports/sales/analysis', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Sales analysis error:', error);
+      throw error;
+    }
+  },
+
+  // Inventory Analysis
+  getInventoryAnalysis: async (categoryCode = null, analysisType = 'COMPREHENSIVE') => {
+    try {
+      const params = { analysisType };
+      if (categoryCode) params.categoryCode = categoryCode;
+      
+      const response = await reportsApi.get('/reports/inventory/analysis', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Inventory analysis error:', error);
+      throw error;
+    }
+  },
+
+  // Demand Predictions
+  getDemandPredictions: async (timeHorizon = 'MEDIUM_TERM', categoryCode = null, algorithm = 'SEASONAL') => {
+    try {
+      const params = { timeHorizon, algorithm };
+      if (categoryCode) params.categoryCode = categoryCode;
+      
+      const response = await reportsApi.get('/reports/predictions/demand', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Demand predictions error:', error);
+      throw error;
+    }
+  },
+
+  // Order Suggestions
+  getOrderSuggestions: async (suggestionType = 'REORDER', priority = 'MEDIUM', budget = null) => {
+    try {
+      const params = { suggestionType, priority };
+      if (budget) params.budget = budget;
+      
+      const response = await reportsApi.get('/reports/suggestions/orders', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Order suggestions error:', error);
+      throw error;
+    }
+  },
+
+  // Tech Category Trends
+  getTechCategoryTrends: async (categoryCode = null) => {
+    try {
+      const params = {};
+      if (categoryCode) params.categoryCode = categoryCode;
+      
+      const response = await reportsApi.get('/reports/trends/tech-categories', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Tech category trends error:', error);
+      throw error;
+    }
+  },
+
+  // Seasonal Trends
+  getSeasonalTrends: async (seasonType = 'QUARTERLY', categoryCode = null) => {
+    try {
+      const params = { seasonType };
+      if (categoryCode) params.categoryCode = categoryCode;
+      
+      const response = await reportsApi.get('/reports/trends/seasonal', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Seasonal trends error:', error);
+      throw error;
+    }
+  },
+
+  // Competitor Analysis
+  getCompetitorAnalysis: async (analysisScope = 'CATEGORY', categoryCode = null) => {
+    try {
+      const params = { analysisScope };
+      if (categoryCode) params.categoryCode = categoryCode;
+      
+      const response = await reportsApi.get('/reports/analysis/competitors', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Competitor analysis error:', error);
+      throw error;
+    }
+  },
+
+  // Custom Analysis
+  executeCustomAnalysis: async (analysisRequest) => {
+    try {
+      const response = await reportsApi.post('/reports/analysis/custom', analysisRequest);
+      return response.data;
+    } catch (error) {
+      console.error('Custom analysis error:', error);
+      throw error;
+    }
+  },
+
+  // Profitability Analysis
+  getProfitabilityAnalysis: async (startDate, endDate, analysisLevel = 'CATEGORY') => {
+    try {
+      const params = { startDate, endDate, analysisLevel };
+      const response = await reportsApi.get('/reports/profitability', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Profitability analysis error:', error);
+      throw error;
+    }
+  },
 };
 
 export default reports;

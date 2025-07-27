@@ -134,12 +134,28 @@ const ReportsPage = () => {
       color: '#4caf50',
     },
     {
+      id: 'sales-analysis',
+      title: '詳細売上分析',
+      description: '技術カテゴリ別、顧客セグメント別の多次元売上分析と収益性分析を行えます。',
+      icon: <Assessment className={classes.cardIcon} />,
+      path: '/reports/sales/analysis',
+      color: '#1976d2',
+    },
+    {
       id: 'inventory',
       title: '在庫レポート',
       description: '在庫状況、発注提案、在庫回転率などの在庫管理データを分析できます。',
       icon: <Storage className={classes.cardIcon} />,
       path: '/reports/inventory',
       color: '#ff9800',
+    },
+    {
+      id: 'inventory-analysis',
+      title: '詳細在庫分析',
+      description: '在庫回転率、デッドストック、技術陳腐化リスクの高度な分析を提供します。',
+      icon: <Storage className={classes.cardIcon} />,
+      path: '/reports/inventory/analysis',
+      color: '#f57c00',
     },
     {
       id: 'customers',

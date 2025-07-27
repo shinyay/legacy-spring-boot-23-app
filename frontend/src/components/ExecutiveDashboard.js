@@ -6,9 +6,9 @@ import {
   Paper,
   CircularProgress,
   Snackbar,
-  Alert,
   Box
 } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { Refresh } from '@material-ui/icons';
 import KPICardGrid from './dashboard/KPICardGrid';
@@ -64,9 +64,9 @@ const ExecutiveDashboard = () => {
 
       // Fetch all dashboard data in parallel
       const [kpisResponse, trendsResponse, alertsResponse] = await Promise.all([
-        api.get('/api/v1/reports/dashboard/kpis'),
-        api.get('/api/v1/reports/dashboard/trends'),
-        api.get('/api/v1/reports/dashboard/alerts')
+        api.get('/reports/dashboard/kpis'),
+        api.get('/reports/dashboard/trends'),
+        api.get('/reports/dashboard/alerts')
       ]);
 
       setDashboardData(kpisResponse.data);

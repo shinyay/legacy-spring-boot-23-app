@@ -16,7 +16,7 @@ import {
   Warning,
   TrendingUp,
   TrendingDown,
-  Inventory,
+  Storage,
   Error,
   Info
 } from '@material-ui/icons';
@@ -78,7 +78,7 @@ const AlertsPanel = ({ alerts, loading }) => {
       case 'FALLING':
         return <TrendingDown style={{ color: '#f44336' }} />;
       case 'LOW_STOCK':
-        return <Inventory style={{ color: '#ff9800' }} />;
+        return <Storage style={{ color: '#ff9800' }} />;
       case 'DEAD_STOCK':
         return <Error style={{ color: '#f44336' }} />;
       default:

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Grid,
   Card,
@@ -126,7 +126,7 @@ const SalesAnalysisPage = () => {
   const [customerSegment, setCustomerSegment] = useState('');
 
   // Load sales analysis data
-  const loadSalesAnalysis = async () => {
+  const loadSalesAnalysis = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -145,12 +145,12 @@ const SalesAnalysisPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate, categoryCode, customerSegment]);
 
   // Load data on component mount and filter changes
   useEffect(() => {
     loadSalesAnalysis();
-  }, [startDate, endDate, categoryCode, customerSegment]);
+  }, [loadSalesAnalysis]);
 
   // Format currency
   const formatCurrency = (value) => {

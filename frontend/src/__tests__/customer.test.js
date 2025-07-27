@@ -1,12 +1,12 @@
-// Mock axios for testing
-jest.mock('../services/api');
-
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import CustomerList from '../components/CustomerList';
+
+// Mock axios for testing
+jest.mock('../services/api');
 
 // Mock store for testing
 const mockStore = createStore(() => ({

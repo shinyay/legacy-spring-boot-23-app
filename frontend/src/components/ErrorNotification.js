@@ -4,8 +4,7 @@ import {
   IconButton 
 } from '@material-ui/core';
 import { 
-  Alert, 
-  AlertTitle 
+  Alert
 } from '@material-ui/lab';
 import { Close as CloseIcon } from '@material-ui/icons';
 

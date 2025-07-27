@@ -37,10 +37,7 @@ import {
   CheckCircle,
   Schedule,
   TrendingUp,
-  Assessment,
   ExpandMore,
-  LocalShipping,
-  MonetizationOn,
   Info,
   Add,
   Remove

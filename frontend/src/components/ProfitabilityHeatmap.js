@@ -11,7 +11,6 @@ import {
 } from '@material-ui/core';
 import {
   ResponsiveContainer,
-  ComposedChart,
   Cell,
   XAxis,
   YAxis,

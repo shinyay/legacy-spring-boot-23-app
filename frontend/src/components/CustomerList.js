@@ -114,7 +114,7 @@ const CustomerList = () => {
   useEffect(() => {
     loadCustomers();
     dispatch(fetchCustomerStats());
-  }, [dispatch, page, rowsPerPage]);
+  }, [dispatch, page, rowsPerPage, loadCustomers]);
 
   useEffect(() => {
     if (error) {

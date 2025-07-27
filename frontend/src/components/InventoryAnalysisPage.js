@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -161,7 +161,7 @@ const InventoryAnalysisPage = () => {
   const [analysisType, setAnalysisType] = useState('COMPREHENSIVE');
 
   // Load inventory analysis data
-  const loadInventoryAnalysis = async () => {
+  const loadInventoryAnalysis = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -178,12 +178,12 @@ const InventoryAnalysisPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryCode, analysisType]);
 
   // Load data on component mount and filter changes
   useEffect(() => {
     loadInventoryAnalysis();
-  }, [categoryCode, analysisType]);
+  }, [loadInventoryAnalysis]);
 
   // Format currency
   const formatCurrency = (value) => {

@@ -1,4 +1,4 @@
-export default {
+const mockApi = {
   get: jest.fn(() => Promise.resolve({ data: {} })),
   post: jest.fn(() => Promise.resolve({ data: {} })),
   put: jest.fn(() => Promise.resolve({ data: {} })),
@@ -9,7 +9,9 @@ export default {
   },
 };
 
-export const mockApi = {
+export default mockApi;
+
+export const mockApiHelper = {
   get: jest.fn(() => Promise.resolve({ data: {} })),
   post: jest.fn(() => Promise.resolve({ data: {} })),
   put: jest.fn(() => Promise.resolve({ data: {} })),

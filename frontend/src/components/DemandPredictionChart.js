@@ -20,9 +20,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ReferenceLine,
-  Area,
-  AreaChart
+  ReferenceLine
 } from 'recharts';
 import { 
   TrendingUp, 

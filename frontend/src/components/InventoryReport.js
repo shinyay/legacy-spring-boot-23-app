@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -163,7 +163,7 @@ const InventoryReport = () => {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
 
-  const fetchInventoryReport = async (useFilters = false) => {
+  const fetchInventoryReport = useCallback(async (useFilters = false) => {
     setLoading(true);
     try {
       let response;
@@ -183,7 +183,7 @@ const InventoryReport = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));
@@ -213,7 +213,7 @@ const InventoryReport = () => {
 
   useEffect(() => {
     fetchInventoryReport(false);
-  }, []);
+  }, [fetchInventoryReport]);
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('ja-JP', {
@@ -243,6 +243,8 @@ const InventoryReport = () => {
         return classes.urgencyHigh;
       case 'MEDIUM':
         return classes.urgencyMedium;
+      case 'LOW':
+        return classes.urgencyLow;
       default:
         return '';
     }

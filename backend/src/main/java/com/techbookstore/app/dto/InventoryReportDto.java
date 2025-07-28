@@ -15,6 +15,12 @@ public class InventoryReportDto {
     private List<ReorderSuggestion> reorderSuggestions;
     private InventoryTurnoverSummary turnoverSummary;
     
+    // Phase 1 enhancement - additional analytics fields
+    private Integer deadStockItems;
+    private BigDecimal deadStockValue;
+    private Double averageTurnoverRate;
+    private Double obsolescenceRiskIndex;
+    
     // Constructors
     public InventoryReportDto() {}
     
@@ -143,6 +149,20 @@ public class InventoryReportDto {
     public void setItems(List<InventoryItem> items) { this.items = items; }
     public List<ReorderSuggestion> getReorderSuggestions() { return reorderSuggestions; }
     public void setReorderSuggestions(List<ReorderSuggestion> reorderSuggestions) { this.reorderSuggestions = reorderSuggestions; }
+    
     public InventoryTurnoverSummary getTurnoverSummary() { return turnoverSummary; }
     public void setTurnoverSummary(InventoryTurnoverSummary turnoverSummary) { this.turnoverSummary = turnoverSummary; }
+    
+    // Phase 1 enhancement - getters and setters for new analytics fields
+    public Integer getDeadStockItems() { return deadStockItems; }
+    public void setDeadStockItems(Integer deadStockItems) { this.deadStockItems = deadStockItems; }
+    
+    public BigDecimal getDeadStockValue() { return deadStockValue; }
+    public void setDeadStockValue(BigDecimal deadStockValue) { this.deadStockValue = deadStockValue; }
+    
+    public Double getAverageTurnoverRate() { return averageTurnoverRate; }
+    public void setAverageTurnoverRate(Double averageTurnoverRate) { this.averageTurnoverRate = averageTurnoverRate; }
+    
+    public Double getObsolescenceRiskIndex() { return obsolescenceRiskIndex; }
+    public void setObsolescenceRiskIndex(Double obsolescenceRiskIndex) { this.obsolescenceRiskIndex = obsolescenceRiskIndex; }
 }

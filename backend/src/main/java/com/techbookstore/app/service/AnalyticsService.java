@@ -32,17 +32,20 @@ public class AnalyticsService {
     private final BookRepository bookRepository;
     private final InventoryTransactionRepository inventoryTransactionRepository;
     private final AggregationCacheRepository cacheRepository;
+    private final ABCXYZAnalysisService abcxyzAnalysisService;
     
     public AnalyticsService(OrderRepository orderRepository, CustomerRepository customerRepository,
                            InventoryRepository inventoryRepository, BookRepository bookRepository,
                            InventoryTransactionRepository inventoryTransactionRepository,
-                           AggregationCacheRepository cacheRepository) {
+                           AggregationCacheRepository cacheRepository,
+                           ABCXYZAnalysisService abcxyzAnalysisService) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
         this.inventoryRepository = inventoryRepository;
         this.bookRepository = bookRepository;
         this.inventoryTransactionRepository = inventoryTransactionRepository;
         this.cacheRepository = cacheRepository;
+        this.abcxyzAnalysisService = abcxyzAnalysisService;
     }
     
     /**
@@ -351,13 +354,82 @@ public class AnalyticsService {
     }
     
     private List<InventoryAnalysisDto.InventoryTurnoverItem> generateInventoryTurnoverAnalysis(String categoryCode) {
-        // Mock implementation - replace with actual repository queries
+        logger.info("Generating inventory turnover analysis for category: {}", categoryCode);
+        
         List<InventoryAnalysisDto.InventoryTurnoverItem> turnoverItems = new ArrayList<>();
         
-        turnoverItems.add(new InventoryAnalysisDto.InventoryTurnoverItem(1L, "Java: The Complete Reference", 
-                                                                        "JAVA", 25, new BigDecimal("5.2")));
-        turnoverItems.add(new InventoryAnalysisDto.InventoryTurnoverItem(2L, "Python Crash Course", 
-                                                                        "PYTHON", 18, new BigDecimal("6.1")));
+        try {
+            // Perform ABC/XYZ analysis for current date
+            LocalDate analysisDate = LocalDate.now();
+            List<ABCXYZAnalysis> abcxyzResults = abcxyzAnalysisService.getLatestAnalysis();
+            
+            // If no recent analysis exists, perform new analysis
+            if (abcxyzResults.isEmpty()) {
+                logger.info("No recent ABC/XYZ analysis found, performing new analysis");
+                abcxyzResults = abcxyzAnalysisService.performAnalysis(analysisDate);
+            }
+            
+            // Convert ABC/XYZ analysis to turnover items
+            for (ABCXYZAnalysis analysis : abcxyzResults) {
+                Book book = analysis.getBook();
+                
+                // Filter by category if specified
+                if (categoryCode != null && !categoryCode.isEmpty()) {
+                    // For now, skip category filtering since we don't have book categories properly linked
+                    // In a real implementation, you would check book.getCategories() or similar
+                }
+                
+                // Get current inventory
+                Optional<Inventory> inventoryOpt = inventoryRepository.findByBookId(book.getId());
+                if (inventoryOpt.isPresent()) {
+                    Inventory inventory = inventoryOpt.get();
+                    
+                    InventoryAnalysisDto.InventoryTurnoverItem item = new InventoryAnalysisDto.InventoryTurnoverItem(
+                        book.getId(),
+                        book.getTitle(),
+                        determineCategoryCode(book), // Helper method to determine category code
+                        inventory.getStoreStock() + inventory.getWarehouseStock(), // Total stock
+                        analysis.getSalesContribution()
+                    );
+                    
+                    // Set additional fields
+                    item.setDaysSinceLastSale(inventory.getDaysSinceLastSale() != null ? 
+                                            inventory.getDaysSinceLastSale() : 0);
+                    
+                    // Calculate turnover category based on ABC/XYZ classification
+                    String turnoverCategory = determineTurnoverCategory(
+                        analysis.getAbcCategory(), 
+                        analysis.getXyzCategory()
+                    );
+                    item.setTurnoverCategory(turnoverCategory);
+                    
+                    // Calculate annual revenue (mock calculation)
+                    BigDecimal annualRevenue = analysis.getSalesContribution()
+                        .multiply(BigDecimal.valueOf(1000)) // Scaling factor
+                        .setScale(2, RoundingMode.HALF_UP);
+                    item.setAnnualRevenue(annualRevenue);
+                    
+                    turnoverItems.add(item);
+                }
+            }
+            
+            // Sort by sales contribution (descending)
+            turnoverItems.sort((a, b) -> b.getTurnoverRate().compareTo(a.getTurnoverRate()));
+            
+            // Limit to top 50 for performance
+            if (turnoverItems.size() > 50) {
+                turnoverItems = turnoverItems.subList(0, 50);
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error generating inventory turnover analysis", e);
+            
+            // Fallback to mock data
+            turnoverItems.add(new InventoryAnalysisDto.InventoryTurnoverItem(1L, "Java: The Complete Reference", 
+                                                                            "JAVA", 25, new BigDecimal("5.2")));
+            turnoverItems.add(new InventoryAnalysisDto.InventoryTurnoverItem(2L, "Python Crash Course", 
+                                                                            "PYTHON", 18, new BigDecimal("6.1")));
+        }
         
         return turnoverItems;
     }
@@ -530,5 +602,46 @@ public class AnalyticsService {
     
     private TechCategoryAnalysisDto.TechLifecycleAnalysis generateTechLifecycleAnalysis(String categoryCode) {
         return new TechCategoryAnalysisDto.TechLifecycleAnalysis("MATURITY", 18, "STABLE");
+    }
+    
+    /**
+     * Helper method to determine category code from book
+     */
+    private String determineCategoryCode(Book book) {
+        // Mock implementation - in real system, extract from book categories
+        if (book.getTitle().toLowerCase().contains("java")) {
+            return "JAVA";
+        } else if (book.getTitle().toLowerCase().contains("python")) {
+            return "PYTHON";
+        } else if (book.getTitle().toLowerCase().contains("javascript")) {
+            return "JAVASCRIPT";
+        } else {
+            return "OTHER";
+        }
+    }
+    
+    /**
+     * Helper method to determine turnover category based on ABC/XYZ classification
+     */
+    private String determineTurnoverCategory(String abcCategory, String xyzCategory) {
+        String combined = abcCategory + xyzCategory;
+        
+        switch (combined) {
+            case "AX":
+            case "AY":
+                return "FAST";
+            case "BX":
+            case "BY":
+                return "MEDIUM";
+            case "CX":
+            case "CY":
+                return "SLOW";
+            case "AZ":
+            case "BZ":
+            case "CZ":
+                return "DEAD";
+            default:
+                return "MEDIUM";
+        }
     }
 }

@@ -40,6 +40,10 @@ public class ABCXYZAnalysisService {
     // XYZ分析の変動係数閾値 (X: <0.5, Y: 0.5-1.0, Z: >1.0)
     private static final double XYZ_X_THRESHOLD = 0.5;
     private static final double XYZ_Y_THRESHOLD = 1.0;
+    
+    // Analysis period constants
+    private static final int ANALYSIS_PERIOD_MONTHS = 12;
+    private static final BigDecimal MINIMUM_SALES_THRESHOLD = BigDecimal.valueOf(100);
 
     public ABCXYZAnalysisService(ABCXYZAnalysisRepository abcxyzRepository,
                                 BookRepository bookRepository,
@@ -56,43 +60,62 @@ public class ABCXYZAnalysisService {
      * 全書籍に対してABC/XYZ分析を実行
      */
     public List<ABCXYZAnalysis> performAnalysis(LocalDate analysisDate) {
-        logger.info("Starting ABC/XYZ analysis for date: {}", analysisDate);
-
-        // Get all books with inventory
-        List<Book> books = bookRepository.findAll();
-        
-        // Calculate sales contribution for ABC analysis
-        Map<Long, BigDecimal> salesContributions = calculateSalesContributions(books, analysisDate);
-        
-        // Calculate demand variability for XYZ analysis
-        Map<Long, BigDecimal> demandVariabilities = calculateDemandVariabilities(books, analysisDate);
-        
-        // Perform ABC classification
-        Map<Long, String> abcClassifications = performAbcAnalysis(salesContributions);
-        
-        // Perform XYZ classification
-        Map<Long, String> xyzClassifications = performXyzAnalysis(demandVariabilities);
-        
-        // Create and save analysis results
-        List<ABCXYZAnalysis> results = new ArrayList<>();
-        
-        for (Book book : books) {
-            if (salesContributions.containsKey(book.getId())) {
-                ABCXYZAnalysis analysis = new ABCXYZAnalysis(
-                    book,
-                    abcClassifications.get(book.getId()),
-                    xyzClassifications.get(book.getId()),
-                    salesContributions.get(book.getId()),
-                    demandVariabilities.get(book.getId()),
-                    analysisDate
-                );
-                
-                results.add(abcxyzRepository.save(analysis));
-            }
+        if (analysisDate == null) {
+            throw new IllegalArgumentException("Analysis date cannot be null");
         }
         
-        logger.info("Completed ABC/XYZ analysis for {} books", results.size());
-        return results;
+        logger.info("Starting ABC/XYZ analysis for date: {}", analysisDate);
+
+        try {
+            // Get all books with inventory
+            List<Book> books = bookRepository.findAll();
+            
+            if (books.isEmpty()) {
+                logger.warn("No books found for ABC/XYZ analysis");
+                return new ArrayList<>();
+            }
+            
+            // Calculate sales contribution for ABC analysis
+            Map<Long, BigDecimal> salesContributions = calculateSalesContributions(books, analysisDate);
+            
+            // Calculate demand variability for XYZ analysis
+            Map<Long, BigDecimal> demandVariabilities = calculateDemandVariabilities(books, analysisDate);
+            
+            // Perform ABC classification
+            Map<Long, String> abcClassifications = performAbcAnalysis(salesContributions);
+            
+            // Perform XYZ classification
+            Map<Long, String> xyzClassifications = performXyzAnalysis(demandVariabilities);
+            
+            // Create and save analysis results
+            List<ABCXYZAnalysis> results = new ArrayList<>();
+            
+            for (Book book : books) {
+                if (salesContributions.containsKey(book.getId())) {
+                    try {
+                        ABCXYZAnalysis analysis = new ABCXYZAnalysis(
+                            book,
+                            abcClassifications.get(book.getId()),
+                            xyzClassifications.get(book.getId()),
+                            salesContributions.get(book.getId()),
+                            demandVariabilities.get(book.getId()),
+                            analysisDate
+                        );
+                        
+                        results.add(abcxyzRepository.save(analysis));
+                    } catch (Exception e) {
+                        logger.error("Failed to save ABC/XYZ analysis for book ID: {}", book.getId(), e);
+                    }
+                }
+            }
+            
+            logger.info("Completed ABC/XYZ analysis for {} books", results.size());
+            return results;
+            
+        } catch (Exception e) {
+            logger.error("Failed to perform ABC/XYZ analysis for date: {}", analysisDate, e);
+            throw new RuntimeException("ABC/XYZ analysis failed", e);
+        }
     }
 
     /**
@@ -103,12 +126,21 @@ public class ABCXYZAnalysisService {
         Map<Long, BigDecimal> contributions = new HashMap<>();
         
         // Calculate total sales for the analysis period (last 12 months)
-        LocalDate startDate = analysisDate.minusMonths(12);
+        LocalDate startDate = analysisDate.minusMonths(ANALYSIS_PERIOD_MONTHS);
         
         for (Book book : books) {
-            // Mock implementation - in real system, calculate from order data
-            BigDecimal bookSales = calculateBookSalesValue(book.getId(), startDate, analysisDate);
-            contributions.put(book.getId(), bookSales);
+            try {
+                // Mock implementation - in real system, calculate from order data
+                BigDecimal bookSales = calculateBookSalesValue(book.getId(), startDate, analysisDate);
+                
+                // Only include books with sales above minimum threshold
+                if (bookSales.compareTo(MINIMUM_SALES_THRESHOLD) >= 0) {
+                    contributions.put(book.getId(), bookSales);
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to calculate sales contribution for book ID: {}", book.getId(), e);
+                // Continue with other books
+            }
         }
         
         // Calculate total sales
@@ -120,6 +152,8 @@ public class ABCXYZAnalysisService {
             contributions.replaceAll((bookId, sales) -> 
                 sales.divide(totalSales, 4, RoundingMode.HALF_UP)
                      .multiply(BigDecimal.valueOf(100)));
+        } else {
+            logger.warn("Total sales is zero for analysis period");
         }
         
         return contributions;

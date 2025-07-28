@@ -29,7 +29,7 @@ public class SeasonalAnalysisService {
     private final BookRepository bookRepository;
     private final OrderRepository orderRepository;
 
-    // Tech book specific seasonal patterns
+    // Tech book specific seasonal patterns - cached for performance
     private static final Map<String, SeasonalPattern> TECH_SEASONAL_PATTERNS = Map.of(
         "SPRING", new SeasonalPattern("新学期需要", 1.3, Arrays.asList(Month.MARCH, Month.APRIL)),
         "SUMMER", new SeasonalPattern("夏休み学習", 1.2, Arrays.asList(Month.JULY, Month.AUGUST)),
@@ -37,7 +37,7 @@ public class SeasonalAnalysisService {
         "WINTER", new SeasonalPattern("年末学習・新年準備", 1.1, Arrays.asList(Month.DECEMBER, Month.JANUARY))
     );
 
-    // Category-specific seasonal multipliers
+    // Category-specific seasonal multipliers - cached for performance
     private static final Map<String, Map<String, BigDecimal>> CATEGORY_SEASONAL_MULTIPLIERS = Map.of(
         "JAVA", Map.of(
             "SPRING", BigDecimal.valueOf(1.4), // Spring framework popularity in new semester
@@ -48,21 +48,38 @@ public class SeasonalAnalysisService {
         "PYTHON", Map.of(
             "SPRING", BigDecimal.valueOf(1.2),
             "SUMMER", BigDecimal.valueOf(1.4), // AI/ML summer courses
-            "FALL", BigDecimal.valueOf(1.3),
+            "FALL", BigDecimal.valueOf(1.5), // Data science job market
             "WINTER", BigDecimal.valueOf(1.1)
         ),
         "JAVASCRIPT", Map.of(
-            "SPRING", BigDecimal.valueOf(1.3),
+            "SPRING", BigDecimal.valueOf(1.3), // New web development courses
             "SUMMER", BigDecimal.valueOf(1.2),
-            "FALL", BigDecimal.valueOf(1.4), // Web development job market
+            "FALL", BigDecimal.valueOf(1.4), // Job hunting season
             "WINTER", BigDecimal.valueOf(1.0)
         ),
         "DATABASE", Map.of(
-            "SPRING", BigDecimal.valueOf(1.2),
+            "SPRING", BigDecimal.valueOf(1.2), // Database courses
             "SUMMER", BigDecimal.valueOf(1.1),
-            "FALL", BigDecimal.valueOf(1.3), // Enterprise hiring season
-            "WINTER", BigDecimal.valueOf(1.0)
+            "FALL", BigDecimal.valueOf(1.3), // Enterprise planning season
+            "WINTER", BigDecimal.valueOf(1.2) // Year-end data analysis
+        ),
+        "AI_ML", Map.of(
+            "SPRING", BigDecimal.valueOf(1.3), // Academic semester
+            "SUMMER", BigDecimal.valueOf(1.5), // Research and summer programs
+            "FALL", BigDecimal.valueOf(1.4), // Job market demand
+            "WINTER", BigDecimal.valueOf(1.2)
+        ),
+        "CLOUD", Map.of(
+            "SPRING", BigDecimal.valueOf(1.2), // Enterprise adoption cycles
+            "SUMMER", BigDecimal.valueOf(1.1),
+            "FALL", BigDecimal.valueOf(1.4), // Budget planning season
+            "WINTER", BigDecimal.valueOf(1.3) // Year-end migrations
         )
+    );
+    
+    // Core technology categories for analysis - cached for performance
+    private static final List<String> CORE_TECH_CATEGORIES = Arrays.asList(
+        "JAVA", "PYTHON", "JAVASCRIPT", "DATABASE", "AI_ML", "CLOUD"
     );
 
     public SeasonalAnalysisService(BookRepository bookRepository, OrderRepository orderRepository) {
@@ -107,9 +124,15 @@ public class SeasonalAnalysisService {
         
         Map<String, SeasonalCategoryAnalysis> categoryAnalysis = new HashMap<>();
         
-        for (String category : Arrays.asList("JAVA", "PYTHON", "JAVASCRIPT", "DATABASE", "AI_ML", "CLOUD")) {
-            SeasonalCategoryAnalysis analysis = analyzeCategorySeasonality(category);
-            categoryAnalysis.put(category, analysis);
+        // Use cached core tech categories for better performance
+        for (String category : CORE_TECH_CATEGORIES) {
+            try {
+                SeasonalCategoryAnalysis analysis = analyzeCategorySeasonality(category);
+                categoryAnalysis.put(category, analysis);
+            } catch (Exception e) {
+                logger.error("Failed to analyze seasonality for category: {}", category, e);
+                // Continue with other categories
+            }
         }
         
         return categoryAnalysis;
@@ -159,11 +182,17 @@ public class SeasonalAnalysisService {
         String currentSeason = getCurrentSeason();
         String nextSeason = getNextSeason(currentSeason);
         
-        for (String category : Arrays.asList("JAVA", "PYTHON", "JAVASCRIPT", "DATABASE")) {
-            SeasonalInventoryRecommendation recommendation = generateCategoryRecommendation(
-                category, currentSeason, nextSeason
-            );
-            recommendations.add(recommendation);
+        // Use cached core tech categories for better performance
+        for (String category : CORE_TECH_CATEGORIES) {
+            try {
+                SeasonalInventoryRecommendation recommendation = generateCategoryRecommendation(
+                    category, currentSeason, nextSeason
+                );
+                recommendations.add(recommendation);
+            } catch (Exception e) {
+                logger.error("Failed to generate seasonal recommendation for category: {}", category, e);
+                // Continue with other categories
+            }
         }
         
         return recommendations;

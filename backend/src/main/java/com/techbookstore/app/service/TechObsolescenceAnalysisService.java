@@ -39,6 +39,17 @@ public class TechObsolescenceAnalysisService {
     private static final int GROWTH_MAX_YEARS = 3;
     private static final int MATURE_MAX_YEARS = 7;
     // DECLINING is beyond MATURE_MAX_YEARS
+    
+    // Risk level thresholds
+    private static final double HIGH_RISK_THRESHOLD = 70.0;
+    private static final double MEDIUM_RISK_THRESHOLD = 40.0;
+    
+    // Obsolescence time estimation constants
+    private static final int VERY_HIGH_RISK_MONTHS = 6;
+    private static final int HIGH_RISK_MONTHS = 12;
+    private static final int MEDIUM_RISK_MONTHS = 24;
+    private static final int LOW_MEDIUM_RISK_MONTHS = 48;
+    private static final int LOW_RISK_MONTHS = 96;
 
     public TechObsolescenceAnalysisService(ObsolescenceAssessmentRepository obsolescenceRepository,
                                          BookRepository bookRepository) {
@@ -51,18 +62,39 @@ public class TechObsolescenceAnalysisService {
      * 全書籍の陳腐化リスク分析を実行
      */
     public List<ObsolescenceAssessment> performObsolescenceAnalysis(LocalDate assessmentDate) {
+        if (assessmentDate == null) {
+            throw new IllegalArgumentException("Assessment date cannot be null");
+        }
+        
         logger.info("Starting tech obsolescence analysis for date: {}", assessmentDate);
 
-        List<Book> books = bookRepository.findAll();
-        List<ObsolescenceAssessment> assessments = new ArrayList<>();
+        try {
+            List<Book> books = bookRepository.findAll();
+            
+            if (books.isEmpty()) {
+                logger.warn("No books found for obsolescence analysis");
+                return new ArrayList<>();
+            }
+            
+            List<ObsolescenceAssessment> assessments = new ArrayList<>();
 
-        for (Book book : books) {
-            ObsolescenceAssessment assessment = analyzeBook(book, assessmentDate);
-            assessments.add(obsolescenceRepository.save(assessment));
+            for (Book book : books) {
+                try {
+                    ObsolescenceAssessment assessment = analyzeBook(book, assessmentDate);
+                    assessments.add(obsolescenceRepository.save(assessment));
+                } catch (Exception e) {
+                    logger.error("Failed to analyze obsolescence for book ID: {}", book.getId(), e);
+                    // Continue with other books
+                }
+            }
+
+            logger.info("Completed obsolescence analysis for {} books", assessments.size());
+            return assessments;
+            
+        } catch (Exception e) {
+            logger.error("Failed to perform obsolescence analysis for date: {}", assessmentDate, e);
+            throw new RuntimeException("Obsolescence analysis failed", e);
         }
-
-        logger.info("Completed obsolescence analysis for {} books", assessments.size());
-        return assessments;
     }
 
     /**
@@ -70,26 +102,46 @@ public class TechObsolescenceAnalysisService {
      * 個別書籍の陳腐化リスク分析
      */
     public ObsolescenceAssessment analyzeBook(Book book, LocalDate assessmentDate) {
-        // Calculate risk score components
-        BigDecimal publicationYearScore = calculatePublicationYearScore(book, assessmentDate);
-        BigDecimal techTrendScore = calculateTechTrendScore(book);
-        BigDecimal marketDemandScore = calculateMarketDemandScore(book);
-        BigDecimal competitionScore = calculateCompetitionScore(book);
+        if (book == null) {
+            throw new IllegalArgumentException("Book cannot be null");
+        }
+        if (assessmentDate == null) {
+            throw new IllegalArgumentException("Assessment date cannot be null");
+        }
+        
+        try {
+            // Calculate risk score components
+            BigDecimal publicationYearScore = calculatePublicationYearScore(book, assessmentDate);
+            BigDecimal techTrendScore = calculateTechTrendScore(book);
+            BigDecimal marketDemandScore = calculateMarketDemandScore(book);
+            BigDecimal competitionScore = calculateCompetitionScore(book);
 
-        // Calculate weighted total risk score
-        BigDecimal totalRiskScore = publicationYearScore.multiply(BigDecimal.valueOf(PUBLICATION_YEAR_WEIGHT))
-            .add(techTrendScore.multiply(BigDecimal.valueOf(TECH_TREND_WEIGHT)))
-            .add(marketDemandScore.multiply(BigDecimal.valueOf(MARKET_DEMAND_WEIGHT)))
-            .add(competitionScore.multiply(BigDecimal.valueOf(COMPETITION_WEIGHT)))
-            .setScale(2, RoundingMode.HALF_UP);
+            // Calculate weighted total risk score
+            BigDecimal totalRiskScore = publicationYearScore.multiply(BigDecimal.valueOf(PUBLICATION_YEAR_WEIGHT))
+                .add(techTrendScore.multiply(BigDecimal.valueOf(TECH_TREND_WEIGHT)))
+                .add(marketDemandScore.multiply(BigDecimal.valueOf(MARKET_DEMAND_WEIGHT)))
+                .add(competitionScore.multiply(BigDecimal.valueOf(COMPETITION_WEIGHT)))
+                .setScale(2, RoundingMode.HALF_UP);
 
-        // Determine risk level
-        String riskLevel = determineRiskLevel(totalRiskScore);
+            // Validate risk score is within expected range
+            if (totalRiskScore.compareTo(BigDecimal.ZERO) < 0 || totalRiskScore.compareTo(BigDecimal.valueOf(100)) > 0) {
+                logger.warn("Risk score out of range for book ID {}: {}", book.getId(), totalRiskScore);
+                totalRiskScore = totalRiskScore.max(BigDecimal.ZERO).min(BigDecimal.valueOf(100));
+            }
 
-        // Calculate months to obsolescence
-        Integer monthsToObsolescence = calculateMonthsToObsolescence(book, totalRiskScore, assessmentDate);
+            // Determine risk level
+            String riskLevel = determineRiskLevel(totalRiskScore);
 
-        return new ObsolescenceAssessment(book, riskLevel, monthsToObsolescence, totalRiskScore, assessmentDate);
+            // Calculate months to obsolescence
+            Integer monthsToObsolescence = calculateMonthsToObsolescence(book, totalRiskScore, assessmentDate);
+
+            return new ObsolescenceAssessment(book, riskLevel, monthsToObsolescence, totalRiskScore, assessmentDate);
+            
+        } catch (Exception e) {
+            logger.error("Failed to analyze book ID: {}", book.getId(), e);
+            // Return a safe default assessment
+            return new ObsolescenceAssessment(book, "MEDIUM", 24, BigDecimal.valueOf(50.0), assessmentDate);
+        }
     }
 
     /**
@@ -192,9 +244,9 @@ public class TechObsolescenceAnalysisService {
     private String determineRiskLevel(BigDecimal riskScore) {
         double score = riskScore.doubleValue();
         
-        if (score >= 70.0) {
+        if (score >= HIGH_RISK_THRESHOLD) {
             return "HIGH";
-        } else if (score >= 40.0) {
+        } else if (score >= MEDIUM_RISK_THRESHOLD) {
             return "MEDIUM";
         } else {
             return "LOW";
@@ -208,18 +260,18 @@ public class TechObsolescenceAnalysisService {
     private Integer calculateMonthsToObsolescence(Book book, BigDecimal riskScore, LocalDate assessmentDate) {
         double score = riskScore.doubleValue();
         
-        // Base months calculation
+        // Base months calculation using constants
         int baseMonths;
         if (score >= 80.0) {
-            baseMonths = 6; // Very high risk - 6 months
-        } else if (score >= 70.0) {
-            baseMonths = 12; // High risk - 1 year
+            baseMonths = VERY_HIGH_RISK_MONTHS; // Very high risk - 6 months
+        } else if (score >= HIGH_RISK_THRESHOLD) {
+            baseMonths = HIGH_RISK_MONTHS; // High risk - 1 year
         } else if (score >= 50.0) {
-            baseMonths = 24; // Medium risk - 2 years
+            baseMonths = MEDIUM_RISK_MONTHS; // Medium risk - 2 years
         } else if (score >= 30.0) {
-            baseMonths = 48; // Low-medium risk - 4 years
+            baseMonths = LOW_MEDIUM_RISK_MONTHS; // Low-medium risk - 4 years
         } else {
-            baseMonths = 96; // Low risk - 8 years
+            baseMonths = LOW_RISK_MONTHS; // Low risk - 8 years
         }
         
         // Adjust based on publication date

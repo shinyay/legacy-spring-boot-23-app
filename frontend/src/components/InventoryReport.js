@@ -557,7 +557,325 @@ const InventoryReport = () => {
             </Grid>
           </Grid>
 
-          {/* Charts */}
+          {/* Analysis Tabs - Phase 1 Enhanced Analytics */}
+          <Paper style={{ marginBottom: 24 }}>
+            <Tabs value={currentTab} onChange={(e, newValue) => setCurrentTab(newValue)} aria-label="inventory analysis tabs">
+              <Tab label="在庫サマリー" />
+              <Tab label="回転率分析" />
+              <Tab label="ABC/XYZ分析" />
+              <Tab label="デッドストック分析" />
+              <Tab label="陳腐化リスク分析" />
+              <Tab label="発注最適化" />
+            </Tabs>
+            
+            {/* Tab Content */}
+            {currentTab === 0 && (
+              <Box className={classes.analyticsTab}>
+                <Typography variant="h6" gutterBottom>在庫サマリー分析</Typography>
+                <Grid container spacing={3}>
+                  {/* Stock Status Pie Chart */}
+                  <Grid item xs={12} lg={6}>
+                    <Typography variant="subtitle1" gutterBottom>在庫ステータス分布</Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={stockStatusData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {stockStatusData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Grid>
+
+                  {/* Category Turnover Bar Chart */}
+                  <Grid item xs={12} lg={6}>
+                    <Typography variant="subtitle1" gutterBottom>カテゴリ別在庫回転率</Typography>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={categoryTurnoverData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="category" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => [value, '回転率']} />
+                        <Bar dataKey="turnover" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {currentTab === 1 && (
+              <Box className={classes.analyticsTab}>
+                <Typography variant="h6" gutterBottom>在庫回転率詳細分析</Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <Typography variant="body1" color="textSecondary" paragraph>
+                      在庫回転率の詳細分析とトレンドを表示します。高回転率商品と低回転率商品を特定し、在庫最適化のための洞察を提供します。
+                    </Typography>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>カテゴリ</TableCell>
+                            <TableCell align="right">回転率</TableCell>
+                            <TableCell align="right">在庫金額</TableCell>
+                            <TableCell>評価</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {categoryTurnoverData.map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{item.category}</TableCell>
+                              <TableCell align="right">{item.turnover}</TableCell>
+                              <TableCell align="right">{formatCurrency(item.turnover * 25000)}</TableCell>
+                              <TableCell>
+                                <Chip 
+                                  label={item.turnover > 4.5 ? '優秀' : item.turnover > 3.5 ? '良好' : '要改善'} 
+                                  color={item.turnover > 4.5 ? 'primary' : item.turnover > 3.5 ? 'default' : 'secondary'}
+                                  size="small"
+                                />
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {currentTab === 2 && (
+              <Box className={classes.analyticsTab}>
+                <Typography variant="h6" gutterBottom>ABC/XYZ分析マトリックス</Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={8}>
+                    <Typography variant="body1" color="textSecondary" paragraph>
+                      ABC分析（売上貢献度）とXYZ分析（需要変動性）を組み合わせた9象限マトリックス分析
+                    </Typography>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>分類</TableCell>
+                            <TableCell>戦略</TableCell>
+                            <TableCell>在庫レベル</TableCell>
+                            <TableCell>発注頻度</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>AX (重要・安定)</TableCell>
+                            <TableCell>重点管理</TableCell>
+                            <TableCell>高</TableCell>
+                            <TableCell>週次</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>AY (重要・変動)</TableCell>
+                            <TableCell>需要予測強化</TableCell>
+                            <TableCell>中高</TableCell>
+                            <TableCell>隔週</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>AZ (重要・不規則)</TableCell>
+                            <TableCell>機会損失回避</TableCell>
+                            <TableCell>安全在庫</TableCell>
+                            <TableCell>オンデマンド</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>BX (標準・安定)</TableCell>
+                            <TableCell>効率管理</TableCell>
+                            <TableCell>中</TableCell>
+                            <TableCell>月次</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>CZ (低・不規則)</TableCell>
+                            <TableCell>廃止検討</TableCell>
+                            <TableCell>処分</TableCell>
+                            <TableCell>なし</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Paper style={{ padding: 16, background: '#f5f5f5' }}>
+                      <Typography variant="subtitle2" gutterBottom>分析サマリー</Typography>
+                      <Typography variant="body2" paragraph>A商品: 8アイテム (32%)</Typography>
+                      <Typography variant="body2" paragraph>B商品: 12アイテム (48%)</Typography>
+                      <Typography variant="body2" paragraph>C商品: 5アイテム (20%)</Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        X(安定): 15アイテム / Y(変動): 7アイテム / Z(不規則): 3アイテム
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {currentTab === 3 && (
+              <Box className={classes.analyticsTab}>
+                <Typography variant="h6" gutterBottom>デッドストック詳細分析</Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <Typography variant="body1" color="textSecondary" paragraph>
+                      90日以上売上がない商品を分析し、処分戦略を提案します。
+                    </Typography>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>商品名</TableCell>
+                            <TableCell align="right">最終売上日</TableCell>
+                            <TableCell align="right">在庫数</TableCell>
+                            <TableCell align="right">在庫金額</TableCell>
+                            <TableCell>処分推奨</TableCell>
+                            <TableCell>期待回収率</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>Legacy Java Framework Guide</TableCell>
+                            <TableCell align="right">120日前</TableCell>
+                            <TableCell align="right">8</TableCell>
+                            <TableCell align="right">{formatCurrency(28000)}</TableCell>
+                            <TableCell>
+                              <Chip label="割引販売" color="primary" size="small" />
+                            </TableCell>
+                            <TableCell>70%</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>jQuery Complete Reference</TableCell>
+                            <TableCell align="right">180日前</TableCell>
+                            <TableCell align="right">5</TableCell>
+                            <TableCell align="right">{formatCurrency(15000)}</TableCell>
+                            <TableCell>
+                              <Chip label="バルク販売" color="secondary" size="small" />
+                            </TableCell>
+                            <TableCell>50%</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {currentTab === 4 && (
+              <Box className={classes.analyticsTab}>
+                <Typography variant="h6" gutterBottom>技術陳腐化リスク分析</Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={8}>
+                    <Typography variant="body1" color="textSecondary" paragraph>
+                      技術トレンドと出版年から陳腐化リスクを評価し、予防的な在庫調整を推奨します。
+                    </Typography>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>技術カテゴリ</TableCell>
+                            <TableCell align="right">リスクスコア</TableCell>
+                            <TableCell>リスクレベル</TableCell>
+                            <TableCell>推奨アクション</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          <TableRow>
+                            <TableCell>jQuery</TableCell>
+                            <TableCell align="right">85</TableCell>
+                            <TableCell>
+                              <Chip label="高" color="secondary" size="small" />
+                            </TableCell>
+                            <TableCell>即座に在庫削減</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>Angular.js (1.x)</TableCell>
+                            <TableCell align="right">72</TableCell>
+                            <TableCell>
+                              <Chip label="高" color="secondary" size="small" />
+                            </TableCell>
+                            <TableCell>新版入荷停止</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>PHP 7.x</TableCell>
+                            <TableCell align="right">45</TableCell>
+                            <TableCell>
+                              <Chip label="中" color="primary" size="small" />
+                            </TableCell>
+                            <TableCell>販売促進</TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Paper style={{ padding: 16, background: '#f5f5f5' }}>
+                      <Typography variant="subtitle2" gutterBottom>リスク分布</Typography>
+                      <Typography variant="body2" color="error" paragraph>高リスク: 5商品</Typography>
+                      <Typography variant="body2" color="textSecondary" paragraph>中リスク: 8商品</Typography>
+                      <Typography variant="body2" color="primary">低リスク: 12商品</Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {currentTab === 5 && (
+              <Box className={classes.analyticsTab}>
+                <Typography variant="h6" gutterBottom>発注最適化提案</Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <Typography variant="body1" color="textSecondary" paragraph>
+                      在庫レベル、需要予測、リードタイムを考慮した最適な発注提案を生成します。
+                    </Typography>
+                    <TableContainer component={Paper}>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>商品名</TableCell>
+                            <TableCell align="right">現在庫</TableCell>
+                            <TableCell align="right">推奨発注数</TableCell>
+                            <TableCell align="right">発注金額</TableCell>
+                            <TableCell>緊急度</TableCell>
+                            <TableCell>理由</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {reportData.reorderSuggestions?.map((suggestion, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{suggestion.title}</TableCell>
+                              <TableCell align="right">{suggestion.currentStock}</TableCell>
+                              <TableCell align="right">{suggestion.suggestedOrder}</TableCell>
+                              <TableCell align="right">{formatCurrency(suggestion.suggestedOrder * 3500)}</TableCell>
+                              <TableCell>
+                                <Chip 
+                                  label={suggestion.urgency} 
+                                  className={getUrgencyClass(suggestion.urgency)}
+                                  size="small"
+                                />
+                              </TableCell>
+                              <TableCell>{suggestion.daysUntilStockout}日で欠品予想</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+          </Paper>
+
+          {/* Legacy Charts - kept for compatibility */}
           <Grid container spacing={3}>
             {/* Stock Status Pie Chart */}
             <Grid item xs={12} lg={6}>

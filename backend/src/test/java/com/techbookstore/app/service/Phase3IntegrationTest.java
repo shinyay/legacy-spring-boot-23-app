@@ -1,6 +1,7 @@
 package com.techbookstore.app.service;
 
 import com.techbookstore.app.dto.OptimalStockDto;
+import com.techbookstore.app.dto.OrderSuggestionDto;
 import com.techbookstore.app.entity.Book;
 import com.techbookstore.app.entity.DemandForecast;
 import com.techbookstore.app.repository.BookRepository;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +34,15 @@ public class Phase3IntegrationTest {
     @Mock
     private OptimalStockCalculatorService optimalStockCalculatorService;
 
+    @Mock
+    private DemandForecastService demandForecastService;
+
+    @Mock
+    private TechTrendAnalysisService techTrendAnalysisService;
+
+    @Mock
+    private SeasonalAnalysisService seasonalAnalysisService;
+
     @InjectMocks
     private IntelligentOrderingService intelligentOrderingService;
 
@@ -45,11 +56,13 @@ public class Phase3IntegrationTest {
         book1.setEstimatedCost(BigDecimal.valueOf(500));
         book1.setEstimatedRevenue(BigDecimal.valueOf(800));
         book1.setStockStatus("REORDER_NEEDED");
+        book1.setRecommendedOrderQuantity(15);
         
         OptimalStockDto book2 = new OptimalStockDto(2L, "Python Guide", 3, 15, 8, 3);
         book2.setEstimatedCost(BigDecimal.valueOf(300));
         book2.setEstimatedRevenue(BigDecimal.valueOf(450));
         book2.setStockStatus("UNDERSTOCK");
+        book2.setRecommendedOrderQuantity(12);
         
         List<OptimalStockDto> candidateBooks = Arrays.asList(book1, book2);
         
@@ -107,39 +120,66 @@ public class Phase3IntegrationTest {
     }
 
     @Test
-    public void testSystemIntegration() {
-        // Test that all components can work together conceptually
-        
-        // 1. Forecast generation -> 2. Optimal stock calculation -> 3. Order optimization
+    public void testIntelligentOrderingService() {
+        // Test intelligent ordering service functionality
         
         // Test data preparation
-        List<Long> bookIds = Arrays.asList(1L, 2L, 3L);
+        List<Long> bookIds = Arrays.asList(1L, 2L);
         
         // Mock optimal stock results
         OptimalStockDto stock1 = new OptimalStockDto(1L, "Book 1", 5, 20, 15, 5);
         stock1.setStockStatus("REORDER_NEEDED");
         stock1.setEstimatedCost(BigDecimal.valueOf(100));
         stock1.setEstimatedRevenue(BigDecimal.valueOf(150));
+        stock1.setRecommendedOrderQuantity(15);
         
         OptimalStockDto stock2 = new OptimalStockDto(2L, "Book 2", 8, 15, 10, 3);
         stock2.setStockStatus("UNDERSTOCK");
         stock2.setEstimatedCost(BigDecimal.valueOf(200));
         stock2.setEstimatedRevenue(BigDecimal.valueOf(280));
+        stock2.setRecommendedOrderQuantity(7);
         
         when(optimalStockCalculatorService.calculateOptimalStock(1L)).thenReturn(stock1);
         when(optimalStockCalculatorService.calculateOptimalStock(2L)).thenReturn(stock2);
-        when(optimalStockCalculatorService.calculateOptimalStock(3L)).thenReturn(stock1);
         
         // Test intelligent ordering
         try {
-            // This should work without throwing exceptions
-            assertNotNull(intelligentOrderingService);
+            OrderSuggestionDto suggestion = intelligentOrderingService.generateOrderSuggestions(bookIds, "EMERGENCY");
             
-            // The service should be able to handle the basic operations
-            assertTrue(bookIds.size() > 0);
+            assertNotNull(suggestion);
+            assertEquals("EMERGENCY", suggestion.getSuggestionType());
+            assertNotNull(suggestion.getCategorySuggestions());
             
         } catch (Exception e) {
-            fail("System integration test failed: " + e.getMessage());
+            fail("Intelligent ordering test failed: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConstraintSensitivityAnalysis() {
+        // Test constraint sensitivity analysis
+        ConstraintOptimizationService optimizationService = new ConstraintOptimizationService();
+        
+        // Create test data
+        OptimalStockDto book1 = new OptimalStockDto(1L, "Java Programming", 5, 20, 10, 5);
+        book1.setEstimatedCost(BigDecimal.valueOf(500));
+        book1.setEstimatedRevenue(BigDecimal.valueOf(800));
+        book1.setStockStatus("REORDER_NEEDED");
+        book1.setRecommendedOrderQuantity(15);
+        
+        List<OptimalStockDto> candidateBooks = Arrays.asList(book1);
+        
+        ConstraintOptimizationService.OptimizationConstraints constraints = 
+            optimizationService.createDefaultConstraints();
+        constraints.setMaxBudget(BigDecimal.valueOf(1000));
+        
+        // Test sensitivity analysis
+        try {
+            Map<String, Object> sensitivityAnalysis = optimizationService.analyzeConstraintSensitivity(candidateBooks, constraints);
+            assertNotNull(sensitivityAnalysis);
+            assertTrue(sensitivityAnalysis.containsKey("budgetSensitivity"));
+        } catch (Exception e) {
+            fail("Constraint sensitivity analysis test failed: " + e.getMessage());
         }
     }
 }

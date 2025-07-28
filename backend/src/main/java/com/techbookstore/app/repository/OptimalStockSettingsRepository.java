@@ -45,6 +45,6 @@ public interface OptimalStockSettingsRepository extends JpaRepository<OptimalSto
     /**
      * Find books with low stock levels based on optimal settings
      */
-    @Query("SELECT oss FROM OptimalStockSettings oss JOIN oss.book.inventories i WHERE i.quantity <= oss.reorderPoint AND oss.validFrom <= :currentDate AND (oss.validTo IS NULL OR oss.validTo >= :currentDate)")
+    @Query("SELECT oss FROM OptimalStockSettings oss JOIN Inventory i ON oss.book.id = i.book.id WHERE (i.storeStock + i.warehouseStock) <= oss.reorderPoint AND oss.validFrom <= :currentDate AND (oss.validTo IS NULL OR oss.validTo >= :currentDate)")
     List<OptimalStockSettings> findBooksNeedingReorder(@Param("currentDate") LocalDate currentDate);
 }

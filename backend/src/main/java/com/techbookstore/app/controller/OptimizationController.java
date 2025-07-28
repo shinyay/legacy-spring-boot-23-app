@@ -1,7 +1,10 @@
 package com.techbookstore.app.controller;
 
 import com.techbookstore.app.dto.OptimalStockDto;
+import com.techbookstore.app.dto.OrderSuggestionDto;
 import com.techbookstore.app.entity.OptimalStockSettings;
+import com.techbookstore.app.service.ConstraintOptimizationService;
+import com.techbookstore.app.service.IntelligentOrderingService;
 import com.techbookstore.app.service.OptimalStockCalculatorService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +21,15 @@ import java.util.Map;
 public class OptimizationController {
 
     private final OptimalStockCalculatorService optimalStockCalculatorService;
+    private final IntelligentOrderingService intelligentOrderingService;
+    private final ConstraintOptimizationService constraintOptimizationService;
 
-    public OptimizationController(OptimalStockCalculatorService optimalStockCalculatorService) {
+    public OptimizationController(OptimalStockCalculatorService optimalStockCalculatorService,
+                                 IntelligentOrderingService intelligentOrderingService,
+                                 ConstraintOptimizationService constraintOptimizationService) {
         this.optimalStockCalculatorService = optimalStockCalculatorService;
+        this.intelligentOrderingService = intelligentOrderingService;
+        this.constraintOptimizationService = constraintOptimizationService;
     }
 
     /**
@@ -48,11 +57,27 @@ public class OptimizationController {
      * POST /api/v1/optimization/order-suggestions
      */
     @PostMapping("/order-suggestions")
+    public ResponseEntity<OrderSuggestionDto> getIntelligentOrderSuggestions(
+            @RequestBody Map<String, Object> request) {
+        
+        @SuppressWarnings("unchecked")
+        List<Long> bookIds = (List<Long>) request.get("bookIds");
+        String orderType = (String) request.getOrDefault("orderType", "OPTIMIZED");
+        
+        OrderSuggestionDto suggestion = intelligentOrderingService.generateOrderSuggestions(bookIds, orderType);
+        return ResponseEntity.ok(suggestion);
+    }
+
+    /**
+     * Get simple order suggestions (legacy endpoint)
+     * POST /api/v1/optimization/order-suggestions-simple
+     */
+    @PostMapping("/order-suggestions-simple")
     public ResponseEntity<List<OptimalStockDto>> getOrderSuggestions(@RequestBody List<Long> bookIds) {
         List<OptimalStockDto> suggestions = bookIds.stream()
             .map(optimalStockCalculatorService::calculateOptimalStock)
             .filter(stock -> "REORDER_NEEDED".equals(stock.getStockStatus()) || "UNDERSTOCK".equals(stock.getStockStatus()))
-            .toList();
+            .collect(java.util.stream.Collectors.toList());
         
         return ResponseEntity.ok(suggestions);
     }
@@ -112,6 +137,43 @@ public class OptimizationController {
     }
 
     /**
+     * Advanced constraint optimization
+     * POST /api/v1/optimization/constraint-optimize
+     */
+    @PostMapping("/constraint-optimize")
+    public ResponseEntity<ConstraintOptimizationService.OptimizationResult> optimizeWithConstraints(
+            @RequestBody Map<String, Object> request) {
+        
+        @SuppressWarnings("unchecked")
+        List<Long> bookIds = (List<Long>) request.get("bookIds");
+        
+        // Get stock analysis for books
+        List<OptimalStockDto> candidateBooks = bookIds.stream()
+            .map(optimalStockCalculatorService::calculateOptimalStock)
+            .collect(java.util.stream.Collectors.toList());
+        
+        // Create constraints
+        ConstraintOptimizationService.OptimizationConstraints constraints = 
+            constraintOptimizationService.createDefaultConstraints();
+        
+        // Apply any custom constraints from request
+        if (request.containsKey("maxBudget")) {
+            constraints.setMaxBudget(java.math.BigDecimal.valueOf(((Number) request.get("maxBudget")).doubleValue()));
+        }
+        if (request.containsKey("maxItems")) {
+            constraints.setMaxItems(((Number) request.get("maxItems")).intValue());
+        }
+        if (request.containsKey("priorityFocus")) {
+            constraints.setPriorityFocus((String) request.get("priorityFocus"));
+        }
+        
+        ConstraintOptimizationService.OptimizationResult result = 
+            constraintOptimizationService.optimizeBookSelection(candidateBooks, constraints);
+        
+        return ResponseEntity.ok(result);
+    }
+
+    /**
      * Bulk calculate optimal stock for multiple books
      * POST /api/v1/optimization/bulk-calculate
      */
@@ -119,7 +181,7 @@ public class OptimizationController {
     public ResponseEntity<List<OptimalStockDto>> bulkCalculateOptimalStock(@RequestBody List<Long> bookIds) {
         List<OptimalStockDto> results = bookIds.stream()
             .map(optimalStockCalculatorService::calculateOptimalStock)
-            .toList();
+            .collect(java.util.stream.Collectors.toList());
         
         return ResponseEntity.ok(results);
     }

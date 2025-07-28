@@ -879,25 +879,65 @@ CREATE TABLE optimal_stock_settings (
 - エクスポート機能（Excel/PDF）
 
 ### 4.2 Phase 2: 高度分析実装（3週間）
-**目標**: ABC/XYZ分析、デッドストック分析、陳腐化リスク分析
+**目標**: ABC/XYZ分析、デッドストック分析、陳腐化リスク分析、季節性分析
 
-**Week 3: ABC/XYZ分析**
-- `ABCXYZAnalysisService`実装
-- データベーステーブル作成
-- マトリックス可視化コンポーネント
-- 戦略提案ロジック
+#### 実装現状と要件詳細
 
-**Week 4-5: デッドストック・陳腐化分析**
-- 既存`InventoryAnalysisDto`活用・拡張
-- 処分戦略アルゴリズム実装
-- 技術ライフサイクル判定ロジック
-- リスクスコア計算エンジン
+**既存実装活用要件**:
+- ✅ `InventoryAnalysisDto`クラス（基本構造完成）
+- ✅ `AnalyticsService.generateInventoryAnalysis()`（メソッド枠組み完成）
+- ✅ エンティティクラス：`ABCXYZAnalysis`, `ObsolescenceAssessment`, `DemandForecast`
+- ✅ データベーススキーマ（`inventory_analytics_schema.sql`）
+- ✅ フロントエンド基本UI（`InventoryReport.js`の分析タブ構造）
+
+**Week 3: ABC/XYZ分析実装**
+- **バックエンド実装**:
+  - `ABCXYZAnalysisService`新規作成
+  - `AnalyticsService`内の`generateInventoryTurnoverAnalysis()`実装
+  - ABC分析（売上貢献度による分類）アルゴリズム
+  - XYZ分析（需要変動性による分類）アルゴリズム
+  - 9象限マトリックス戦略マッピング
+- **フロントエンド実装**:
+  - ABC/XYZ分析マトリックス可視化（散布図チャート）
+  - 戦略提案パネル
+  - 分類別詳細テーブル
+
+**Week 4: デッドストック・陳腐化分析強化**
+- **バックエンド実装**:
+  - `generateDeadStockAnalysis()`の完全実装
+  - `EnhancedDeadStockItem`クラス拡張
+  - 処分戦略決定アルゴリズム（割引販売、バルク販売、返品、廃棄）
+  - `TechObsolescenceAnalysis`サービス実装
+  - 技術ライフサイクル判定ロジック（EMERGING, GROWTH, MATURE, DECLINING）
+  - 陳腐化リスクスコア計算エンジン
+- **フロントエンド実装**:
+  - デッドストック処分戦略ダッシュボード
+  - 技術陳腐化リスクヒートマップ
+  - アクションアイテムパネル
+
+**Week 5: 季節性分析・統合実装**
+- **バックエンド実装**:
+  - `SeasonalAnalysisService`新規実装
+  - 技術専門書特有の季節性パターン分析
+  - `generateSeasonalInventoryTrend()`完全実装
+  - 分析結果統合ロジック
+- **フロントエンド実装**:
+  - 季節性トレンドチャート
+  - 統合分析ダッシュボード
+  - エクスポート機能強化
+
+**重点実装要件**:
+1. **技術専門書特化ロジック**: 出版年・技術カテゴリ・市場トレンド考慮
+2. **実用的な戦略提案**: 具体的なアクション（発注量、処分方法、タイミング）
+3. **パフォーマンス最適化**: 10,000商品で分析処理5秒以内
+4. **データ精度**: 既存在庫データとの整合性100%維持
 
 **成果物**:
-- ABC/XYZ分析機能
-- 高度デッドストック分析
-- 技術陳腐化リスク評価
-- インタラクティブ分析ダッシュボード
+- 完全実装されたABC/XYZ分析機能
+- 処分戦略付きデッドストック分析
+- 技術陳腐化リスク評価システム
+- 季節性パターン分析
+- 統合分析ダッシュボード
 
 ### 4.3 Phase 3: 予測・最適化（4週間）
 **目標**: 需要予測、最適在庫計算、インテリジェント発注

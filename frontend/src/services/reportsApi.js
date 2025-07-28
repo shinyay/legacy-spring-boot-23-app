@@ -108,6 +108,25 @@ export const reports = {
     }
   },
 
+  // Enhanced Inventory Report with filtering - Phase 1
+  getEnhancedInventoryReport: async (filters = {}) => {
+    try {
+      const params = {};
+      // Add non-empty filters to params
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== '' && value !== null && value !== undefined) {
+          params[key] = value;
+        }
+      });
+
+      const response = await reportsApi.get('/reports/inventory/enhanced', { params });
+      return response.data;
+    } catch (error) {
+      console.error('Enhanced inventory report error:', error);
+      throw error;
+    }
+  },
+
   getInventoryTurnover: async (category = null) => {
     try {
       const params = {};

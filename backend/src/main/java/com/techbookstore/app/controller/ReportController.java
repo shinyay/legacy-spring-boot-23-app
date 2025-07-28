@@ -115,9 +115,37 @@ public class ReportController {
      */
     @GetMapping("/inventory")
     public ResponseEntity<InventoryReportDto> getInventoryReport() {
-        logger.info("Generating inventory report");
+        logger.info("Generating basic inventory report");
         
         InventoryReportDto report = reportService.generateInventoryReport();
+        return ResponseEntity.ok(report);
+    }
+
+    /**
+     * Generate enhanced inventory report with filtering capabilities.
+     * Phase 1 enhancement with comprehensive filtering and analytics.
+     * 
+     * @param category optional technology category filter (Java, Python, React, etc.)
+     * @param level optional technical level filter (BEGINNER, INTERMEDIATE, ADVANCED)
+     * @param publisher optional publisher filter
+     * @param stockStatus optional stock status filter (NORMAL, LOW, CRITICAL, OVERSTOCK)
+     * @param priceRange optional price range filter (~3000, 3000-5000, 5000+)
+     * @param publicationYear optional publication year filter
+     * @return enhanced inventory report with analytics
+     */
+    @GetMapping("/inventory/enhanced")
+    public ResponseEntity<InventoryReportDto> getEnhancedInventoryReport(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) String publisher,
+            @RequestParam(required = false) String stockStatus,
+            @RequestParam(required = false) String priceRange,
+            @RequestParam(required = false) Integer publicationYear) {
+        logger.info("Generating enhanced inventory report with filters - category: {}, level: {}, publisher: {}, stockStatus: {}, priceRange: {}, publicationYear: {}", 
+                   category, level, publisher, stockStatus, priceRange, publicationYear);
+        
+        InventoryReportDto report = reportService.generateInventoryReport(category, level, publisher, 
+                                                                         stockStatus, priceRange, publicationYear);
         return ResponseEntity.ok(report);
     }
     

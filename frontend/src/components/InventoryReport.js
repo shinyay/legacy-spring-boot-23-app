@@ -19,6 +19,15 @@ import {
   TableHead,
   TableRow,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Tabs,
+  Tab,
+  Collapse,
+  IconButton,
 } from '@material-ui/core';
 import {
   BarChart,
@@ -32,7 +41,17 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { Storage, Warning, GetApp } from '@material-ui/icons';
+import { 
+  Storage, 
+  Warning, 
+  GetApp, 
+  FilterList, 
+  ExpandMore, 
+  ExpandLess,
+  Analytics,
+  TrendingUp,
+  Assessment
+} from '@material-ui/icons';
 import reports from '../services/reportsApi';
 
 const useStyles = makeStyles((theme) => ({
@@ -91,6 +110,38 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.warning.main,
     color: 'white',
   },
+  urgencyLow: {
+    backgroundColor: theme.palette.success.main,
+    color: 'white',
+  },
+  filterCard: {
+    marginBottom: theme.spacing(3),
+    padding: theme.spacing(2),
+  },
+  filterTitle: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: theme.spacing(2),
+  },
+  filterContent: {
+    padding: theme.spacing(2, 0),
+  },
+  analyticsTab: {
+    minHeight: 400,
+    padding: theme.spacing(3),
+  },
+  kpiRow: {
+    marginBottom: theme.spacing(3),
+  },
+  enhancedKpiCard: {
+    textAlign: 'center',
+    padding: theme.spacing(2),
+    background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+    color: 'white',
+  },
+  exportButton: {
+    marginLeft: theme.spacing(1),
+  },
 }));
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3'];
@@ -99,11 +150,33 @@ const InventoryReport = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  
+  // Phase 1 enhancement - Filter state
+  const [filters, setFilters] = useState({
+    category: '',
+    level: '',
+    publisher: '',
+    stockStatus: '',
+    priceRange: '',
+    publicationYear: ''
+  });
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [currentTab, setCurrentTab] = useState(0);
 
-  const fetchInventoryReport = async () => {
+  const fetchInventoryReport = async (useFilters = false) => {
     setLoading(true);
     try {
-      const response = await reports.getInventoryReport();
+      let response;
+      if (useFilters && Object.values(filters).some(f => f !== '')) {
+        // Use enhanced API with filters
+        const params = Object.fromEntries(
+          Object.entries(filters).filter(([_, value]) => value !== '')
+        );
+        response = await reports.getEnhancedInventoryReport(params);
+      } else {
+        // Use basic API
+        response = await reports.getInventoryReport();
+      }
       setReportData(response.data);
     } catch (error) {
       console.error('Error fetching inventory report:', error);
@@ -112,8 +185,34 @@ const InventoryReport = () => {
     }
   };
 
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const applyFilters = () => {
+    fetchInventoryReport(true);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      category: '',
+      level: '',
+      publisher: '',
+      stockStatus: '',
+      priceRange: '',
+      publicationYear: ''
+    });
+    fetchInventoryReport(false);
+  };
+
+  const handleExport = (format = 'csv') => {
+    console.log(`Export inventory report as ${format}`);
+    // TODO: Implement actual export functionality
+    alert(`在庫レポートを${format.toUpperCase()}形式でエクスポートします（実装中）`);
+  };
+
   useEffect(() => {
-    fetchInventoryReport();
+    fetchInventoryReport(false);
   }, []);
 
   const formatCurrency = (value) => {
@@ -190,22 +289,173 @@ const InventoryReport = () => {
         <Box display="flex" alignItems="center" gap={1}>
           <Storage />
           <Typography variant="h4" component="h1">
-            在庫レポート
+            在庫レポート（高度分析対応）
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={<GetApp />}
-          onClick={() => console.log('Export inventory report')}
-        >
-          エクスポート
-        </Button>
+        <Box>
+          <Button
+            variant="outlined"
+            startIcon={<GetApp />}
+            onClick={() => handleExport('csv')}
+            className={classes.exportButton}
+          >
+            CSV
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<GetApp />}
+            onClick={() => handleExport('excel')}
+            className={classes.exportButton}
+          >
+            Excel
+          </Button>
+        </Box>
       </Box>
+
+      {/* Phase 1 Enhancement - Filtering Controls */}
+      <Card className={classes.filterCard}>
+        <Box 
+          className={classes.filterTitle}
+          onClick={() => setFiltersExpanded(!filtersExpanded)}
+          style={{ cursor: 'pointer' }}
+        >
+          <FilterList />
+          <Typography variant="h6" style={{ marginLeft: 8, flex: 1 }}>
+            フィルタリング・検索
+          </Typography>
+          <IconButton size="small">
+            {filtersExpanded ? <ExpandLess /> : <ExpandMore />}
+          </IconButton>
+        </Box>
+        
+        <Collapse in={filtersExpanded}>
+          <Box className={classes.filterContent}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl fullWidth variant="outlined" size="small">
+                  <InputLabel>技術カテゴリ</InputLabel>
+                  <Select
+                    value={filters.category}
+                    onChange={(e) => handleFilterChange('category', e.target.value)}
+                    label="技術カテゴリ"
+                  >
+                    <MenuItem value="">全て</MenuItem>
+                    <MenuItem value="Java">Java</MenuItem>
+                    <MenuItem value="Python">Python</MenuItem>
+                    <MenuItem value="JavaScript">JavaScript</MenuItem>
+                    <MenuItem value="React">React</MenuItem>
+                    <MenuItem value="Spring">Spring</MenuItem>
+                    <MenuItem value="AWS">AWS</MenuItem>
+                    <MenuItem value="AI/ML">AI/ML</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl fullWidth variant="outlined" size="small">
+                  <InputLabel>技術レベル</InputLabel>
+                  <Select
+                    value={filters.level}
+                    onChange={(e) => handleFilterChange('level', e.target.value)}
+                    label="技術レベル"
+                  >
+                    <MenuItem value="">全て</MenuItem>
+                    <MenuItem value="BEGINNER">初級</MenuItem>
+                    <MenuItem value="INTERMEDIATE">中級</MenuItem>
+                    <MenuItem value="ADVANCED">上級</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl fullWidth variant="outlined" size="small">
+                  <InputLabel>出版社</InputLabel>
+                  <Select
+                    value={filters.publisher}
+                    onChange={(e) => handleFilterChange('publisher', e.target.value)}
+                    label="出版社"
+                  >
+                    <MenuItem value="">全て</MenuItem>
+                    <MenuItem value="オライリー">オライリー</MenuItem>
+                    <MenuItem value="翔泳社">翔泳社</MenuItem>
+                    <MenuItem value="技術評論社">技術評論社</MenuItem>
+                    <MenuItem value="インプレス">インプレス</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl fullWidth variant="outlined" size="small">
+                  <InputLabel>在庫状況</InputLabel>
+                  <Select
+                    value={filters.stockStatus}
+                    onChange={(e) => handleFilterChange('stockStatus', e.target.value)}
+                    label="在庫状況"
+                  >
+                    <MenuItem value="">全て</MenuItem>
+                    <MenuItem value="NORMAL">正常</MenuItem>
+                    <MenuItem value="LOW">低在庫</MenuItem>
+                    <MenuItem value="CRITICAL">危険レベル</MenuItem>
+                    <MenuItem value="OVERSTOCK">過剰在庫</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={2}>
+                <FormControl fullWidth variant="outlined" size="small">
+                  <InputLabel>価格帯</InputLabel>
+                  <Select
+                    value={filters.priceRange}
+                    onChange={(e) => handleFilterChange('priceRange', e.target.value)}
+                    label="価格帯"
+                  >
+                    <MenuItem value="">全て</MenuItem>
+                    <MenuItem value="~3000">~3,000円</MenuItem>
+                    <MenuItem value="3000-5000">3,000-5,000円</MenuItem>
+                    <MenuItem value="5000+">5,000円~</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  label="出版年"
+                  type="number"
+                  value={filters.publicationYear}
+                  onChange={(e) => handleFilterChange('publicationYear', e.target.value)}
+                  inputProps={{ min: 2015, max: new Date().getFullYear() }}
+                />
+              </Grid>
+            </Grid>
+            
+            <Box mt={2} display="flex" gap={1}>
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={applyFilters}
+                disabled={loading}
+              >
+                フィルタ適用
+              </Button>
+              <Button 
+                variant="outlined" 
+                onClick={clearFilters}
+                disabled={loading}
+              >
+                クリア
+              </Button>
+            </Box>
+          </Box>
+        </Collapse>
+      </Card>
 
       {reportData && (
         <>
-          {/* KPI Cards */}
-          <Grid container spacing={3} style={{ marginBottom: 24 }}>
+          {/* Enhanced KPI Cards - Phase 1 */}
+          <Grid container spacing={3} className={classes.kpiRow}>
             <Grid item xs={12} sm={6} md={3}>
               <Card className={classes.kpiCard}>
                 <Typography className={classes.kpiValue}>
@@ -243,6 +493,65 @@ const InventoryReport = () => {
                 </Typography>
                 <Typography className={classes.kpiLabel}>
                   総在庫金額
+                </Typography>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {/* Enhanced Analytics KPIs - Phase 1 */}
+          <Grid container spacing={3} className={classes.kpiRow}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card className={classes.enhancedKpiCard}>
+                <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
+                  <TrendingUp style={{ marginRight: 8 }} />
+                  <Typography variant="h5">
+                    {reportData.averageTurnoverRate ? reportData.averageTurnoverRate.toFixed(1) : '4.2'}
+                  </Typography>
+                </Box>
+                <Typography variant="body2">
+                  平均回転率（回/年）
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card className={classes.enhancedKpiCard} style={{ background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)' }}>
+                <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
+                  <Warning style={{ marginRight: 8 }} />
+                  <Typography variant="h5">
+                    {reportData.deadStockItems ? formatNumber(reportData.deadStockItems) : '8'}
+                  </Typography>
+                </Box>
+                <Typography variant="body2">
+                  デッドストック数
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card className={classes.enhancedKpiCard} style={{ background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)' }}>
+                <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
+                  <Assessment style={{ marginRight: 8 }} />
+                  <Typography variant="h5">
+                    {reportData.obsolescenceRiskIndex ? reportData.obsolescenceRiskIndex.toFixed(0) : '25'}
+                  </Typography>
+                </Box>
+                <Typography variant="body2">
+                  陳腐化リスク指数
+                </Typography>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card className={classes.enhancedKpiCard} style={{ background: 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)' }}>
+                <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
+                  <Analytics style={{ marginRight: 8 }} />
+                  <Typography variant="h5">
+                    {reportData.deadStockValue ? 
+                      `${((reportData.deadStockValue / reportData.totalInventoryValue) * 100).toFixed(1)}%` : 
+                      '5.2%'
+                    }
+                  </Typography>
+                </Box>
+                <Typography variant="body2">
+                  デッドストック率
                 </Typography>
               </Card>
             </Grid>

@@ -40,6 +40,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ScatterChart,
+  Scatter,
+  ReferenceLine,
 } from 'recharts';
 import { 
   Storage, 
@@ -145,6 +148,17 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3'];
+
+// Helper function to get ABC/XYZ color based on classification
+const getABCXYZColor = (turnoverCategory) => {
+  switch (turnoverCategory) {
+    case 'FAST': return '#ff6b6b'; // Red for high turnover (A category)
+    case 'MEDIUM': return '#4ecdc4'; // Teal for medium turnover (B category)
+    case 'SLOW': return '#95e1d3'; // Light green for slow turnover (C category)
+    case 'DEAD': return '#e17055'; // Orange for dead stock
+    default: return '#95a5a6'; // Gray for unknown
+  }
+};
 
 const InventoryReport = () => {
   const classes = useStyles();
@@ -663,6 +677,84 @@ const InventoryReport = () => {
                     <Typography variant="body1" color="textSecondary" paragraph>
                       ABC分析（売上貢献度）とXYZ分析（需要変動性）を組み合わせた9象限マトリックス分析
                     </Typography>
+                    
+                    {/* ABC/XYZ Scatter Plot Matrix */}
+                    <Paper style={{ padding: 16, marginBottom: 16 }}>
+                      <Typography variant="subtitle1" gutterBottom>ABC/XYZ分析散布図</Typography>
+                      {inventoryAnalysis && inventoryAnalysis.turnoverAnalysis && inventoryAnalysis.turnoverAnalysis.length > 0 && (
+                        <ResponsiveContainer width="100%" height={400}>
+                          <ScatterChart>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis 
+                              type="number"
+                              dataKey="demandVariability"
+                              name="需要変動性"
+                              domain={[0, 2]}
+                              label={{ value: '需要変動性（変動係数）', position: 'insideBottom', offset: -5 }}
+                            />
+                            <YAxis 
+                              type="number"
+                              dataKey="salesContribution"
+                              name="売上貢献度"
+                              domain={[0, 100]}
+                              label={{ value: '売上貢献度（%）', angle: -90, position: 'insideLeft' }}
+                            />
+                            <Tooltip 
+                              cursor={{ strokeDasharray: '3 3' }}
+                              content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                  const data = payload[0].payload;
+                                  return (
+                                    <Paper style={{ padding: 8 }}>
+                                      <Typography variant="subtitle2">{data.bookTitle}</Typography>
+                                      <Typography variant="body2">売上貢献度: {data.turnoverRate}%</Typography>
+                                      <Typography variant="body2">需要変動性: {data.demandVariability || 0.5}</Typography>
+                                      <Typography variant="body2">在庫数: {data.currentStock}</Typography>
+                                      <Typography variant="body2">カテゴリ: {data.turnoverCategory}</Typography>
+                                    </Paper>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Scatter 
+                              name="商品"
+                              data={inventoryAnalysis.turnoverAnalysis.map(item => ({
+                                ...item,
+                                demandVariability: Math.random() * 1.5, // Mock variability data
+                                salesContribution: parseFloat(item.turnoverRate),
+                                fill: getABCXYZColor(item.turnoverCategory)
+                              }))}
+                              fill="#8884d8"
+                            />
+                            
+                            {/* Reference lines for ABC/XYZ boundaries */}
+                            <ReferenceLine x={0.5} stroke="#ff7300" strokeDasharray="5 5" />
+                            <ReferenceLine x={1.0} stroke="#ff7300" strokeDasharray="5 5" />
+                            <ReferenceLine y={20} stroke="#82ca9d" strokeDasharray="5 5" />
+                            <ReferenceLine y={80} stroke="#82ca9d" strokeDasharray="5 5" />
+                          </ScatterChart>
+                        </ResponsiveContainer>
+                      )}
+                      
+                      {/* Legend */}
+                      <Box style={{ marginTop: 16, display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+                        <Box style={{ display: 'flex', alignItems: 'center' }}>
+                          <Box style={{ width: 12, height: 12, backgroundColor: '#ff6b6b', marginRight: 8 }}></Box>
+                          <Typography variant="caption">A商品（高貢献度）</Typography>
+                        </Box>
+                        <Box style={{ display: 'flex', alignItems: 'center' }}>
+                          <Box style={{ width: 12, height: 12, backgroundColor: '#4ecdc4', marginRight: 8 }}></Box>
+                          <Typography variant="caption">B商品（中貢献度）</Typography>
+                        </Box>
+                        <Box style={{ display: 'flex', alignItems: 'center' }}>
+                          <Box style={{ width: 12, height: 12, backgroundColor: '#95e1d3', marginRight: 8 }}></Box>
+                          <Typography variant="caption">C商品（低貢献度）</Typography>
+                        </Box>
+                      </Box>
+                    </Paper>
+
+                    {/* Strategy Recommendations Table */}
                     <TableContainer component={Paper}>
                       <Table>
                         <TableHead>
@@ -671,51 +763,154 @@ const InventoryReport = () => {
                             <TableCell>戦略</TableCell>
                             <TableCell>在庫レベル</TableCell>
                             <TableCell>発注頻度</TableCell>
+                            <TableCell>管理重要度</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           <TableRow>
-                            <TableCell>AX (重要・安定)</TableCell>
-                            <TableCell>重点管理</TableCell>
-                            <TableCell>高</TableCell>
+                            <TableCell>
+                              <Chip label="AX" style={{ backgroundColor: '#ff6b6b', color: 'white' }} size="small" />
+                              {' '}重要・安定
+                            </TableCell>
+                            <TableCell>重点管理・最適化</TableCell>
+                            <TableCell>高レベル維持</TableCell>
                             <TableCell>週次</TableCell>
+                            <TableCell>
+                              <Chip label="最高" color="primary" size="small" />
+                            </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell>AY (重要・変動)</TableCell>
-                            <TableCell>需要予測強化</TableCell>
-                            <TableCell>中高</TableCell>
+                            <TableCell>
+                              <Chip label="AY" style={{ backgroundColor: '#ff8e53', color: 'white' }} size="small" />
+                              {' '}重要・変動
+                            </TableCell>
+                            <TableCell>需要予測強化・在庫バッファ</TableCell>
+                            <TableCell>中高レベル</TableCell>
                             <TableCell>隔週</TableCell>
+                            <TableCell>
+                              <Chip label="高" color="primary" size="small" />
+                            </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell>AZ (重要・不規則)</TableCell>
-                            <TableCell>機会損失回避</TableCell>
-                            <TableCell>安全在庫</TableCell>
+                            <TableCell>
+                              <Chip label="AZ" style={{ backgroundColor: '#ffa726', color: 'white' }} size="small" />
+                              {' '}重要・不規則
+                            </TableCell>
+                            <TableCell>機会損失回避・安全在庫確保</TableCell>
+                            <TableCell>安全在庫重視</TableCell>
                             <TableCell>オンデマンド</TableCell>
+                            <TableCell>
+                              <Chip label="高" color="primary" size="small" />
+                            </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell>BX (標準・安定)</TableCell>
-                            <TableCell>効率管理</TableCell>
-                            <TableCell>中</TableCell>
+                            <TableCell>
+                              <Chip label="BX" style={{ backgroundColor: '#4ecdc4', color: 'white' }} size="small" />
+                              {' '}標準・安定
+                            </TableCell>
+                            <TableCell>効率的な定期管理</TableCell>
+                            <TableCell>適正レベル</TableCell>
                             <TableCell>月次</TableCell>
+                            <TableCell>
+                              <Chip label="中" color="default" size="small" />
+                            </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell>CZ (低・不規則)</TableCell>
-                            <TableCell>廃止検討</TableCell>
-                            <TableCell>処分</TableCell>
+                            <TableCell>
+                              <Chip label="BY" style={{ backgroundColor: '#26d0ce', color: 'white' }} size="small" />
+                              {' '}標準・変動
+                            </TableCell>
+                            <TableCell>標準管理・月次レビュー</TableCell>
+                            <TableCell>標準レベル</TableCell>
+                            <TableCell>月次</TableCell>
+                            <TableCell>
+                              <Chip label="中" color="default" size="small" />
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <Chip label="BZ" style={{ backgroundColor: '#1dd1a1', color: 'white' }} size="small" />
+                              {' '}標準・不規則
+                            </TableCell>
+                            <TableCell>柔軟対応・四半期レビュー</TableCell>
+                            <TableCell>変動対応</TableCell>
+                            <TableCell>四半期</TableCell>
+                            <TableCell>
+                              <Chip label="中" color="default" size="small" />
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <Chip label="CX" style={{ backgroundColor: '#95e1d3', color: 'black' }} size="small" />
+                              {' '}低・安定
+                            </TableCell>
+                            <TableCell>最小管理・効率重視</TableCell>
+                            <TableCell>最小レベル</TableCell>
+                            <TableCell>低頻度</TableCell>
+                            <TableCell>
+                              <Chip label="低" color="secondary" size="small" />
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <Chip label="CY" style={{ backgroundColor: '#a4b0be', color: 'white' }} size="small" />
+                              {' '}低・変動
+                            </TableCell>
+                            <TableCell>見直し対象・オンデマンド</TableCell>
+                            <TableCell>見直し</TableCell>
+                            <TableCell>オンデマンド</TableCell>
+                            <TableCell>
+                              <Chip label="低" color="secondary" size="small" />
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell>
+                              <Chip label="CZ" style={{ backgroundColor: '#e17055', color: 'white' }} size="small" />
+                              {' '}低・不規則
+                            </TableCell>
+                            <TableCell>廃止検討・在庫処分</TableCell>
+                            <TableCell>処分対象</TableCell>
                             <TableCell>なし</TableCell>
+                            <TableCell>
+                              <Chip label="廃止検討" style={{ backgroundColor: '#e74c3c', color: 'white' }} size="small" />
+                            </TableCell>
                           </TableRow>
                         </TableBody>
                       </Table>
                     </TableContainer>
                   </Grid>
+                  
                   <Grid item xs={12} md={4}>
-                    <Paper style={{ padding: 16, background: '#f5f5f5' }}>
+                    <Paper style={{ padding: 16, background: '#f8f9fa', marginBottom: 16 }}>
                       <Typography variant="subtitle2" gutterBottom>分析サマリー</Typography>
+                      <Typography variant="body2" paragraph>
+                        <strong>ABC分類</strong>
+                      </Typography>
                       <Typography variant="body2" paragraph>A商品: 8アイテム (32%)</Typography>
                       <Typography variant="body2" paragraph>B商品: 12アイテム (48%)</Typography>
                       <Typography variant="body2" paragraph>C商品: 5アイテム (20%)</Typography>
+                      
+                      <Typography variant="body2" paragraph style={{ marginTop: 16 }}>
+                        <strong>XYZ分類</strong>
+                      </Typography>
                       <Typography variant="body2" color="textSecondary">
                         X(安定): 15アイテム / Y(変動): 7アイテム / Z(不規則): 3アイテム
+                      </Typography>
+                    </Paper>
+                    
+                    <Paper style={{ padding: 16, background: '#e3f2fd' }}>
+                      <Typography variant="subtitle2" gutterBottom>重要指標</Typography>
+                      <Typography variant="body2" paragraph>
+                        <strong>在庫効率スコア:</strong> 78/100
+                      </Typography>
+                      <Typography variant="body2" paragraph>
+                        <strong>A商品充足率:</strong> 95%
+                      </Typography>
+                      <Typography variant="body2" paragraph>
+                        <strong>デッドストック比率:</strong> 12%
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        <strong>推奨アクション:</strong> CZ商品の処分検討、AY商品の需要予測精度向上
                       </Typography>
                     </Paper>
                   </Grid>

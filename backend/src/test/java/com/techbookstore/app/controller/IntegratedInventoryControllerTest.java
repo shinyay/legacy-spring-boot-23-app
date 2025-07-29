@@ -23,8 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebMvc
 @TestPropertySource(properties = {
     "spring.profiles.active=test",
-    "spring.redis.host=localhost",
-    "spring.redis.port=6379"
+    "spring.cache.type=simple"
 })
 public class IntegratedInventoryControllerTest {
 

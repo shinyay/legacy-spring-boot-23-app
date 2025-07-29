@@ -115,6 +115,56 @@ public class IntegratedInventoryAnalysisService {
     }
     
     /**
+     * Asynchronous execution of integrated analysis
+     * For better performance with concurrent users
+     */
+    @Async("integratedAnalysisExecutor")
+    public CompletableFuture<IntegratedAnalysisResult> executeAsyncIntegratedAnalysis(IntegratedAnalysisRequest request) {
+        logger.info("Starting async integrated analysis for request: {}", request.cacheKey());
+        
+        try {
+            // Execute analysis in parallel where possible
+            CompletableFuture<InventoryReportDto> baseReportFuture = 
+                CompletableFuture.supplyAsync(() -> generateBaseReport(request));
+            
+            CompletableFuture<IntegratedAnalysisResult.AdvancedAnalysisData> advancedFuture = 
+                CompletableFuture.supplyAsync(() -> generateAdvancedAnalysis(request));
+            
+            CompletableFuture<IntegratedAnalysisResult.ForecastingData> forecastFuture = null;
+            if (shouldIncludeForecasting(request)) {
+                forecastFuture = CompletableFuture.supplyAsync(() -> generateForecastingData(request));
+            }
+            final CompletableFuture<IntegratedAnalysisResult.ForecastingData> finalForecastFuture = forecastFuture;
+            
+            // Wait for all parallel tasks
+            CompletableFuture<Void> allTasks = (finalForecastFuture != null) 
+                ? CompletableFuture.allOf(baseReportFuture, advancedFuture, finalForecastFuture)
+                : CompletableFuture.allOf(baseReportFuture, advancedFuture);
+            
+            return allTasks.thenApply(v -> {
+                IntegratedAnalysisResult result = new IntegratedAnalysisResult(UUID.randomUUID().toString());
+                result.setBaseReport(baseReportFuture.join());
+                result.setAdvancedAnalysis(advancedFuture.join());
+                
+                if (finalForecastFuture != null) {
+                    result.setForecasting(finalForecastFuture.join());
+                }
+                
+                // Generate optimization data based on all other results
+                IntegratedAnalysisResult.OptimizationData optimizationData = generateOptimizationData(request, result);
+                result.setOptimization(optimizationData);
+                
+                result.setStatus("COMPLETED");
+                return result;
+            });
+            
+        } catch (Exception e) {
+            logger.error("Async integrated analysis failed", e);
+            throw new IntegratedAnalysisException("非同期統合分析処理に失敗しました", e);
+        }
+    }
+    
+    /**
      * Generate real-time dashboard data
      * Optimized for quick response with minimal processing
      */
@@ -126,9 +176,18 @@ public class IntegratedInventoryAnalysisService {
         
         try {
             // Quick inventory summary
+            Integer publicationYear = null;
+            try {
+                if (request.getPublicationYear() != null && !request.getPublicationYear().trim().isEmpty()) {
+                    publicationYear = Integer.parseInt(request.getPublicationYear());
+                }
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid publication year format: {}", request.getPublicationYear());
+            }
+            
             InventoryReportDto quickReport = reportService.generateInventoryReport(
                 request.getCategory(), request.getLevel(), request.getPublisher(), 
-                request.getStockStatus(), request.getPriceRange(), request.getPublicationYear());
+                request.getStockStatus(), request.getPriceRange(), publicationYear);
             
             dashboardData.put("inventorySummary", quickReport);
             
@@ -165,13 +224,22 @@ public class IntegratedInventoryAnalysisService {
     // Private helper methods
     
     private InventoryReportDto generateBaseReport(IntegratedAnalysisRequest request) {
+        Integer publicationYear = null;
+        try {
+            if (request.getPublicationYear() != null && !request.getPublicationYear().trim().isEmpty()) {
+                publicationYear = Integer.parseInt(request.getPublicationYear());
+            }
+        } catch (NumberFormatException e) {
+            logger.warn("Invalid publication year format: {}", request.getPublicationYear());
+        }
+        
         return reportService.generateInventoryReport(
             request.getCategory(), 
             request.getLevel(), 
             request.getPublisher(),
             request.getStockStatus(), 
             request.getPriceRange(), 
-            request.getPublicationYear()
+            publicationYear
         );
     }
     

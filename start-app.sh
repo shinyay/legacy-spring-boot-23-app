@@ -112,6 +112,25 @@ fi
 log_info "TechBookStore アプリケーションを起動中..."
 log_info "作業ディレクトリ: $WORKSPACE_DIR"
 
+# Redis接続チェック（Dev Container環境の場合）
+if [ -n "$REDIS_HOST" ]; then
+    log_info "Redis接続をチェック中..."
+    REDIS_HOST_TO_CHECK="${REDIS_HOST:-localhost}"
+    REDIS_PORT_TO_CHECK="${REDIS_PORT:-6379}"
+    
+    for i in {1..10}; do
+        if timeout 3 bash -c "</dev/tcp/$REDIS_HOST_TO_CHECK/$REDIS_PORT_TO_CHECK" >/dev/null 2>&1; then
+            log_info "Redis ($REDIS_HOST_TO_CHECK:$REDIS_PORT_TO_CHECK) への接続が確認できました"
+            break
+        fi
+        if [ $i -eq 10 ]; then
+            log_warn "Redis ($REDIS_HOST_TO_CHECK:$REDIS_PORT_TO_CHECK) への接続に失敗しました"
+            log_warn "アプリケーションは起動しますが、Redis機能が利用できない可能性があります"
+        fi
+        sleep 1
+    done
+fi
+
 # Backend を起動
 log_info "Backend を起動中..."
 cd "$BACKEND_DIR"

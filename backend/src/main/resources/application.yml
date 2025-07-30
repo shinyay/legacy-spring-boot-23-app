@@ -34,9 +34,10 @@ spring:
     init:
       mode: always
       data-locations: classpath:data.sql
+  # Redis設定（Dev Container環境）
   redis:
-    host: localhost
-    port: 6379
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
     database: 0
     timeout: 2000ms
     lettuce:

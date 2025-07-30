@@ -14,7 +14,13 @@ services:
       - SPRING_PROFILES_ACTIVE=dev
       - JAVA_HOME=/usr/lib/jvm/msopenjdk-current
       - MAVEN_HOME=/usr/share/maven
-    network_mode: service:db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
+    networks:
+      - techbookstore-network
 
   db:
     image: postgres:12
@@ -26,14 +32,18 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - techbookstore-network
 
   redis:
-    image: redis:5-alpine
+    image: redis:7-alpine
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
     ports:
       - "6379:6379"
+    networks:
+      - techbookstore-network
 
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
@@ -44,6 +54,12 @@ services:
       - "10002:10002"
     volumes:
       - azurite-data:/data
+    networks:
+      - techbookstore-network
+
+networks:
+  techbookstore-network:
+    driver: bridge
 
 volumes:
   postgres-data:

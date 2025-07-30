@@ -27,6 +27,10 @@
 - **プレ本番環境**: PostgreSQL 12.x
 - **本番環境**: Azure Database for PostgreSQL 11
 
+### キャッシュ・セッション
+- **開発環境**: Redis 7.x（Dev Container内で自動起動）
+- **本番環境**: Azure Cache for Redis
+
 ### フロントエンド
 - React 16.13.1
 - Redux 4.0.5
@@ -60,6 +64,13 @@ code .
 **Dev Container環境を使用している場合、以下の設定は自動的に行われます。**
 
 Java開発のためのVS Code設定は、Dev Container起動時に自動的に構成されます。`.vscode/settings.json`ファイルが自動生成され、適切なJava Homeパスが設定されます。
+
+**自動起動サービス（Dev Container）：**
+- PostgreSQL 12（ポート5432）
+- Redis 7-alpine（ポート6379）
+- Azure Storage Emulator (Azurite)（ポート10000-10002）
+
+これらのサービスはDev Container起動時に自動的に開始され、アプリケーションから利用可能になります。
 
 **ローカル環境での手動設定：**
 

@@ -51,9 +51,9 @@ import {
   FilterList, 
   ExpandMore, 
   ExpandLess,
-  Analytics,
+  Assessment,
   TrendingUp,
-  Assessment
+  Assessment as Analytics
 } from '@material-ui/icons';
 import reports from '../services/reportsApi';
 
@@ -164,6 +164,7 @@ const InventoryReport = () => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [inventoryAnalysis, setInventoryAnalysis] = useState(null);
   
   // Phase 1 enhancement - Filter state
   const [filters, setFilters] = useState({
@@ -192,6 +193,11 @@ const InventoryReport = () => {
         response = await reports.getInventoryReport();
       }
       setReportData(response.data);
+      
+      // Mock inventory analysis data for now
+      setInventoryAnalysis({
+        turnoverAnalysis: []
+      });
     } catch (error) {
       console.error('Error fetching inventory report:', error);
     } finally {

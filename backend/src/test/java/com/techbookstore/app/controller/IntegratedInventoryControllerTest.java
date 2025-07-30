@@ -2,11 +2,13 @@ package com.techbookstore.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techbookstore.app.dto.IntegratedAnalysisRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.profiles.active=test",
     "spring.cache.type=simple"
 })
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class IntegratedInventoryControllerTest {
 
     @Autowired
@@ -35,13 +38,13 @@ public class IntegratedInventoryControllerTest {
 
     private MockMvc mockMvc;
 
+    @BeforeEach
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
     @Test
     public void testComprehensiveAnalysis() throws Exception {
-        setup();
         
         IntegratedAnalysisRequest request = new IntegratedAnalysisRequest();
         request.setCategory("JAVA");
@@ -62,7 +65,6 @@ public class IntegratedInventoryControllerTest {
 
     @Test
     public void testRealtimeDashboard() throws Exception {
-        setup();
         
         IntegratedAnalysisRequest request = new IntegratedAnalysisRequest();
         request.setCategory("JAVASCRIPT");
@@ -80,7 +82,6 @@ public class IntegratedInventoryControllerTest {
 
     @Test
     public void testBatchOptimization() throws Exception {
-        setup();
         
         IntegratedAnalysisRequest request = new IntegratedAnalysisRequest();
         request.setCategory("PYTHON");
@@ -98,7 +99,6 @@ public class IntegratedInventoryControllerTest {
 
     @Test
     public void testHealthCheck() throws Exception {
-        setup();
         
         mockMvc.perform(get("/api/v1/inventory/integrated/health"))
                 .andExpect(status().isOk())
@@ -110,7 +110,6 @@ public class IntegratedInventoryControllerTest {
 
     @Test
     public void testMetrics() throws Exception {
-        setup();
         
         mockMvc.perform(get("/api/v1/inventory/integrated/metrics"))
                 .andExpect(status().isOk())
@@ -123,7 +122,6 @@ public class IntegratedInventoryControllerTest {
 
     @Test
     public void testDashboardWithEmptyRequest() throws Exception {
-        setup();
         
         mockMvc.perform(post("/api/v1/inventory/integrated/realtime-dashboard")
                 .contentType(MediaType.APPLICATION_JSON)

@@ -1,9 +1,13 @@
 package com.techbookstore.app.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -16,15 +20,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Redis cache configuration for Phase 4 integrated analysis
+ * Cache configuration for Phase 4 integrated analysis
  * Provides different TTL configurations for different analysis types
+ * Uses Redis when available, falls back to simple caching for tests
  */
 @Configuration
 @EnableCaching
 public class IntegratedCacheConfiguration {
     
     @Bean
-    public CacheManager integratedCacheManager(RedisConnectionFactory connectionFactory) {
+    @Primary
+    @ConditionalOnBean(RedisConnectionFactory.class)
+    @ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis", matchIfMissing = true)
+    public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
         RedisCacheManager.RedisCacheManagerBuilder builder = RedisCacheManager
             .builder(connectionFactory)
             .cacheDefaults(cacheConfiguration());
@@ -67,6 +75,22 @@ public class IntegratedCacheConfiguration {
                 .entryTtl(Duration.ofMinutes(1)));
         
         return builder.withInitialCacheConfigurations(cacheConfigurations).build();
+    }
+    
+    @Bean
+    @ConditionalOnProperty(name = "spring.cache.type", havingValue = "simple")
+    public CacheManager simpleCacheManager() {
+        // Simple cache manager for test environments
+        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
+        cacheManager.setCacheNames(java.util.Arrays.asList(
+            "baseInventoryReport",
+            "advancedAnalysis", 
+            "forecastAnalysis",
+            "integratedAnalysis",
+            "performanceMetrics",
+            "dashboardData"
+        ));
+        return cacheManager;
     }
     
     private RedisCacheConfiguration cacheConfiguration() {

@@ -142,6 +142,7 @@ public class IntegratedInventoryAnalysisService {
                 : CompletableFuture.allOf(baseReportFuture, advancedFuture);
             
             return allTasks.thenApply(v -> {
+                long startTime = System.currentTimeMillis();
                 IntegratedAnalysisResult result = new IntegratedAnalysisResult(UUID.randomUUID().toString());
                 result.setBaseReport(baseReportFuture.join());
                 result.setAdvancedAnalysis(advancedFuture.join());
@@ -153,6 +154,13 @@ public class IntegratedInventoryAnalysisService {
                 // Generate optimization data based on all other results
                 IntegratedAnalysisResult.OptimizationData optimizationData = generateOptimizationData(request, result);
                 result.setOptimization(optimizationData);
+                
+                // Generate performance metrics for async execution
+                long totalTime = System.currentTimeMillis() - startTime;
+                IntegratedAnalysisResult.PerformanceMetrics metrics = generatePerformanceMetrics(
+                    totalTime, 0L, 0L, 0L, 0L); // For async, we don't track individual phase times
+                result.setPerformanceMetrics(metrics);
+                result.setExecutionTimeMs(totalTime);
                 
                 result.setStatus("COMPLETED");
                 return result;

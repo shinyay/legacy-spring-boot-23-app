@@ -319,6 +319,68 @@ public class DemandForecastService {
     }
 
     /**
+     * Generate ensemble forecasts for integrated analysis
+     * Simplified method for Phase 4 integration
+     */
+    public List<com.techbookstore.app.dto.DemandForecastResult> generateEnsembleForecasts(Integer horizonDays) {
+        logger.info("Generating ensemble forecasts for {} days horizon", horizonDays);
+        
+        List<com.techbookstore.app.dto.DemandForecastResult> results = new ArrayList<>();
+        List<Book> books = bookRepository.findAll();
+        
+        LocalDate forecastDate = LocalDate.now().plusDays(horizonDays);
+        
+        for (Book book : books) {
+            try {
+                // Simplified forecast calculation
+                com.techbookstore.app.dto.DemandForecastResult forecast = 
+                    new com.techbookstore.app.dto.DemandForecastResult();
+                forecast.setBookId(book.getId());
+                forecast.setBookTitle(book.getTitle());
+                forecast.setForecastDate(forecastDate);
+                forecast.setHorizon(horizonDays);
+                forecast.setAlgorithm("ENSEMBLE");
+                
+                // Simple forecast based on average demand
+                int averageDemand = calculateAverageDemand(book);
+                forecast.setForecastedDemand(averageDemand);
+                forecast.setConfidenceLevel(BigDecimal.valueOf(75.0)); // Default confidence
+                
+                // Set bounds
+                forecast.setUpperBound(BigDecimal.valueOf(averageDemand * 1.2));
+                forecast.setLowerBound(BigDecimal.valueOf(averageDemand * 0.8));
+                
+                results.add(forecast);
+                
+            } catch (Exception e) {
+                logger.warn("Failed to generate forecast for book {}: {}", book.getId(), e.getMessage());
+            }
+        }
+        
+        return results;
+    }
+    
+    /**
+     * Calculate simple average demand for a book
+     */
+    private int calculateAverageDemand(Book book) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(90); // 3 months
+        
+        List<Order> orders = orderRepository.findByOrderDateBetween(
+            startDate.atStartOfDay(), endDate.atTime(23, 59, 59));
+        
+        int totalDemand = orders.stream()
+            .flatMap(order -> order.getOrderItems().stream())
+            .filter(item -> item.getBook().getId().equals(book.getId()))
+            .mapToInt(item -> item.getQuantity())
+            .sum();
+        
+        // Average per month over 3 months
+        return Math.max(1, totalDemand / 3);
+    }
+
+    /**
      * Helper method to get actual demand for a book on a specific date
      */
     private int getActualDemand(Book book, LocalDate date) {

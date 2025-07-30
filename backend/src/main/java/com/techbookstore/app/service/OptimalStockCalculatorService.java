@@ -385,6 +385,57 @@ public class OptimalStockCalculatorService {
     }
 
     /**
+     * Calculate optimal levels for all books
+     * For use in integrated analysis
+     */
+    @Transactional(readOnly = true)
+    public List<com.techbookstore.app.dto.OptimalStockLevel> calculateOptimalLevels() {
+        logger.info("Calculating optimal levels for all books");
+        
+        List<Book> books = bookRepository.findAll();
+        return books.stream()
+            .map(book -> {
+                try {
+                    OptimalStockDto optimalDto = calculateOptimalStock(book.getId());
+                    
+                    com.techbookstore.app.dto.OptimalStockLevel level = new com.techbookstore.app.dto.OptimalStockLevel();
+                    level.setBookId(book.getId());
+                    level.setBookTitle(book.getTitle());
+                    level.setOptimalStock(optimalDto.getOptimalStockLevel());
+                    level.setSafetyStock(optimalDto.getSafetyStock());
+                    level.setReorderPoint(optimalDto.getReorderPoint());
+                    
+                    // Get current stock
+                    Optional<Inventory> inventory = inventoryRepository.findByBookId(book.getId());
+                    level.setCurrentStock(inventory.map(Inventory::getTotalStock).orElse(0));
+                    
+                    // Set calculation method and recommendation
+                    level.setCalculationMethod("EOQ");
+                    level.setLeadTimeDays(7); // Default lead time
+                    
+                    // Determine recommendation
+                    Integer currentStock = level.getCurrentStock();
+                    Integer optimalStock = level.getOptimalStock();
+                    
+                    if (currentStock < optimalStock * 0.8) {
+                        level.setRecommendation("INCREASE");
+                    } else if (currentStock > optimalStock * 1.2) {
+                        level.setRecommendation("DECREASE");
+                    } else {
+                        level.setRecommendation("MAINTAIN");
+                    }
+                    
+                    return level;
+                } catch (Exception e) {
+                    logger.warn("Failed to calculate optimal level for book {}: {}", book.getId(), e.getMessage());
+                    return null;
+                }
+            })
+            .filter(level -> level != null)
+            .collect(Collectors.toList());
+    }
+
+    /**
      * Inner class for EOQ calculation results
      */
     private static class EOQCalculationResult {

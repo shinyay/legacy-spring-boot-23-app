@@ -3,6 +3,8 @@ import { Switch, Route, useHistory } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Drawer, List, ListItem, Box, CssBaseline, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Dashboard, Book, Storage, ShoppingCart, People, Assessment } from '@material-ui/icons';
+import { I18nProvider, useI18n } from './contexts/I18nContext';
+import LanguageSelector from './components/LanguageSelector';
 import ErrorBoundary from './components/ErrorBoundary';
 import BookList from './components/BookList';
 import InventoryList from './components/InventoryList';
@@ -29,6 +31,9 @@ const useStyles = makeStyles((theme) => ({
     width: `calc(100% - ${drawerWidth}px)`,
     marginLeft: drawerWidth,
   },
+  appBarTitle: {
+    flexGrow: 1,
+  },
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
@@ -44,15 +49,16 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function App() {
+function AppContent() {
   const classes = useStyles();
   const history = useHistory();
   const [selectedMenu, setSelectedMenu] = useState('dashboard');
+  const { t } = useI18n();
 
   const menuItems = [
     { id: 'dashboard', label: 'ダッシュボード', icon: <Dashboard />, path: '/' },
     { id: 'books', label: '書籍管理', icon: <Book />, path: '/books' },
-    { id: 'inventory', label: '在庫管理', icon: <Storage />, path: '/inventory' },
+    { id: 'inventory', label: t('inventory.title', '在庫管理'), icon: <Storage />, path: '/inventory' },
     { id: 'orders', label: '注文管理', icon: <ShoppingCart />, path: '/orders' },
     { id: 'customers', label: '顧客管理', icon: <People />, path: '/customers' },
     { id: 'reports', label: 'レポート', icon: <Assessment />, path: '/reports' },
@@ -69,9 +75,10 @@ function App() {
       <CssBaseline />
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
-          <Typography variant="h6" noWrap>
-            TechBookStore - 技術専門書店在庫管理システム
+          <Typography variant="h6" noWrap className={classes.appBarTitle}>
+            {t('app.title', 'TechBookStore - 技術専門書店在庫管理システム')}
           </Typography>
+          <LanguageSelector />
         </Toolbar>
       </AppBar>
       <Drawer
@@ -130,6 +137,12 @@ function App() {
         </Box>
       </main>
     </div>
+  );
+function App() {
+  return (
+    <I18nProvider>
+      <AppContent />
+    </I18nProvider>
   );
 }
 

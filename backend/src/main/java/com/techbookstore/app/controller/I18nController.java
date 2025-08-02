@@ -2,9 +2,12 @@ package com.techbookstore.app.controller;
 
 import com.techbookstore.app.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -26,7 +29,15 @@ public class I18nController {
      * Get messages for current locale.
      */
     @GetMapping("/messages")
-    public Map<String, String> getMessages() {
+    public Map<String, String> getMessages(HttpServletRequest request) {
+        // Set locale based on Accept-Language header
+        String acceptLanguage = request.getHeader("Accept-Language");
+        Locale locale = Locale.JAPANESE; // default
+        if (acceptLanguage != null && acceptLanguage.startsWith("en")) {
+            locale = Locale.ENGLISH;
+        }
+        LocaleContextHolder.setLocale(locale);
+        
         Map<String, String> messages = new HashMap<>();
         
         // Common labels

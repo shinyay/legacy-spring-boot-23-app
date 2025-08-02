@@ -38,6 +38,7 @@ import {
   fetchCustomerOrders,
   clearCustomerError
 } from '../store/actions/customersActions';
+import { useI18n } from '../contexts/I18nContext';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -97,6 +98,7 @@ const CustomerDetail = () => {
   const dispatch = useDispatch();
   const history = useHistory();
   const { id } = useParams();
+  const { t } = useI18n();
   
   const {
     selectedCustomer: customer,
@@ -267,7 +269,7 @@ const CustomerDetail = () => {
 
           <Grid container spacing={3} className={classes.infoGrid}>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>基本情報</Typography>
+              <Typography variant="h6" gutterBottom>{t('customer.basic.info', '基本情報')}</Typography>
               
               <div className={classes.infoItem}>
                 <EmailIcon className={classes.infoIcon} />
@@ -283,7 +285,7 @@ const CustomerDetail = () => {
                 <div className={classes.infoItem}>
                   <CalendarIcon className={classes.infoIcon} />
                   <Typography>
-                    生年月日: {new Date(customer.birthDate).toLocaleDateString('ja-JP')}
+                    {t('customer.birthdate', '生年月日')}: {new Date(customer.birthDate).toLocaleDateString('ja-JP')}
                   </Typography>
                 </div>
               )}
@@ -292,34 +294,34 @@ const CustomerDetail = () => {
                 <div className={classes.infoItem}>
                   <PersonIcon className={classes.infoIcon} />
                   <Typography>
-                    性別: {customer.gender === 'MALE' ? '男性' : 
-                            customer.gender === 'FEMALE' ? '女性' : 'その他'}
+                    {t('customer.gender', '性別')}: {customer.gender === 'MALE' ? t('customer.gender.male', '男性') : 
+                            customer.gender === 'FEMALE' ? t('customer.gender.female', '女性') : t('customer.gender.other', 'その他')}
                   </Typography>
                 </div>
               )}
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>職業・会社情報</Typography>
+              <Typography variant="h6" gutterBottom>{t('customer.occupation.info', '職業・会社情報')}</Typography>
               
               {customer.occupation && (
                 <div className={classes.infoItem}>
                   <WorkIcon className={classes.infoIcon} />
-                  <Typography>職業: {customer.occupation}</Typography>
+                  <Typography>{t('customer.occupation', '職業')}: {customer.occupation}</Typography>
                 </div>
               )}
               
               {customer.companyName && (
                 <div className={classes.infoItem}>
                   <BusinessIcon className={classes.infoIcon} />
-                  <Typography>会社名: {customer.companyName}</Typography>
+                  <Typography>{t('customer.company', '会社名')}: {customer.companyName}</Typography>
                 </div>
               )}
               
               {customer.department && (
                 <div className={classes.infoItem}>
                   <WorkIcon className={classes.infoIcon} />
-                  <Typography>部署: {customer.department}</Typography>
+                  <Typography>{t('customer.department', '部署')}: {customer.department}</Typography>
                 </div>
               )}
               

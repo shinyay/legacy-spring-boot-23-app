@@ -16,10 +16,6 @@ spring:
     encoding: UTF-8
     fallback-to-system-locale: false
     use-code-as-default-message: false
-  # Default locale
-  mvc:
-    locale: ja
-    locale-resolver: cookie
 
 ---
 # 開発環境（H2 Database）

@@ -157,7 +157,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
       fullWidth
     >
       <DialogTitle className={classes.title}>
-        <span>{t('receive.dialog.title', '入荷処理')}</span>
+        <span>{t('receive.dialog.title', '入荷登録')}</span>
         <IconButton onClick={handleClose} size="small">
           <CloseIcon />
         </IconButton>
@@ -166,7 +166,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
       <DialogContent>
         <Box className={classes.bookInfo}>
           <Typography variant="subtitle1" gutterBottom>
-            <strong>{t('inventory.book.title', '書籍情報')}</strong>
+            <strong>{t('inventory.book.title', '書籍タイトル')}</strong>
           </Typography>
           <Typography variant="body2">
             <strong>タイトル:</strong> {inventory.bookTitle}

@@ -138,6 +138,8 @@ function AppContent() {
       </main>
     </div>
   );
+}
+
 function App() {
   return (
     <I18nProvider>

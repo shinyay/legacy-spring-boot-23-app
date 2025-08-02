@@ -30,51 +30,51 @@ public class SeasonalAnalysisService {
     private final OrderRepository orderRepository;
 
     // Tech book specific seasonal patterns - cached for performance
-    private static final Map<String, SeasonalPattern> TECH_SEASONAL_PATTERNS = Map.of(
-        "SPRING", new SeasonalPattern("新学期需要", 1.3, Arrays.asList(Month.MARCH, Month.APRIL)),
-        "SUMMER", new SeasonalPattern("夏休み学習", 1.2, Arrays.asList(Month.JULY, Month.AUGUST)),
-        "FALL", new SeasonalPattern("資格試験・就活", 1.4, Arrays.asList(Month.SEPTEMBER, Month.OCTOBER, Month.NOVEMBER)),
-        "WINTER", new SeasonalPattern("年末学習・新年準備", 1.1, Arrays.asList(Month.DECEMBER, Month.JANUARY))
+    private static final Map<String, SeasonalPattern> TECH_SEASONAL_PATTERNS = Map.ofEntries(
+        Map.entry("SPRING", new SeasonalPattern("新学期需要", 1.3, Arrays.asList(Month.MARCH, Month.APRIL))),
+        Map.entry("SUMMER", new SeasonalPattern("夏休み学習", 1.2, Arrays.asList(Month.JULY, Month.AUGUST))),
+        Map.entry("FALL", new SeasonalPattern("資格試験・就活", 1.4, Arrays.asList(Month.SEPTEMBER, Month.OCTOBER, Month.NOVEMBER))),
+        Map.entry("WINTER", new SeasonalPattern("年末学習・新年準備", 1.1, Arrays.asList(Month.DECEMBER, Month.JANUARY)))
     );
 
     // Category-specific seasonal multipliers - cached for performance
-    private static final Map<String, Map<String, BigDecimal>> CATEGORY_SEASONAL_MULTIPLIERS = Map.of(
-        "JAVA", Map.of(
+    private static final Map<String, Map<String, BigDecimal>> CATEGORY_SEASONAL_MULTIPLIERS = Map.ofEntries(
+        Map.entry("JAVA", Map.of(
             "SPRING", BigDecimal.valueOf(1.4), // Spring framework popularity in new semester
             "SUMMER", BigDecimal.valueOf(1.1),
             "FALL", BigDecimal.valueOf(1.3), // Job hunting season
             "WINTER", BigDecimal.valueOf(1.0)
-        ),
-        "PYTHON", Map.of(
+        )),
+        Map.entry("PYTHON", Map.of(
             "SPRING", BigDecimal.valueOf(1.2),
             "SUMMER", BigDecimal.valueOf(1.4), // AI/ML summer courses
             "FALL", BigDecimal.valueOf(1.5), // Data science job market
             "WINTER", BigDecimal.valueOf(1.1)
-        ),
-        "JAVASCRIPT", Map.of(
+        )),
+        Map.entry("JAVASCRIPT", Map.of(
             "SPRING", BigDecimal.valueOf(1.3), // New web development courses
             "SUMMER", BigDecimal.valueOf(1.2),
             "FALL", BigDecimal.valueOf(1.4), // Job hunting season
             "WINTER", BigDecimal.valueOf(1.0)
-        ),
-        "DATABASE", Map.of(
+        )),
+        Map.entry("DATABASE", Map.of(
             "SPRING", BigDecimal.valueOf(1.2), // Database courses
             "SUMMER", BigDecimal.valueOf(1.1),
             "FALL", BigDecimal.valueOf(1.3), // Enterprise planning season
             "WINTER", BigDecimal.valueOf(1.2) // Year-end data analysis
-        ),
-        "AI_ML", Map.of(
+        )),
+        Map.entry("AI_ML", Map.of(
             "SPRING", BigDecimal.valueOf(1.3), // Academic semester
             "SUMMER", BigDecimal.valueOf(1.5), // Research and summer programs
             "FALL", BigDecimal.valueOf(1.4), // Job market demand
             "WINTER", BigDecimal.valueOf(1.2)
-        ),
-        "CLOUD", Map.of(
+        )),
+        Map.entry("CLOUD", Map.of(
             "SPRING", BigDecimal.valueOf(1.2), // Enterprise adoption cycles
             "SUMMER", BigDecimal.valueOf(1.1),
             "FALL", BigDecimal.valueOf(1.4), // Budget planning season
             "WINTER", BigDecimal.valueOf(1.3) // Year-end migrations
-        )
+        ))
     );
     
     // Core technology categories for analysis - cached for performance
@@ -317,11 +317,11 @@ public class SeasonalAnalysisService {
         
         Map<String, BigDecimal> categoryMultipliers = CATEGORY_SEASONAL_MULTIPLIERS.get(category);
         if (categoryMultipliers == null) {
-            categoryMultipliers = Map.of(
-                "SPRING", BigDecimal.valueOf(1.2),
-                "SUMMER", BigDecimal.valueOf(1.1),
-                "FALL", BigDecimal.valueOf(1.3),
-                "WINTER", BigDecimal.valueOf(1.0)
+            categoryMultipliers = Map.ofEntries(
+                Map.entry("SPRING", BigDecimal.valueOf(1.2)),
+                Map.entry("SUMMER", BigDecimal.valueOf(1.1)),
+                Map.entry("FALL", BigDecimal.valueOf(1.3)),
+                Map.entry("WINTER", BigDecimal.valueOf(1.0))
             );
         }
         

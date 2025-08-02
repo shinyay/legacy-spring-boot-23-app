@@ -19,6 +19,7 @@ import {
 import { Close as CloseIcon } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/core/styles';
 import { receiveStock } from '../store/actions/inventoryActions';
+import { useI18n } from '../contexts/I18nContext';
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -51,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
 const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { t } = useI18n();
 
   const [formData, setFormData] = useState({
     quantity: '',
@@ -155,7 +157,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
       fullWidth
     >
       <DialogTitle className={classes.title}>
-        <span>入荷処理</span>
+        <span>{t('receive.dialog.title', '入荷登録')}</span>
         <IconButton onClick={handleClose} size="small">
           <CloseIcon />
         </IconButton>
@@ -164,7 +166,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
       <DialogContent>
         <Box className={classes.bookInfo}>
           <Typography variant="subtitle1" gutterBottom>
-            <strong>書籍情報</strong>
+            <strong>{t('inventory.book.title', '書籍タイトル')}</strong>
           </Typography>
           <Typography variant="body2">
             <strong>タイトル:</strong> {inventory.bookTitle}
@@ -185,30 +187,30 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="入荷数量 *"
+                label={`${t('receive.quantity', '入荷数量')} *`}
                 type="number"
                 value={formData.quantity}
                 onChange={handleInputChange('quantity')}
                 error={!!errors.quantity}
                 helperText={errors.quantity}
                 className={classes.formControl}
-                inputProps={{ min: 1, 'aria-label': '入荷数量' }}
+                inputProps={{ min: 1, 'aria-label': t('receive.quantity', '入荷数量') }}
                 id="receive-quantity-input"
                 autoFocus
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth className={classes.formControl}>
-                <InputLabel id="location-select-label">入荷場所 *</InputLabel>
+                <InputLabel id="location-select-label">{t('receive.location', '入荷場所')} *</InputLabel>
                 <Select
                   labelId="location-select-label"
                   value={formData.location}
                   onChange={handleInputChange('location')}
-                  aria-label="入荷場所"
+                  aria-label={t('receive.location', '入荷場所')}
                   error={!!errors.location}
                 >
-                  <MenuItem value="STORE">店頭</MenuItem>
-                  <MenuItem value="WAREHOUSE">倉庫</MenuItem>
+                  <MenuItem value="STORE">{t('inventory.location.store', '店頭')}</MenuItem>
+                  <MenuItem value="WAREHOUSE">{t('inventory.location.warehouse', '倉庫')}</MenuItem>
                 </Select>
                 {errors.location && (
                   <Typography variant="caption" color="error" className={classes.error}>
@@ -220,25 +222,25 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="入荷理由・備考"
+                label={t('receive.reason', '入荷理由・備考')}
                 multiline
                 rows={2}
                 value={formData.reason}
                 onChange={handleInputChange('reason')}
                 className={classes.formControl}
                 id="receive-reason-input"
-                aria-label="入荷理由・備考"
+                aria-label={t('receive.reason', '入荷理由・備考')}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="納品書番号"
+                label={t('receive.delivery.note', '納品書番号')}
                 value={formData.deliveryNote}
                 onChange={handleInputChange('deliveryNote')}
                 className={classes.formControl}
                 id="delivery-note-input"
-                aria-label="納品書番号"
+                aria-label={t('receive.delivery.note', '納品書番号')}
               />
             </Grid>
           </Grid>
@@ -253,7 +255,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
 
       <DialogActions>
         <Button onClick={handleClose} disabled={loading}>
-          キャンセル
+          {t('form.cancel', 'キャンセル')}
         </Button>
         <Button
           onClick={handleSubmit}
@@ -261,7 +263,7 @@ const ReceiveStockDialog = ({ open, onClose, inventory, onSuccess }) => {
           variant="contained"
           disabled={loading}
         >
-          {loading ? '処理中...' : '入荷実行'}
+          {loading ? '処理中...' : t('inventory.receive', '入荷実行')}
         </Button>
       </DialogActions>
     </Dialog>

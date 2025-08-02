@@ -174,18 +174,18 @@ public class IntegratedInventoryController {
             // Simple health checks
             health.put("status", "healthy");
             health.put("timestamp", java.time.LocalDateTime.now());
-            health.put("services", Map.of(
-                "integratedAnalysis", "up",
-                "cache", "up",
-                "asyncExecutor", "up",
-                "database", "up"
+            health.put("services", Map.ofEntries(
+                Map.entry("integratedAnalysis", "up"),
+                Map.entry("cache", "up"),
+                Map.entry("asyncExecutor", "up"),
+                Map.entry("database", "up")
             ));
             
             // System metrics
-            health.put("metrics", Map.of(
-                "uptime", "running",
-                "cacheStatus", "active",
-                "threadPoolStatus", "healthy"
+            health.put("metrics", Map.ofEntries(
+                Map.entry("uptime", "running"),
+                Map.entry("cacheStatus", "active"),
+                Map.entry("threadPoolStatus", "healthy")
             ));
             
             return ResponseEntity.ok(health);

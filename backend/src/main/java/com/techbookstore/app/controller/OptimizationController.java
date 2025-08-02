@@ -121,16 +121,16 @@ public class OptimizationController {
             .filter(book -> "UNDERSTOCK".equals(book.getStockStatus()))
             .count();
         
-        Map<String, Object> analysis = Map.of(
-            "totalBooksNeedingReorder", totalBooksNeedingReorder,
-            "totalEstimatedCost", totalEstimatedCost,
-            "totalEstimatedRevenue", totalEstimatedRevenue,
-            "estimatedProfit", totalEstimatedRevenue - totalEstimatedCost,
-            "statusBreakdown", Map.of(
+        Map<String, Object> analysis = Map.ofEntries(
+            Map.entry("totalBooksNeedingReorder", totalBooksNeedingReorder),
+            Map.entry("totalEstimatedCost", totalEstimatedCost),
+            Map.entry("totalEstimatedRevenue", totalEstimatedRevenue),
+            Map.entry("estimatedProfit", totalEstimatedRevenue - totalEstimatedCost),
+            Map.entry("statusBreakdown", Map.of(
                 "reorderNeeded", reorderNeeded,
                 "understock", understock
-            ),
-            "recommendations", generateRecommendations(allBooksNeedingReorder)
+            )),
+            Map.entry("recommendations", generateRecommendations(allBooksNeedingReorder))
         );
         
         return ResponseEntity.ok(analysis);

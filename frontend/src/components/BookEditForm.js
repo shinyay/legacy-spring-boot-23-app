@@ -23,6 +23,7 @@ import {
   updateBook,
   setEditMode
 } from '../store/actions/booksActions';
+import { useI18n } from '../contexts/I18nContext';
 
 const useStyles = makeStyles((theme) => ({
   formCard: {
@@ -72,6 +73,7 @@ const TECH_LEVELS = [
 const BookEditForm = ({ book, onCancel }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { t } = useI18n();
   
   const { loading } = useSelector(state => state.books);
   
@@ -264,7 +266,7 @@ const BookEditForm = ({ book, onCancel }) => {
               <TextField
                 fullWidth
                 required
-                label="タイトル"
+                label={t('book.title', 'タイトル')}
                 value={formData.title}
                 onChange={handleFieldChange('title')}
                 error={!!formErrors.title}
@@ -276,7 +278,7 @@ const BookEditForm = ({ book, onCancel }) => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="英語タイトル"
+                label={t('book.title.english', '英語タイトル')}
                 value={formData.titleEn}
                 onChange={handleFieldChange('titleEn')}
                 className={classes.formField}
@@ -287,7 +289,7 @@ const BookEditForm = ({ book, onCancel }) => {
               <TextField
                 fullWidth
                 type="date"
-                label="発行日"
+                label={t('book.publication.date', '発行日')}
                 value={formData.publicationDate}
                 onChange={handleFieldChange('publicationDate')}
                 error={!!formErrors.publicationDate}
@@ -301,7 +303,7 @@ const BookEditForm = ({ book, onCancel }) => {
               <TextField
                 fullWidth
                 type="number"
-                label="版次"
+                label={t('book.edition', '版次')}
                 value={formData.edition}
                 onChange={handleFieldChange('edition')}
                 error={!!formErrors.edition}
@@ -314,7 +316,7 @@ const BookEditForm = ({ book, onCancel }) => {
               <TextField
                 fullWidth
                 type="number"
-                label="定価"
+                label={t('book.list.price', '定価')}
                 value={formData.listPrice}
                 onChange={handleFieldChange('listPrice')}
                 error={!!formErrors.listPrice}
@@ -328,7 +330,7 @@ const BookEditForm = ({ book, onCancel }) => {
               <TextField
                 fullWidth
                 type="number"
-                label="販売価格"
+                label={t('book.selling.price', '販売価格')}
                 value={formData.sellingPrice}
                 onChange={handleFieldChange('sellingPrice')}
                 error={!!formErrors.sellingPrice}
@@ -374,7 +376,7 @@ const BookEditForm = ({ book, onCancel }) => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="バージョン情報"
+                label={t('book.version.info', 'バージョン情報')}
                 value={formData.versionInfo}
                 onChange={handleFieldChange('versionInfo')}
                 className={classes.formField}
@@ -384,7 +386,7 @@ const BookEditForm = ({ book, onCancel }) => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="サンプルコードURL"
+                label={t('book.sample.code.url', 'サンプルコードURL')}
                 value={formData.sampleCodeUrl}
                 onChange={handleFieldChange('sampleCodeUrl')}
                 error={!!formErrors.sampleCodeUrl}
@@ -400,7 +402,7 @@ const BookEditForm = ({ book, onCancel }) => {
               disabled={loading}
               startIcon={<CancelIcon />}
             >
-              キャンセル
+              {t('form.cancel', 'キャンセル')}
             </Button>
             <Button
               type="submit"
@@ -409,7 +411,7 @@ const BookEditForm = ({ book, onCancel }) => {
               disabled={loading}
               startIcon={<SaveIcon />}
             >
-              {loading ? '保存中...' : '保存'}
+              {loading ? '保存中...' : t('form.save', '保存')}
             </Button>
           </Box>
         </form>

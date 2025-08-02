@@ -18,6 +18,7 @@ import {
 import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { fetchInventory } from '../store/actions/inventoryActions';
+import { useI18n } from '../contexts/I18nContext';
 import ReceiveStockDialog from './ReceiveStockDialog';
 import SellStockDialog from './SellStockDialog';
 
@@ -56,6 +57,7 @@ const useStyles = makeStyles((theme) => ({
 function InventoryList() {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const { t } = useI18n();
   
   // Redux state - using real API calls instead of mock data
   const inventoryItems = useSelector((state) => state.inventory?.items || []);
@@ -88,11 +90,11 @@ function InventoryList() {
 
   const getStockStatusLabel = (availableStock, lowStock) => {
     if (availableStock <= 0) {
-      return '在庫切れ';
+      return t('inventory.status.outofstock', '在庫切れ');
     } else if (lowStock) {
-      return '在庫少';
+      return t('inventory.status.lowstock', '在庫少');
     } else {
-      return '在庫有';
+      return t('inventory.status.instock', '在庫有');
     }
   };
 
@@ -115,7 +117,7 @@ function InventoryList() {
     dispatch(fetchInventory());
     setNotification({
       open: true,
-      message: '操作が完了しました',
+      message: t('receive.operation.success', '操作が完了しました'),
       severity: 'success'
     });
   };
@@ -145,7 +147,7 @@ function InventoryList() {
   return (
     <div className={classes.root}>
       <Typography variant="h4" gutterBottom>
-        在庫一覧
+        {t('inventory.title', '在庫一覧')}
       </Typography>
 
       <Paper className={classes.paper}>
@@ -153,15 +155,15 @@ function InventoryList() {
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <TableCell>書籍タイトル</TableCell>
+                <TableCell>{t('inventory.book.title', '書籍タイトル')}</TableCell>
                 <TableCell>ISBN-13</TableCell>
                 <TableCell align="right">店頭在庫</TableCell>
                 <TableCell align="right">倉庫在庫</TableCell>
                 <TableCell align="right">予約数</TableCell>
-                <TableCell align="right">利用可能在庫</TableCell>
-                <TableCell>在庫状況</TableCell>
-                <TableCell>棚番号</TableCell>
-                <TableCell>アクション</TableCell>
+                <TableCell align="right">{t('inventory.available.stock', '利用可能在庫')}</TableCell>
+                <TableCell>{t('inventory.status', '在庫状況')}</TableCell>
+                <TableCell>{t('inventory.location', '棚番号')}</TableCell>
+                <TableCell>{t('inventory.actions', 'アクション')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -201,7 +203,7 @@ function InventoryList() {
                         color="primary"
                         onClick={() => handleReceiveClick(item)}
                       >
-                        入荷
+                        {t('inventory.receive', '入荷')}
                       </Button>
                       <Button
                         variant="outlined"
@@ -209,7 +211,7 @@ function InventoryList() {
                         color="secondary"
                         onClick={() => handleSellClick(item)}
                       >
-                        販売
+                        {t('inventory.sell', '販売')}
                       </Button>
                     </div>
                   </TableCell>

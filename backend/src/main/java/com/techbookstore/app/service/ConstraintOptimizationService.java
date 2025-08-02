@@ -382,14 +382,14 @@ public class ConstraintOptimizationService {
         budgetTest.setPriorityFocus(baseConstraints.getPriorityFocus());
         
         OptimizationResult budgetResult = optimizeBookSelection(books, budgetTest);
-        analysis.put("budgetSensitivity", Map.of(
-            "20PercentIncrease", Map.of(
-                "additionalProfit", budgetResult.getTotalProfit().subtract(
+        analysis.put("budgetSensitivity", Map.ofEntries(
+            Map.entry("20PercentIncrease", Map.ofEntries(
+                Map.entry("additionalProfit", budgetResult.getTotalProfit().subtract(
                     optimizeBookSelection(books, baseConstraints).getTotalProfit()
-                ),
-                "additionalItems", budgetResult.getTotalItems() - 
-                    optimizeBookSelection(books, baseConstraints).getTotalItems()
-            )
+                )),
+                Map.entry("additionalItems", budgetResult.getTotalItems() - 
+                    optimizeBookSelection(books, baseConstraints).getTotalItems())
+            ))
         ));
         
         return analysis;

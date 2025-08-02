@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,11 +62,11 @@ public class ForecastController {
             // Get accuracy for specific algorithm
             ForecastAccuracy accuracy = demandForecastService.evaluateAccuracy(algorithm, finalFromDate, finalToDate);
             ForecastAccuracyDto dto = convertToDto(accuracy);
-            accuracyReports = List.of(dto);
+            accuracyReports = Collections.singletonList(dto);
         } else {
             // Get accuracy for all algorithms
             String[] algorithms = {"MOVING_AVERAGE", "EXPONENTIAL_SMOOTHING", "LINEAR_REGRESSION", "SEASONAL_ADJUSTED", "ENSEMBLE"};
-            accuracyReports = List.of(algorithms).stream()
+            accuracyReports = Arrays.asList(algorithms).stream()
                 .map(alg -> {
                     ForecastAccuracy accuracy = demandForecastService.evaluateAccuracy(alg, finalFromDate, finalToDate);
                     return convertToDto(accuracy);
@@ -103,7 +105,7 @@ public class ForecastController {
         
         String[] algorithms = {"MOVING_AVERAGE", "EXPONENTIAL_SMOOTHING", "LINEAR_REGRESSION", "SEASONAL_ADJUSTED", "ENSEMBLE"};
         
-        List<ForecastAccuracyDto> comparisons = List.of(algorithms).stream()
+        List<ForecastAccuracyDto> comparisons = Arrays.asList(algorithms).stream()
             .map(algorithm -> {
                 ForecastAccuracy accuracy = demandForecastService.evaluateAccuracy(algorithm, fromDate, toDate);
                 return convertToDto(accuracy);

@@ -225,11 +225,11 @@ public class DemandForecastService {
      */
     private DemandForecast calculateEnsembleForecast(List<DemandForecast> forecasts, Book book, LocalDate forecastDate) {
         // Weighted average based on algorithm confidence
-        Map<String, Double> weights = Map.of(
-            "MOVING_AVERAGE", 0.25,
-            "EXPONENTIAL_SMOOTHING", 0.30,
-            "LINEAR_REGRESSION", 0.25,
-            "SEASONAL_ADJUSTED", 0.20
+        Map<String, Double> weights = Map.ofEntries(
+            Map.entry("MOVING_AVERAGE", 0.25),
+            Map.entry("EXPONENTIAL_SMOOTHING", 0.30),
+            Map.entry("LINEAR_REGRESSION", 0.25),
+            Map.entry("SEASONAL_ADJUSTED", 0.20)
         );
         
         double weightedSum = 0.0;

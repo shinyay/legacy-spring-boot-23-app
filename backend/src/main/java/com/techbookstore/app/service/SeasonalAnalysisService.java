@@ -30,11 +30,11 @@ public class SeasonalAnalysisService {
     private final OrderRepository orderRepository;
 
     // Tech book specific seasonal patterns - cached for performance
-    private static final Map<String, SeasonalPattern> TECH_SEASONAL_PATTERNS = Map.of(
-        "SPRING", new SeasonalPattern("新学期需要", 1.3, Arrays.asList(Month.MARCH, Month.APRIL)),
-        "SUMMER", new SeasonalPattern("夏休み学習", 1.2, Arrays.asList(Month.JULY, Month.AUGUST)),
-        "FALL", new SeasonalPattern("資格試験・就活", 1.4, Arrays.asList(Month.SEPTEMBER, Month.OCTOBER, Month.NOVEMBER)),
-        "WINTER", new SeasonalPattern("年末学習・新年準備", 1.1, Arrays.asList(Month.DECEMBER, Month.JANUARY))
+    private static final Map<String, SeasonalPattern> TECH_SEASONAL_PATTERNS = Map.ofEntries(
+        Map.entry("SPRING", new SeasonalPattern("新学期需要", 1.3, Arrays.asList(Month.MARCH, Month.APRIL))),
+        Map.entry("SUMMER", new SeasonalPattern("夏休み学習", 1.2, Arrays.asList(Month.JULY, Month.AUGUST))),
+        Map.entry("FALL", new SeasonalPattern("資格試験・就活", 1.4, Arrays.asList(Month.SEPTEMBER, Month.OCTOBER, Month.NOVEMBER))),
+        Map.entry("WINTER", new SeasonalPattern("年末学習・新年準備", 1.1, Arrays.asList(Month.DECEMBER, Month.JANUARY)))
     );
 
     // Category-specific seasonal multipliers - cached for performance
@@ -317,11 +317,11 @@ public class SeasonalAnalysisService {
         
         Map<String, BigDecimal> categoryMultipliers = CATEGORY_SEASONAL_MULTIPLIERS.get(category);
         if (categoryMultipliers == null) {
-            categoryMultipliers = Map.of(
-                "SPRING", BigDecimal.valueOf(1.2),
-                "SUMMER", BigDecimal.valueOf(1.1),
-                "FALL", BigDecimal.valueOf(1.3),
-                "WINTER", BigDecimal.valueOf(1.0)
+            categoryMultipliers = Map.ofEntries(
+                Map.entry("SPRING", BigDecimal.valueOf(1.2)),
+                Map.entry("SUMMER", BigDecimal.valueOf(1.1)),
+                Map.entry("FALL", BigDecimal.valueOf(1.3)),
+                Map.entry("WINTER", BigDecimal.valueOf(1.0))
             );
         }
         

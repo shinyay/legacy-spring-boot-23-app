@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const I18nContext = createContext();
@@ -16,7 +16,7 @@ export const I18nProvider = ({ children }) => {
   const [locale, setLocale] = useState('ja');
   const [loading, setLoading] = useState(true);
 
-  const loadMessages = async (lang = locale) => {
+  const loadMessages = useCallback(async (lang = locale) => {
     try {
       setLoading(true);
       const response = await axios.get(`/api/v1/i18n/messages`, {
@@ -35,7 +35,7 @@ export const I18nProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [locale]);
 
   const switchLanguage = async (lang) => {
     await loadMessages(lang);
@@ -55,7 +55,7 @@ export const I18nProvider = ({ children }) => {
     // Load initial language preference
     const savedLang = localStorage.getItem('preferredLanguage') || 'ja';
     loadMessages(savedLang);
-  }, []);
+  }, [loadMessages]);
 
   const value = {
     messages,
@@ -89,6 +89,8 @@ const getDefaultMessages = (lang) => {
       'inventory.status.outofstock': 'Out of Stock',
       'inventory.status.lowstock': 'Low Stock',
       'inventory.status.instock': 'In Stock',
+      'inventory.location.store': 'Store',
+      'inventory.location.warehouse': 'Warehouse',
       'customer.basic.info': 'Basic Information',
       'customer.birthdate': 'Birth Date',
       'customer.gender.male': 'Male',
@@ -104,13 +106,17 @@ const getDefaultMessages = (lang) => {
       'book.edition': 'Edition',
       'book.list.price': 'List Price',
       'book.selling.price': 'Selling Price',
+      'receive.dialog.title': 'Receive Stock',
       'receive.quantity': 'Receive Quantity',
       'receive.location': 'Receive Location',
       'receive.reason': 'Reason & Notes',
       'receive.delivery.note': 'Delivery Note Number',
       'receive.operation.success': 'Operation completed successfully',
       'form.save': 'Save',
-      'form.cancel': 'Cancel'
+      'form.cancel': 'Cancel',
+      'form.submit': 'Submit',
+      'form.edit': 'Edit',
+      'form.delete': 'Delete'
     };
   } else {
     return {
@@ -127,6 +133,8 @@ const getDefaultMessages = (lang) => {
       'inventory.status.outofstock': '在庫切れ',
       'inventory.status.lowstock': '在庫少',
       'inventory.status.instock': '在庫有',
+      'inventory.location.store': '店頭',
+      'inventory.location.warehouse': '倉庫',
       'customer.basic.info': '基本情報',
       'customer.birthdate': '生年月日',
       'customer.gender.male': '男性',
@@ -142,13 +150,17 @@ const getDefaultMessages = (lang) => {
       'book.edition': '版次',
       'book.list.price': '定価',
       'book.selling.price': '販売価格',
+      'receive.dialog.title': '入荷登録',
       'receive.quantity': '入荷数量',
       'receive.location': '入荷場所',
       'receive.reason': '入荷理由・備考',
       'receive.delivery.note': '納品書番号',
       'receive.operation.success': '操作が完了しました',
       'form.save': '保存',
-      'form.cancel': 'キャンセル'
+      'form.cancel': 'キャンセル',
+      'form.submit': '送信',
+      'form.edit': '編集',
+      'form.delete': '削除'
     };
   }
 };
